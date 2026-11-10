@@ -39,6 +39,7 @@ known-first-party = ["hnle"]
 
 [tool.ruff.lint.per-file-ignores]
 "packages/hnle/src/hnle/cli.py" = ["B008", "UP007"]
+"apps/api/app/*.py" = ["B008"]
 
 [tool.mypy]
 python_version = "3.12"

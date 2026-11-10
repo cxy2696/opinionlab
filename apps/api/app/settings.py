@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     database_url: str = "postgresql+asyncpg://app:CHANGE_ME@localhost:5432/opinionlab"
     redis_url: str = "redis://localhost:6379/0"
     log_level: str = "INFO"
+    jwt_secret: str = "dev-secret-change-me"
 
 
 settings = Settings()

@@ -14,6 +14,11 @@ from typing import Any
 import pytest
 from hypothesis import HealthCheck, settings
 
+# The service-layer tests read app.settings at import time; point it at the
+# disposable test database before any app module is imported.
+if os.environ.get("TEST_DATABASE_URL") and not os.environ.get("DATABASE_URL"):
+    os.environ["DATABASE_URL"] = os.environ["TEST_DATABASE_URL"]
+
 TEST_DATABASE_NAME = "opinionlab_test"
 TEST_REDIS_URL = "redis://localhost:6379/15"
 
