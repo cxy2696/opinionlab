@@ -7,7 +7,7 @@ database and from global environment state.
 from __future__ import annotations
 
 import os
-from collections.abc import Iterator
+from collections.abc import AsyncIterator, Iterator
 from pathlib import Path
 from typing import Any
 
@@ -28,6 +28,50 @@ settings.register_profile(
 )
 settings.register_profile("default", max_examples=50, deadline=None)
 settings.load_profile("ci" if os.environ.get("CI") else "default")
+
+
+SERVICE_TABLES = [
+    "artifacts",
+    "run_shares",
+    "run_replicas",
+    "runs",
+    "scenarios",
+    "graph_snapshots",
+    "datasets",
+    "use_case_approvals",
+    "idempotency_keys",
+    "refresh_tokens",
+    "memberships",
+    "audit_logs",
+    "users",
+    "orgs",
+]
+
+
+async def _truncate(dsn: str) -> None:
+    import asyncpg
+
+    connection = await asyncpg.connect(dsn.replace("postgresql+asyncpg://", "postgresql://"))
+    try:
+        await connection.execute(
+            "TRUNCATE " + ", ".join(SERVICE_TABLES) + " RESTART IDENTITY CASCADE"
+        )
+    finally:
+        await connection.close()
+
+
+@pytest.fixture
+async def clean_db() -> AsyncIterator[None]:
+    """Delete service rows in reverse-FK order before and after a test."""
+    dsn = os.environ.get("TEST_DATABASE_URL") or os.environ.get("DATABASE_URL")
+    if not dsn:
+        yield
+        return
+    await _truncate(dsn)
+    try:
+        yield
+    finally:
+        await _truncate(dsn)
 
 
 @pytest.fixture

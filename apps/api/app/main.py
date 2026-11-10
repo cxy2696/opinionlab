@@ -25,6 +25,7 @@ from app.deps import (
     write_audit,
 )
 from app.errors import ApiError, api_error_handler
+from app.locks import acquire_ingest_lock
 from app.models import (
     Artifact,
     Dataset,
@@ -104,6 +105,11 @@ class TokenPair(BaseModel):
 
 class RefreshRequest(BaseModel):
     refresh_token: str
+
+
+class ChangePasswordRequest(BaseModel):
+    old_password: str
+    new_password: str = Field(min_length=8, max_length=128)
 
 
 class ScenarioCreate(BaseModel):
@@ -271,6 +277,23 @@ async def logout(
     return {"status": "ok"}
 
 
+@auth.post("/change-password")
+async def change_password(
+    body: ChangePasswordRequest,
+    principal: Principal = Depends(get_principal),
+    session: AsyncSession = Depends(get_session),
+) -> dict[str, str]:
+    user = await session.get(User, principal.user_id)
+    if user is None or not verify_password(user.password_hash, body.old_password):
+        raise ApiError(401, "INVALID_CREDENTIALS", "current password is incorrect")
+    from app.security import hash_password
+
+    user.password_hash = hash_password(body.new_password)
+    user.must_change_pw = False
+    await session.commit()
+    return {"status": "ok"}
+
+
 @api.get("/orgs/me")
 async def org_me(
     principal: Principal = Depends(get_principal),
@@ -364,6 +387,8 @@ async def ingest_dataset(
     session: AsyncSession = Depends(get_session),
 ) -> dict[str, Any]:
     dataset = await _dataset_for(session, principal, dataset_id)
+    if not acquire_ingest_lock(str(dataset.id)):
+        raise ApiError(409, "INGEST_IN_PROGRESS", "dataset is already being ingested")
     return {"data": {"dataset_id": str(dataset.id), "status": "queued"}}
 
 
