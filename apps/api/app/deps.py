@@ -14,8 +14,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db import SessionFactory
 from app.errors import ApiError
-from app.models import AuditLog, IdempotencyKey, Membership, User
+from app.models import AuditLog, IdempotencyKey, Membership, Org, User
 from app.security import decode_token
+from app.settings import settings
 
 bearer = HTTPBearer(auto_error=False)
 ALL_ROLES = frozenset(
@@ -58,6 +59,16 @@ async def get_principal(
     )
     if membership is None:
         raise ApiError(403, "FORBIDDEN", "no membership in this org")
+    org = await session.get(Org, org_id)
+    if org is None:
+        raise ApiError(403, "FORBIDDEN", "organisation not found")
+    if org.region != settings.region:
+        raise ApiError(
+            403,
+            "REGION_MISMATCH",
+            "tenant data may not be accessed from another region",
+            {"org_region": org.region, "deployment_region": settings.region},
+        )
     return Principal(user_id=user_id, org_id=org_id, role=membership.role, email=user.email)
 
 

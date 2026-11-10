@@ -12,7 +12,7 @@ from fastapi import APIRouter, Depends, FastAPI, Header, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
-from sqlalchemy import func, select
+from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.deps import (
@@ -26,13 +26,16 @@ from app.deps import (
 )
 from app.errors import ApiError, api_error_handler
 from app.models import (
+    Artifact,
     Dataset,
+    GraphSnapshot,
     Membership,
     Org,
     RefreshToken,
     Run,
     RunShare,
     Scenario,
+    UseCaseApproval,
     User,
     utcnow,
 )
@@ -45,6 +48,7 @@ from app.security import (
     decode_token,
     verify_password,
 )
+from app.settings import settings
 from app.state import request_cancel
 from hnle.spec import ModelSpec
 
@@ -133,6 +137,13 @@ class DatasetCreate(BaseModel):
     name: str
     source_type: str = "upload_csv"
     size_bytes: int | None = Field(default=None, ge=0)
+    consent_basis: str | None = None
+    dpia: dict[str, Any] | None = None
+
+
+class UseCaseRequest(BaseModel):
+    template_key: str
+    declaration: str = Field(min_length=10, max_length=4000)
 
 
 class CompareRequest(BaseModel):
@@ -289,7 +300,13 @@ async def create_dataset(
     if replay is not None:
         status_code, replay_payload = replay
         return JSONResponse(status_code=status_code, content=replay_payload)
-    dataset = Dataset(org_id=principal.org_id, name=body.name, source_type=body.source_type)
+    dataset = Dataset(
+        org_id=principal.org_id,
+        name=body.name,
+        source_type=body.source_type,
+        consent_basis=body.consent_basis,
+        dpia=body.dpia,
+    )
     session.add(dataset)
     await session.flush()
     response_payload: dict[str, Any] = {
@@ -379,8 +396,23 @@ async def clone_template(
     )
     if match is None:
         raise ApiError(404, "NOT_FOUND", "template not found")
-    if not match.is_enabled():
-        raise ApiError(403, "USE_CASE_NOT_APPROVED", "template requires use-case approval")
+    approval = await session.scalar(
+        select(UseCaseApproval).where(
+            UseCaseApproval.org_id == principal.org_id,
+            UseCaseApproval.template_key == key,
+            UseCaseApproval.status == "approved",
+        )
+    )
+    if (
+        not match.is_enabled()
+        and settings.use_case_review_enabled
+        and approval is None
+    ):
+        raise ApiError(
+            403,
+            "USE_CASE_NOT_APPROVED",
+            "G5-class templates require use-case approval before cloning",
+        )
     scenario = Scenario(
         org_id=principal.org_id,
         template_key=key,
@@ -542,6 +574,17 @@ async def delete_dataset(
         raise ApiError(404, "NOT_FOUND", "dataset not found")
     if dataset.org_id != principal.org_id:
         raise ApiError(403, "FORBIDDEN", "dataset belongs to another organisation")
+    scenarios = (
+        await session.scalars(select(Scenario).where(Scenario.dataset_id == dataset_id))
+    ).all()
+    for scenario in scenarios:
+        runs = (await session.scalars(select(Run).where(Run.scenario_id == scenario.id))).all()
+        for run in runs:
+            await session.execute(delete(Artifact).where(Artifact.run_id == run.id))
+            await session.execute(delete(RunShare).where(RunShare.run_id == run.id))
+            await session.delete(run)
+        scenario.dataset_id = None
+    await session.execute(delete(GraphSnapshot).where(GraphSnapshot.dataset_id == dataset_id))
     await session.delete(dataset)
     await write_audit(session, principal, "dataset.delete", str(dataset_id))
     await session.commit()
@@ -793,6 +836,56 @@ async def export_report(
             "summary_only": principal.role == "reviewer" or not detail,
         }
     }
+
+
+@api.post("/orgs/use-case", status_code=201)
+async def request_use_case(
+    body: UseCaseRequest,
+    principal: Principal = Depends(require_roles("org_admin")),
+    session: AsyncSession = Depends(get_session),
+) -> dict[str, Any]:
+    org = await session.get(Org, principal.org_id)
+    if org is not None:
+        org.use_case_declaration = body.declaration
+    approval = await session.scalar(
+        select(UseCaseApproval).where(
+            UseCaseApproval.org_id == principal.org_id,
+            UseCaseApproval.template_key == body.template_key,
+        )
+    )
+    if approval is None:
+        approval = UseCaseApproval(
+            org_id=principal.org_id,
+            template_key=body.template_key,
+            declaration=body.declaration,
+            requested_by=principal.user_id,
+        )
+        session.add(approval)
+    else:
+        approval.declaration = body.declaration
+        approval.status = "pending"
+    await session.flush()
+    await session.commit()
+    return {"data": {"approval_id": str(approval.id), "status": approval.status}}
+
+
+@api.post("/platform/use-cases/{approval_id}/approve")
+async def approve_use_case(
+    approval_id: uuid.UUID,
+    principal: Principal = Depends(require_roles("platform_admin")),
+    session: AsyncSession = Depends(get_session),
+) -> dict[str, Any]:
+    approval = await session.get(UseCaseApproval, approval_id)
+    if approval is None:
+        raise ApiError(404, "NOT_FOUND", "approval not found")
+    approval.status = "approved"
+    approval.approved_by = principal.user_id
+    approval.decided_at = utcnow()
+    await write_audit(
+        session, principal, "use_case.approve", str(approval.id), {"org_id": str(approval.org_id)}
+    )
+    await session.commit()
+    return {"data": {"approval_id": str(approval.id), "status": "approved"}}
 
 
 @api.post("/admin/settings")

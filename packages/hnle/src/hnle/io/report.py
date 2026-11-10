@@ -193,6 +193,10 @@ details pre {{ background: #f5f7fa; padding: .8rem; overflow-x: auto; max-height
 <p>{html.escape(assumptions[0])}<br>{html.escape(assumptions[1])}</p>
 <h2>局限 / Limitations</h2>
 <p>{html.escape(limitations[0])}<br>{html.escape(limitations[1])}</p>
+<h2>AI 使用 / AI usage</h2>
+<p>本报告未使用生成式 AI 撰写结论；如未来启用，AI 生成段落将带显式标识并需人工复核。<br>
+No generative AI was used for this report; any future AI-generated section will be
+explicitly labelled and human-reviewed.</p>
 <details><summary>manifest / 运行清单</summary><pre>{manifest_json}</pre></details>
 {watermark}
 <script nonce="{token}">{_echarts_bundle()}</script>

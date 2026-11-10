@@ -22,6 +22,7 @@ class Settings(BaseSettings):
     rate_limit_user_rps: int = 30
     rate_limit_org_rps: int = 200
     connector_allowed_hosts: str = ""
+    use_case_review_enabled: bool = True
 
 
 settings = Settings()
