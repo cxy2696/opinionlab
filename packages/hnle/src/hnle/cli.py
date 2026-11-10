@@ -8,6 +8,7 @@ validated before any engine work starts.
 from __future__ import annotations
 
 import json
+import re
 import time
 from pathlib import Path
 from typing import Any, Optional
@@ -252,25 +253,48 @@ def _grid_combos(grid: list[str]) -> list[dict[str, Any]]:
 def sweep(
     spec: Path = typer.Option(DEFAULT_SPEC, "--spec", help="Scenario file"),
     grid: list[str] = typer.Option(
-        [], "--grid", help="Grid axis e.g. --grid q=1,1.5,2 --grid latency.mu=2,5"
+        [], "--grid", help="Axis e.g. q=0.5:2.5:5 or mu=1,5,10 (mu/sigma aliases)"
     ),
-    out: Path = typer.Option(Path("sweep.csv"), help="Sweep result CSV"),
+    lhs: int = typer.Option(0, help="Latin-hypercube sample count (0 = full grid)"),
+    repeats: int = typer.Option(1, help="Replicas per point / 每点副本数"),
+    jobs: int = typer.Option(1, help="Parallel workers / 并行进程数"),
+    sobol: bool = typer.Option(False, help="Use first-order variance effect instead of Pearson"),
+    out: Path = typer.Option(Path("sweep.csv"), help="Phase diagram CSV"),
+    sensitivity_out: Path = typer.Option(Path("sensitivity.json"), help="Sensitivity ranking JSON"),
 ) -> None:
-    """Run a parameter grid and write one row per combination."""
+    """Run a parameter sweep and rank parameter influence."""
+    from hnle.sweep import lhs_samples, parse_axis, run_sweep, sensitivity
+
     base, graph, _ = _load_spec(spec, [])
-    combos = _grid_combos(grid) or [{}]
-    rows: list[dict[str, Any]] = []
-    for combo in combos:
-        payload = base.model_dump(mode="json")
-        for key, value in combo.items():
-            _deep_set(payload, key, value)
-        variant = ModelSpec.model_validate(payload)
-        result = run_sparse(variant, graph, variant.seed)
-        summary = summarize(result, variant, graph.hyperedges).to_dict()
-        rows.append({**combo, "q": variant.q, **summary})
-    frame = pd.DataFrame(rows)
+    expanded = [
+        part
+        for item in grid
+        for part in re.split(r",(?=[A-Za-z_][\w.]*=)", item)
+    ]
+    axes = [parse_axis(item) for item in expanded]
+    if lhs > 0:
+        samples = lhs_samples(axes, lhs)
+    elif axes:
+        from hnle.sweep import grid_samples
+
+        samples = grid_samples(axes)
+    else:
+        samples = [{}]
+    frame = run_sweep(base, graph, samples, repeats=repeats, jobs=jobs)
     frame.to_csv(out, index=False)
-    typer.echo(f"sweep: {len(rows)} combos → {out}")
+    ranking = sensitivity(
+        frame, [axis.path for axis in axes], method="sobol" if sobol else "pearson"
+    )
+    sensitivity_out.write_text(
+        json.dumps([{"parameter": name, "score": score} for name, score in ranking], indent=2)
+        + "\n",
+        encoding="utf-8",
+    )
+    typer.echo(
+        f"sweep: {len(frame)} points → {out}; top={ranking[0][0] if ranking else '-'} "
+        f"({ranking[0][1]:.3f})" if ranking
+        else f"sweep: {len(frame)} points → {out}"
+    )
 
 
 @app.command()

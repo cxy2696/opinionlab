@@ -222,3 +222,29 @@ def test_repo_scenario_and_report_roundtrip(tmp_path: Path) -> None:
         app, ["report", "--run-id", run_id, "--runs-dir", str(out)]
     )
     assert verified.exit_code == 0, verified.output
+
+
+def test_sweep_range_syntax_with_sensitivity(scenario: Path, tmp_path: Path) -> None:
+    out = tmp_path / "phase.csv"
+    sens = tmp_path / "sensitivity.json"
+    result = CliRunner().invoke(
+        app,
+        [
+            "sweep",
+            "--spec",
+            str(scenario),
+            "--grid",
+            "q=0.5:2.5:3,mu=1:5:2",
+            "--repeats",
+            "1",
+            "--out",
+            str(out),
+            "--sensitivity-out",
+            str(sens),
+        ],
+    )
+    assert result.exit_code == 0, result.output
+    frame = pd.read_csv(out)
+    assert len(frame) == 6
+    ranking = json.loads(sens.read_text())
+    assert {item["parameter"] for item in ranking} == {"q", "latency.mu"}
