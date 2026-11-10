@@ -1,0 +1,15 @@
+# Sentiment label -> opinion index (lower-cased keys, externalised per OPT-06).
+labels:
+  joy: 1
+  happiness: 1
+  optimism: 1
+  positive: 1
+  love: 1
+  surprise: 1
+  anger: 0
+  sadness: 0
+  negative: 0
+  fear: 0
+  disgust: 0
+  neutral: 0
+default_opinion: null

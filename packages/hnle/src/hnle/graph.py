@@ -7,6 +7,7 @@ deterministic synthetic builder used by the engine and tests.
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass
 
 import numpy as np
@@ -68,3 +69,21 @@ def adjacency_lists(graph: Hypergraph) -> list[list[int]]:
 def opinions_array(opinions: list[int]) -> npt.NDArray[np.int64]:
     """Validate a plain list of opinions and convert it to an ``int64`` array."""
     return np.asarray(opinions, dtype=np.int64)
+
+
+def canonical_node_order(node_ids: Iterable[str]) -> list[str]:
+    """Deterministic node ordering: unique then lexicographically sorted."""
+    return sorted(set(node_ids))
+
+
+def normalize_weights(
+    raw: npt.NDArray[np.float64], *, all_zero_warning: str = "engagement_all_zero"
+) -> tuple[npt.NDArray[np.float64], dict[str, int]]:
+    """Scale weights to [0, 1]; all-zero input falls back to uniform + warning."""
+    weights = np.asarray(raw, dtype=np.float64)
+    warnings: dict[str, int] = {}
+    peak = float(weights.max()) if weights.size else 0.0
+    if peak <= 0.0:
+        warnings[all_zero_warning] = 1
+        return np.ones(weights.size, dtype=np.float64), warnings
+    return weights / peak, warnings
