@@ -1,0 +1,17 @@
+region: cn
+domain: opinionlab.example.cn
+image:
+  repository: registry.cn-hangzhou.aliyuncs.com/opinionlab/api
+  tag: "0.1.0"
+storage:
+  bucket: opinionlab-cn-artifacts
+  storageClass: alicloud-disk-essd
+secrets:
+  jwtSecretName: opinionlab-jwt-cn
+  hmacSaltSecretName: opinionlab-hmac-cn
+  databaseSecretName: opinionlab-db-cn
+ingress:
+  tlsSecret: opinionlab-cn-tls
+worker:
+  concurrency: 8
+  queues: "q_normal,q_batch,q_ingest"

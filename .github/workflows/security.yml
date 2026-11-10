@@ -1,0 +1,17 @@
+name: security
+
+on:
+  schedule:
+    - cron: "0 3 * * 1"  # weekly, Monday 03:00 UTC
+  workflow_dispatch:
+
+jobs:
+  pip-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+      - run: uv sync
+      - run: uv run pip-audit

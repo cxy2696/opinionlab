@@ -1,0 +1,17 @@
+region: global
+domain: opinionlab.example.eu
+image:
+  repository: ghcr.io/cxy2696/opinionlab-api
+  tag: "0.1.0"
+storage:
+  bucket: opinionlab-eu-artifacts
+  storageClass: gp3
+secrets:
+  jwtSecretName: opinionlab-jwt-eu
+  hmacSaltSecretName: opinionlab-hmac-eu
+  databaseSecretName: opinionlab-db-eu
+ingress:
+  tlsSecret: opinionlab-eu-tls
+worker:
+  concurrency: 8
+  queues: "q_normal,q_batch,q_ingest"

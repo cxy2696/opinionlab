@@ -140,6 +140,7 @@ class Run(Base):
     aggregate: Mapped[dict[str, object] | None] = mapped_column(JSON, nullable=True)
     disclaimer_key: Mapped[str] = mapped_column(Text, default="simulation_not_prediction")
     error_code: Mapped[str | None] = mapped_column(Text, nullable=True)
+    tainted: Mapped[bool] = mapped_column(Boolean, default=False)
     created_by: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     queued_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)

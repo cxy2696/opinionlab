@@ -37,3 +37,20 @@ Alert rules (Prometheus):
 2. 提交无反应：`redis-cli XLEN` 与 worker 存活、队列深度。
 3. 作业一直 running：比对 soft/hard limit，> hard+5min 主动查 Celery 结果。
 4. 结果异常：取 manifest 比对 `engine_version + spec_sha256`，检查 golden 基线漂移。
+
+
+## 金丝雀与回滚 / Canary & rollback
+1. 新版本先部署 1 个 API/worker 实例，路由 5% 流量，观察 30 分钟。
+2. 通过指标：API P95 < 500ms、作业失败率 < 5%、`opinionlab_api_duration_seconds` 无异常抬升。
+3. 回滚触发：失败率 > 20%（15 分钟）、5xx > 1%（5 分钟）、发现 OPT-01 类数值缺陷。
+4. 回滚：`docker compose pull <previous-tag> && up -d`；数据库仅可逆迁移 `alembic downgrade -1`。
+
+### Tainted 标记流程 / Tainted run marking
+发现引擎缺陷（数值不可复现/顺序依赖）时：
+```sql
+ALTER TABLE runs ADD COLUMN IF NOT EXISTS tainted BOOLEAN NOT NULL DEFAULT FALSE;
+UPDATE runs SET tainted = TRUE
+WHERE spec_sha256 IN ('<affected-sha-1>', '<affected-sha-2>');
+```
+- 通知导出过相关报告的 scenario_owner，报告页显示 "tainted" 提示。
+- 受影响 run 不删除，保留复现证据；重新运行生成新 run。
