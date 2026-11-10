@@ -38,7 +38,7 @@ select = ["E", "F", "I", "UP", "B", "SIM"]
 known-first-party = ["hnle"]
 
 [tool.ruff.lint.per-file-ignores]
-"packages/hnle/src/hnle/cli.py" = ["B008"]
+"packages/hnle/src/hnle/cli.py" = ["B008", "UP007"]
 
 [tool.mypy]
 python_version = "3.12"
