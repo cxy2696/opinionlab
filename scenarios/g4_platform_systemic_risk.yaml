@@ -1,0 +1,31 @@
+key: G4
+name_zh: 平台系统性风险
+name_en: Platform systemic risk
+question_zh: 超边持续增长时，平台话题是否会进入高波动、难收敛的状态？
+question_en: When hyperedges keep growing, can platform topics enter a high-volatility, non-converging
+  regime?
+data_shape_zh: 平台级话题流：用户-标签-互动，按小时聚合。
+data_shape_en: 'Platform-wide topic stream: user–hashtag–engagement aggregated hourly.'
+interpretation_zh: 拓扑增长叠加高从众 q，会显著抬高 cascade p99 并推迟收敛。
+interpretation_en: Topology growth plus high conformity q raises cascade p99 and delays convergence.
+assumptions_zh: 假设新超边按稳定到达率出现。
+assumptions_en: Assumes new hyperedges arrive at a stable rate.
+limitations_zh: 未建模推荐系统对连接形成的反馈。
+limitations_en: Does not model recommender feedback on link formation.
+feature_flag: null
+enabled_by_default: true
+spec:
+  n_steps: 120
+  q: 2.2
+  latency:
+    dist: exponential
+    mu: 3
+  repeats: 3
+  topology:
+    mode: time_varying
+    arrival_rate: 0.5
+    decay_rate: 0.02
+graph:
+  n_nodes: 400
+  n_edges: 1000
+  seed: 20

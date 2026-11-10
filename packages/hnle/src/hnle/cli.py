@@ -8,6 +8,7 @@ validated before any engine work starts.
 from __future__ import annotations
 
 import json
+import os
 import re
 import time
 from pathlib import Path
@@ -108,6 +109,14 @@ def _load_spec(
         spec = ModelSpec.model_validate(merged)
     except ValidationError as exc:
         _report_validation_error(exc)
+    if isinstance(raw, dict) and raw.get("enabled_by_default") is False:
+        flag = str(raw.get("feature_flag") or "").upper()
+        if (os.environ.get(flag, "") if flag else "").lower() not in {"1", "true", "yes", "on"}:
+            typer.echo(
+                f"template disabled by feature flag {flag or '<none>'} / 模板默认关闭",
+                err=True,
+            )
+            raise typer.Exit(code=3)
     graph_data = raw.get("graph") if isinstance(raw, dict) else None
     if graph_data:
         n_nodes = int(graph_data.get("n_nodes", 200))
@@ -128,6 +137,21 @@ def _load_spec(
         return spec, graph, graph_data
     rng = np.random.default_rng(spec.seed)
     return spec, random_hypergraph(200, 400, rng, spec.hyperedge), {}
+
+
+@app.command()
+def templates(
+    directory: Path = typer.Option(Path("scenarios"), help="Template directory / 模板目录"),
+) -> None:
+    """List the scenario template library with bilingual descriptions."""
+    from hnle.templates import iter_templates
+
+    for template in iter_templates(directory):
+        state = "enabled" if template.is_enabled() else "DISABLED"
+        typer.echo(
+            f"[{template.key}] {template.name_zh} / {template.name_en} ({state})\n"
+            f"  {template.question_zh}\n  {template.question_en}"
+        )
 
 
 @app.command()
@@ -187,7 +211,7 @@ def simulate(
     artifact_elapsed = time.perf_counter() - artifact_started
     paths = export_run(
         parsed, graph, artifact, out_dir,
-        wall_clock_seconds=artifact_elapsed, include_figure=True,
+        wall_clock_seconds=artifact_elapsed, include_figure=True, aggregate=aggregate,
     )
     metrics = summarize(artifact, parsed, graph.hyperedges).to_dict()
     diversity = aggregate.metrics["diversity_final"]

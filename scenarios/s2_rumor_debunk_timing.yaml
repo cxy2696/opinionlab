@@ -1,0 +1,35 @@
+key: S2
+name_zh: 辟谣时机
+name_en: Rumor debunk timing
+question_zh: 辟谣信息在谣言峰值前后不同时点投放，最终负向观点占比差多少？
+question_en: How much does the final negative share differ when debunking before vs after the rumor peak?
+data_shape_zh: 谣言话题的转发链：用户-标签-互动；需包含谣言与辟谣两个标签。
+data_shape_en: 'Rumor cascade: user–hashtag–engagement, with separate rumor and debunk tags.'
+interpretation_zh: 越早投放辟谣，负向占比越低；若 CI 重叠则不能宣称时点有效。
+interpretation_en: Earlier debunking lowers the negative share; overlapping CIs mean the timing effect
+  is not established.
+assumptions_zh: 假设辟谣触达与话题活跃度成正比。
+assumptions_en: Assumes debunk reach is proportional to topic activity.
+limitations_zh: 忽略辟谣内容质量与信源可信度差异。
+limitations_en: Ignores debunk quality and source-credibility differences.
+feature_flag: null
+enabled_by_default: true
+spec:
+  n_steps: 100
+  q: 1.6
+  latency:
+    dist: normal
+    mu: 3
+    sigma: 1
+  repeats: 3
+  interventions:
+  - at_step: 20
+    type: debunk
+    target:
+      opinion: '1'
+    magnitude: 0.3
+    duration: 5
+graph:
+  n_nodes: 300
+  n_edges: 900
+  seed: 12

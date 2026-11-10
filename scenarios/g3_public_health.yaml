@@ -1,0 +1,35 @@
+key: G3
+name_zh: 公共卫生
+name_en: Public health
+question_zh: 权威信源集中发声，能否在疫情话题中形成稳定的正向共识？
+question_en: Can concentrated authoritative messaging form a stable positive consensus in an outbreak
+  topic?
+data_shape_zh: 公共卫生话题：用户-标签-互动；需区分官方与个人账号。
+data_shape_en: 'Public-health topics: user–hashtag–engagement with official vs individual accounts.'
+interpretation_zh: 种子观点比例越高，收敛越快；但过度集中可能压低多样性。
+interpretation_en: A higher seeded share converges faster, but over-concentration can suppress diversity.
+assumptions_zh: 假设官方账号影响力可由互动量近似。
+assumptions_en: Assumes official-account influence is approximated by engagement.
+limitations_zh: 未建模信任度与地域差异。
+limitations_en: Does not model trust levels or regional differences.
+feature_flag: null
+enabled_by_default: true
+spec:
+  n_steps: 100
+  q: 1.8
+  latency:
+    dist: normal
+    mu: 4
+    sigma: 1.5
+  repeats: 3
+  interventions:
+  - at_step: 8
+    type: seed_opinion
+    target:
+      opinion: '1'
+    magnitude: 0.2
+    duration: 1
+graph:
+  n_nodes: 350
+  n_edges: 900
+  seed: 19

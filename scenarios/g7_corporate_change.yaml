@@ -1,0 +1,35 @@
+key: G7
+name_zh: 企业变更沟通
+name_en: Corporate change communication
+question_zh: 组织变革沟通的节奏，会如何影响员工观点的分化与回流？
+question_en: How does the cadence of change communication affect employee opinion polarisation and relapse?
+data_shape_zh: 内部社区话题：员工-标签-互动；需匿名化到部门粒度。
+data_shape_en: 'Internal community: employee–hashtag–engagement, anonymised to department level.'
+interpretation_zh: 分段沟通降低短期冲击，但若间隔过长，负向观点会重新聚集。
+interpretation_en: Staged communication softens the initial shock, but long gaps let negative opinions
+  regroup.
+assumptions_zh: 假设部门内互动同质，忽略正式组织层级。
+assumptions_en: Assumes homogeneous intra-department interaction and ignores formal hierarchy.
+limitations_zh: 不包含真实人事决策与离职行为。
+limitations_en: Excludes actual HR decisions and attrition.
+feature_flag: null
+enabled_by_default: true
+spec:
+  n_steps: 100
+  q: 1.5
+  latency:
+    dist: normal
+    mu: 5
+    sigma: 2
+  repeats: 3
+  interventions:
+  - at_step: 20
+    type: dampen
+    target:
+      opinion: '1'
+    magnitude: 0.25
+    duration: 10
+graph:
+  n_nodes: 300
+  n_edges: 800
+  seed: 22

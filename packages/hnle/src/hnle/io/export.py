@@ -51,7 +51,11 @@ def series_frame(result: RunResult) -> pd.DataFrame:
 
 
 def _html_report(
-    run_id: str, spec: ModelSpec, summary: dict[str, Any], frame: pd.DataFrame
+    run_id: str,
+    spec: ModelSpec,
+    summary: dict[str, Any],
+    frame: pd.DataFrame,
+    aggregate: Any = None,
 ) -> str:
     rows = "\n".join(
         f"<tr><td>{name}</td><td>{value:.6g}</td></tr>"
@@ -59,6 +63,13 @@ def _html_report(
         else f"<tr><td>{name}</td><td>{value}</td></tr>"
         for name, value in summary.items()
     )
+    ci_rows = ""
+    if aggregate is not None:
+        ci_rows = "\n".join(
+            f"<tr><td>{name}</td><td>{item.mean:.6g}</td><td>{item.ci95_lo:.6g}</td>"
+            f"<td>{item.ci95_hi:.6g}</td></tr>"
+            for name, item in aggregate.metrics.items()
+        )
     points = json.dumps(
         {
             "step": frame["step"].tolist(),
@@ -90,6 +101,9 @@ code {{ background: #f5f7fa; padding: .1rem .3rem; }}
 <table><thead><tr><th>metric</th><th>value</th></tr></thead><tbody>
 {rows}
 </tbody></table>
+{f'<h2>蒙特卡洛 95% CI / Monte-Carlo 95% CI</h2><table><thead><tr><th>metric</th>'
+ f'<th>mean</th><th>ci95_lo</th><th>ci95_hi</th></tr></thead><tbody>{ci_rows}</tbody></table>'
+ if ci_rows else ''}
 <h2>多样性曲线 / Diversity series</h2>
 <p>共 {len(frame)} 步；数据已内嵌，可离线查看。 /
 {len(frame)} steps, data embedded for offline use.</p>
@@ -109,6 +123,7 @@ def export_run(
     weights: Any = None,
     wall_clock_seconds: float | None = None,
     include_figure: bool = True,
+    aggregate: Any = None,
 ) -> dict[str, Path]:
     """Write every artifact for one run into ``out_dir/<run_id>/``."""
     run_id = run_id_for(spec)
@@ -139,7 +154,9 @@ def export_run(
         plt.close(fig)
 
     report_path = target / f"{run_id}.report.html"
-    report_path.write_text(_html_report(run_id, spec, summary, frame), encoding="utf-8")
+    report_path.write_text(
+        _html_report(run_id, spec, summary, frame, aggregate), encoding="utf-8"
+    )
 
     actual_weights = weights if weights is not None else np.ones(graph.n_nodes, dtype=np.float64)
     graph_path = save_graph(target / "graph.npz", graph, actual_weights)

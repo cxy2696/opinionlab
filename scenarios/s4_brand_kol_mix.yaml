@@ -1,0 +1,38 @@
+key: S4
+name_zh: 品牌 KOL 组合
+name_en: Brand KOL mix
+question_zh: 头部 KOL 与长尾创作者的不同配比，会改变品牌话题的观点分布吗？
+question_en: Does the mix of top KOLs versus long-tail creators change the opinion distribution?
+data_shape_zh: 品牌话题：用户-标签-互动量；需可区分 KOL 与普通用户权重。
+data_shape_en: 'Brand topics: user–hashtag–engagement, with KOL vs regular-user weights.'
+interpretation_zh: KOL 权重越高，早期级联越大但后期多样性越低，存在覆盖与多元的权衡。
+interpretation_en: Higher KOL weight yields larger early cascades but lower late diversity — a reach versus
+  pluralism trade-off.
+assumptions_zh: 假设互动量可近似影响力且不随事件变化。
+assumptions_en: Assumes engagement approximates influence and is stable across the event.
+limitations_zh: 未建模商业投放预算与竞品行为。
+limitations_en: Does not model paid media budgets or competitor behaviour.
+feature_flag: null
+enabled_by_default: true
+spec:
+  n_steps: 100
+  q: 1.4
+  latency:
+    dist: normal
+    mu: 5
+    sigma: 2
+  repeats: 3
+  weights:
+    source: engagement
+    normalize: max
+  interventions:
+  - at_step: 10
+    type: boost
+    target:
+      opinion: '1'
+    magnitude: 0.25
+    duration: 10
+graph:
+  n_nodes: 350
+  n_edges: 900
+  seed: 14

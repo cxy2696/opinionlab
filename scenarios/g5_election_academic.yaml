@@ -1,0 +1,29 @@
+key: G5
+name_zh: 选举类学术模板
+name_en: Election academic template
+question_zh: 选举周期内，观点分布与级联是否呈现可复现的周期结构？
+question_en: Do opinion distributions and cascades show a reproducible cyclical structure across an election
+  cycle?
+data_shape_zh: 选举话题：用户-标签-互动；仅限学术研究且需用途审批。
+data_shape_en: 'Election topics: user–hashtag–engagement; academic use only, subject to use-case review.'
+interpretation_zh: 该模板默认关闭，仅在用途审批通过后启用，结论不得用于真实选举预测。
+interpretation_en: Disabled by default; enabled only after use-case approval, and results must not be
+  used for election forecasting.
+assumptions_zh: 假设议题空间稳定、外部事件可枚举。
+assumptions_en: Assumes a stable issue space and enumerable exogenous events.
+limitations_zh: 合规限制：不得用于真实个人或选情预测。
+limitations_en: 'Compliance: must not be used on real individuals or for election forecasting.'
+feature_flag: ff_g5_election_templates
+enabled_by_default: false
+spec:
+  n_steps: 100
+  q: 1.5
+  latency:
+    dist: normal
+    mu: 4
+    sigma: 2
+  repeats: 3
+graph:
+  n_nodes: 200
+  n_edges: 400
+  seed: 23

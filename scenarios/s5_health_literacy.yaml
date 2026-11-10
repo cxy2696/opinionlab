@@ -1,0 +1,35 @@
+key: S5
+name_zh: 应急科普
+name_en: Emergency science literacy
+question_zh: 突发公共卫生事件中，科普投放能否降低恐慌性观点占比？
+question_en: Can science communication reduce panic-driven opinions during a public-health emergency?
+data_shape_zh: 健康话题：用户-标签-互动；需含科普与恐慌两类标签。
+data_shape_en: 'Health topics: user–hashtag–engagement with science and panic tags.'
+interpretation_zh: 科普越早，正向占比越高；若时延很大，需同时安排权威信源重复触达。
+interpretation_en: Earlier science communication raises the positive share; with long latency, repeat
+  authoritative reach is needed.
+assumptions_zh: 假设科普内容被同等理解，未建模健康素养差异。
+assumptions_en: Assumes equal comprehension; health-literacy differences are not modelled.
+limitations_zh: 不包含线下行为与真实感染数据。
+limitations_en: Excludes offline behaviour and real infection data.
+feature_flag: null
+enabled_by_default: true
+spec:
+  n_steps: 90
+  q: 1.5
+  latency:
+    dist: normal
+    mu: 4
+    sigma: 1.5
+  repeats: 3
+  interventions:
+  - at_step: 10
+    type: debunk
+    target:
+      opinion: '1'
+    magnitude: 0.4
+    duration: 5
+graph:
+  n_nodes: 250
+  n_edges: 700
+  seed: 15

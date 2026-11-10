@@ -1,0 +1,35 @@
+key: G6
+name_zh: 灾害预警
+name_en: Disaster warning
+question_zh: 灾害预警发布后，信息扩散是否能在短时间内覆盖多数节点并稳定？
+question_en: After a disaster warning, can information reach most nodes quickly and stay stable?
+data_shape_zh: 应急话题：用户-标签-互动；需含预警与谣言标签。
+data_shape_en: 'Emergency topics: user–hashtag–engagement with warning and rumor tags.'
+interpretation_zh: 预警后若正向占比快速上升且不回落，说明覆盖有效；否则需补充渠道。
+interpretation_en: A quick, non-reverting rise in the positive share means coverage worked; otherwise
+  add channels.
+assumptions_zh: 假设预警触达与话题活跃度相关。
+assumptions_en: Assumes warning reach correlates with topic activity.
+limitations_zh: 未建模线下应急响应与地理因素。
+limitations_en: Does not model offline response or geography.
+feature_flag: null
+enabled_by_default: true
+spec:
+  n_steps: 90
+  q: 1.7
+  latency:
+    dist: normal
+    mu: 3
+    sigma: 1
+  repeats: 3
+  interventions:
+  - at_step: 5
+    type: boost
+    target:
+      opinion: '1'
+    magnitude: 0.3
+    duration: 10
+graph:
+  n_nodes: 250
+  n_edges: 700
+  seed: 21

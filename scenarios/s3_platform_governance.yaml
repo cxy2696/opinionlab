@@ -1,0 +1,34 @@
+key: S3
+name_zh: 平台治理
+name_en: Platform governance
+question_zh: 平台限流/降温措施能否压低极端叙事的级联规模？
+question_en: Can platform throttling reduce the cascade size of extreme narratives?
+data_shape_zh: 平台内话题互动：用户-标签-曝光；需标注治理动作时间点。
+data_shape_en: 'In-platform topic interaction: user–hashtag–exposure with moderation timestamps.'
+interpretation_zh: 治理后级联 p99 下降且收敛加快，说明措施有效；否则可能只是转移了讨论场域。
+interpretation_en: A lower cascade p99 and faster convergence after moderation suggests effectiveness;
+  otherwise discussion may simply move elsewhere.
+assumptions_zh: 假设治理动作对全体用户同时生效。
+assumptions_en: Assumes moderation applies to all users simultaneously.
+limitations_zh: 无法观察被删除内容与跨平台迁移。
+limitations_en: Cannot observe removed content or cross-platform migration.
+feature_flag: null
+enabled_by_default: true
+spec:
+  n_steps: 120
+  q: 2.0
+  latency:
+    dist: exponential
+    mu: 2
+  repeats: 3
+  interventions:
+  - at_step: 25
+    type: dampen
+    target:
+      opinion: '1'
+    magnitude: 0.3
+    duration: 15
+graph:
+  n_nodes: 400
+  n_edges: 1000
+  seed: 13

@@ -1,0 +1,35 @@
+key: S1
+name_zh: 政策发布节奏
+name_en: Policy release cadence
+question_zh: 政策分阶段发布时，公众讨论会在第几步达到峰值、峰值后是否回落？
+question_en: When a policy is released in stages, at which step does discussion peak and does it subside?
+data_shape_zh: 微博话题：用户-话题标签-互动量；按天聚合，脱敏后构图。
+data_shape_en: 'Weibo topics: user–hashtag–engagement, aggregated daily and pseudonymised.'
+interpretation_zh: 若峰值后多样性快速下降，说明讨论收敛为单一叙事；干预后若级联仍高，需延长沟通窗口。
+interpretation_en: A fast diversity drop after the peak means the discussion converges to one narrative;
+  high cascades after the intervention call for a longer communication window.
+assumptions_zh: 假设话题内互动同质、外部事件不在观测窗口内。
+assumptions_en: Assumes homogeneous within-topic interaction and no exogenous events in the window.
+limitations_zh: 不建模媒体议程设置与平台推荐算法。
+limitations_en: Does not model media agenda-setting or platform recommendation algorithms.
+feature_flag: null
+enabled_by_default: true
+spec:
+  n_steps: 120
+  q: 1.8
+  latency:
+    dist: normal
+    mu: 4
+    sigma: 1.5
+  repeats: 3
+  interventions:
+  - at_step: 30
+    type: boost
+    target:
+      opinion: '1'
+    magnitude: 0.2
+    duration: 10
+graph:
+  n_nodes: 300
+  n_edges: 800
+  seed: 11

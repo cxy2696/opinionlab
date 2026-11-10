@@ -1,0 +1,35 @@
+key: S6
+name_zh: 金融预期沟通
+name_en: Financial expectation communication
+question_zh: 监管沟通节奏如何影响市场情绪的收敛速度与尾部风险？
+question_en: How does the cadence of regulator communication affect sentiment convergence and tail risk?
+data_shape_zh: 财经话题：用户-标签-互动；需按交易时段对齐时间戳。
+data_shape_en: 'Financial topics: user–hashtag–engagement aligned to trading sessions.'
+interpretation_zh: 渐进式沟通降低 cascade p99，但可能延长收敛时间；需权衡稳定性与效率。
+interpretation_en: Gradual communication lowers cascade p99 but can lengthen convergence; stability trades
+  off against speed.
+assumptions_zh: 假设市场参与者同质解读同一信息。
+assumptions_en: Assumes homogeneous interpretation of the same message.
+limitations_zh: 未建模真实价格反馈与机构交易行为。
+limitations_en: Does not model price feedback or institutional trading.
+feature_flag: null
+enabled_by_default: true
+spec:
+  n_steps: 110
+  q: 1.7
+  latency:
+    dist: normal
+    mu: 6
+    sigma: 2
+  repeats: 3
+  interventions:
+  - at_step: 15
+    type: boost
+    target:
+      opinion: '1'
+    magnitude: 0.2
+    duration: 20
+graph:
+  n_nodes: 300
+  n_edges: 800
+  seed: 16

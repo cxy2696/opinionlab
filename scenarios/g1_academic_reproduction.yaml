@@ -1,0 +1,32 @@
+key: G1
+name_zh: 学术复现
+name_en: Academic reproduction
+question_zh: 在经典 Voter 极限（q=1、L=1、二元超边）下，共识概率是否随规模按预期衰减？
+question_en: In the classical voter limit (q=1, L=1, pair edges), does consensus probability decay with
+  size as expected?
+data_shape_zh: 随机二元超图；也可替换为论文附带数据。
+data_shape_en: Random pair hypergraph; the paper's dataset can be substituted.
+interpretation_zh: 共识概率随 n 单调下降，可作为实现正确性的数学锚点。
+interpretation_en: Consensus probability decreasing with n serves as the mathematical correctness anchor.
+assumptions_zh: 假设无外部冲击、均匀权重。
+assumptions_en: Assumes no external shocks and uniform weights.
+limitations_zh: 有限步长与有限图规模会影响收敛判定。
+limitations_en: Finite horizon and graph size affect convergence detection.
+feature_flag: null
+enabled_by_default: true
+spec:
+  n_steps: 150
+  q: 1.0
+  n_opinions: 2
+  repeats: 5
+  latency:
+    dist: const
+    mu: 1
+  hyperedge:
+    min_size: 2
+    max_size: 2
+  consensus_threshold: 0.8
+graph:
+  n_nodes: 200
+  n_edges: 400
+  seed: 17
