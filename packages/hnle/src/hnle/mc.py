@@ -10,7 +10,8 @@ from concurrent.futures import ProcessPoolExecutor
 
 import numpy as np
 
-from hnle.core.sparse import RunResult, run_sparse
+from hnle.core.sparse import RunResult
+from hnle.engine import run_engine
 from hnle.graph import Hypergraph
 from hnle.spec import ModelSpec
 
@@ -26,7 +27,7 @@ def replica_seeds(spec: ModelSpec, repeats: int) -> list[int]:
 
 def _run_job(job: _Job) -> RunResult:
     spec, graph, seed = job
-    return run_sparse(spec, graph, seed)
+    return run_engine(spec, graph, seed)
 
 
 def run_monte_carlo(
