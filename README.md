@@ -1,5 +1,9 @@
 # OpinionLab · 舆情演化仿真沙盘
 
+[![CI](https://github.com/cxy2696/opinionlab/actions/workflows/ci.yml/badge.svg)](https://github.com/cxy2696/opinionlab/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](pyproject.toml)
+
 [中文](#中文) · [English](#english)
 
 OpinionLab 是一个**可复现、可服务化**的舆论动力学仿真平台：在超图上模拟群体观点演化，支持非线性从众、异质时延、外部冲击与干预推演，并输出带 95% 置信区间的群体指标与离线报告。
@@ -68,6 +72,17 @@ make check
 | [容量报告](docs/capacity-report.md) | 容量公式、实测 c、压测场景 |
 | [产品演示](docs/DEMO.md) | 演示页、公开 API、限制与适用场景 |
 | [CHANGELOG](CHANGELOG.md) | 行为变更、依赖与已知偏差 |
+
+### 测试与基准 / Tests & benchmarks
+
+```bash
+make check   # ruff + mypy --strict + pytest（引擎、API、演示页；数据库相关用例需 TEST_DATABASE_URL）
+make bench   # 10 万节点基准，超过 90s 失败
+```
+
+- 单元 / 集成 / 金标：`tests/`；演示页：`tests/test_demo_app.py`
+- 数据库与 Redis 集成由 CI 的 postgres:16 + redis:7.2 service 覆盖
+- 压测脚本：`benchmarks/locustfile.py`（场景 A/B/C）
 
 ### 目录
 
