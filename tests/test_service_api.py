@@ -196,6 +196,10 @@ async def test_reviewer_only_sees_shared_runs(client: AsyncClient) -> None:
         f"/api/v1/reports/{seeded['run']}/export?detail=false", headers=_auth(token)
     )
     assert summary.status_code == 200
+    payload = summary.json()["data"]
+    assert payload["disclaimer_key"] == "simulation_not_prediction"
+    assert payload["watermark"] is True
+    assert payload["summary_only"] is True
 
 
 async def test_node_trace_is_forbidden(client: AsyncClient) -> None:

@@ -209,9 +209,16 @@ def simulate(
     artifact_started = time.perf_counter()
     artifact = run_sparse(parsed, graph, parsed.seed)
     artifact_elapsed = time.perf_counter() - artifact_started
+    raw_meta = yaml.safe_load(spec.read_text(encoding="utf-8")) or {}
+    narrative = {
+        key: str(raw_meta[key])
+        for key in ("assumptions_zh", "assumptions_en", "limitations_zh", "limitations_en")
+        if key in raw_meta
+    }
     paths = export_run(
         parsed, graph, artifact, out_dir,
         wall_clock_seconds=artifact_elapsed, include_figure=True, aggregate=aggregate,
+        narrative=narrative,
     )
     metrics = summarize(artifact, parsed, graph.hyperedges).to_dict()
     diversity = aggregate.metrics["diversity_final"]

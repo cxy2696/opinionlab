@@ -783,7 +783,16 @@ async def export_report(
         session, principal, "report.export", str(run.id), {"detail": detail}
     )
     await session.commit()
-    return {"data": {"run_id": str(run.id), "detail": detail, "status": "queued"}}
+    return {
+        "data": {
+            "run_id": str(run.id),
+            "detail": detail,
+            "status": "queued",
+            "disclaimer_key": run.disclaimer_key,
+            "watermark": not detail,
+            "summary_only": principal.role == "reviewer" or not detail,
+        }
+    }
 
 
 @api.post("/admin/settings")
