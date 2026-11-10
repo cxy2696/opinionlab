@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 import pandas as pd
@@ -42,8 +43,11 @@ def test_help_lists_all_subcommands() -> None:
 
 
 def test_simulate_help_lists_options_and_defaults() -> None:
-    result = CliRunner().invoke(app, ["simulate", "--help"])
+    result = CliRunner().invoke(
+        app, ["simulate", "--help"], env={"COLUMNS": "200", "TERM": "dumb"}
+    )
     assert result.exit_code == 0
+    plain = re.sub(r"\x1b\[[0-9;]*[A-Za-z]", "", result.output)
     for option in (
         "--spec",
         "--set",
@@ -54,8 +58,8 @@ def test_simulate_help_lists_options_and_defaults() -> None:
         "--decision-rule",
         "--out-dir",
     ):
-        assert option in result.output
-    assert "scenarios/cn_rumor_debon_timing.yaml" in result.output
+        assert option in plain
+    assert "scenarios/cn_rumor_debon_timing.yaml" in plain
 
 
 def test_simulate_runs_and_exports(scenario: Path, tmp_path: Path) -> None:
