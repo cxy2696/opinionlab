@@ -143,6 +143,8 @@ class WeightsSpec(_Base):
 
 class TopologySpec(_Base):
     mode: TopologyMode = TopologyMode.static
+    arrival_rate: float = Field(0.0, ge=0.0)
+    decay_rate: float = Field(0.0, ge=0.0)
 
 
 class HyperedgeSpec(_Base):

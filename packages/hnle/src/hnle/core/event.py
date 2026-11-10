@@ -29,7 +29,7 @@ from hnle.core.update import (
 )
 from hnle.graph import Hypergraph
 from hnle.metrics import diversity
-from hnle.spec import Aggregation, LatencyQuantize, ModelSpec
+from hnle.spec import Aggregation, LatencyQuantize, ModelSpec, TopologyMode
 
 
 def _aggregate(
@@ -137,6 +137,12 @@ def _process_batch(
 
 def run_event(spec: ModelSpec, graph: Hypergraph, seed: int) -> RunResult:
     """Run one replica with the event-driven kernel."""
+    if spec.shocks or spec.interventions:
+        raise NotImplementedError(
+            "event_driven engine does not support shocks/interventions yet"
+        )
+    if spec.topology.mode is not TopologyMode.static:
+        raise NotImplementedError("event_driven engine requires static topology")
     edges = tuple(sorted(graph.hyperedges))
     init_rng, latency_rng, decision_rng = derive_streams(seed)
     n_nodes = graph.n_nodes

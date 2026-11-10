@@ -178,7 +178,9 @@ def test_compare_writes_directions(scenario: Path, tmp_path: Path) -> None:
     assert result.exit_code == 0, result.output
     payload = json.loads(out.read_text())
     assert len(payload["variants"]) == 2
-    assert {item["direction"] for item in payload["variants"]} <= {"improved", "worsened"}
+    for item in payload["variants"]:
+        assert {"metric", "baseline", "variant", "direction", "significant"} <= set(item)
+        assert item["direction"].split(":")[-1] in {"improved", "worsened", "inconclusive"}
 
 
 def test_ingest_writes_snapshot(tmp_path: Path) -> None:

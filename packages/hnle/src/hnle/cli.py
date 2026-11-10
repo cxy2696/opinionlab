@@ -315,35 +315,29 @@ def compare(
     out: Path = typer.Option(Path("compare.json"), help="Comparison JSON"),
 ) -> None:
     """Compare the baseline against one or more single-override variants."""
+    from hnle.compare import compare_variants
+
     base, graph, _ = _load_spec(spec, [])
-    seed = base.seed
-    baseline = run_sparse(base.model_copy(update={"repeats": repeats}), graph, seed)
-    variants: list[dict[str, Any]] = []
-    for index, item in enumerate(variant):
-        payload = base.model_dump(mode="json")
+    specs: list[tuple[str, dict[str, Any]]] = []
+    for item in variant:
         key, separator, raw = item.partition("=")
         if not separator:
             raise typer.BadParameter(f"--variant expects key=value, got {item!r}")
-        _deep_set(payload, key.strip(), yaml.safe_load(raw))
-        candidate = ModelSpec.model_validate(payload)
-        result = run_sparse(candidate, graph, seed + index + 1)
-        base_div = baseline.diversity_series[-1]
-        variant_div = result.diversity_series[-1]
-        direction = "improved" if variant_div > base_div else "worsened"
-        variants.append(
-            {
-                "override": item,
-                "diversity_final": variant_div,
-                "baseline": base_div,
-                "direction": direction,
-            }
-        )
+        specs.append((item, {key.strip(): yaml.safe_load(raw)}))
+    comparisons = compare_variants(base, graph, specs, repeats=repeats, jobs=1)
     out.write_text(
-        json.dumps({"baseline": base.model_dump(mode="json"), "variants": variants},
-                   ensure_ascii=False, indent=2) + "\n",
+        json.dumps(
+            {
+                "baseline_spec": base.model_dump(mode="json"),
+                "variants": [comparison.to_dict() for comparison in comparisons],
+            },
+            ensure_ascii=False,
+            indent=2,
+        )
+        + "\n",
         encoding="utf-8",
     )
-    typer.echo(f"compare: {len(variants)} variants → {out}")
+    typer.echo(f"compare: {len(comparisons)} variants → {out}")
 
 
 @app.command()

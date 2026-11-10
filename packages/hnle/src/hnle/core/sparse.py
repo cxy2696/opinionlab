@@ -20,6 +20,7 @@ import numpy as np
 import numpy.typing as npt
 from scipy.sparse import csr_matrix
 
+from hnle.core.shocks import apply_one_shot, evolve_topology, probability_bias
 from hnle.core.update import (
     RunResult,
     choose_opinions,
@@ -30,7 +31,7 @@ from hnle.core.update import (
 )
 from hnle.graph import Hypergraph
 from hnle.metrics import diversity
-from hnle.spec import Aggregation, ModelSpec
+from hnle.spec import Aggregation, ModelSpec, TopologyMode
 
 __all__ = ["RunResult", "build_incidence", "run_sparse"]
 
@@ -105,7 +106,7 @@ def _node_probabilities(
 
 def run_sparse(spec: ModelSpec, graph: Hypergraph, seed: int) -> RunResult:
     """Run one replica with the CSR kernel."""
-    edges = tuple(sorted(graph.hyperedges))
+    edge_list: list[tuple[int, ...]] = list(sorted(graph.hyperedges))
     init_rng, latency_rng, decision_rng = derive_streams(seed)
     n_nodes = graph.n_nodes
     k = spec.n_opinions
@@ -113,10 +114,15 @@ def run_sparse(spec: ModelSpec, graph: Hypergraph, seed: int) -> RunResult:
     latencies = draw_latencies(spec, n_nodes, latency_rng)
     weights, warn_counts = node_weights(spec, graph)
 
-    incidence = build_incidence(graph, edges)
-    transposed = incidence.T.tocsr()
-    degree = np.asarray(transposed.sum(axis=1), dtype=np.float64).ravel()
-    edge_sizes = np.asarray([len(edge) for edge in edges], dtype=np.float64)
+    def rebuild() -> tuple[Any, Any, npt.NDArray[np.float64], npt.NDArray[np.float64]]:
+        current = tuple(edge_list)
+        matrix = build_incidence(graph, current)
+        matrix_t = matrix.T.tocsr()
+        deg = np.asarray(matrix_t.sum(axis=1), dtype=np.float64).ravel()
+        sizes = np.asarray([len(edge) for edge in current], dtype=np.float64)
+        return matrix, matrix_t, deg, sizes
+
+    incidence, transposed, degree, edge_sizes = rebuild()
     last_change = np.zeros(n_nodes, dtype=np.int64)
 
     diversity_series = [diversity(opinions)]
@@ -127,9 +133,21 @@ def run_sparse(spec: ModelSpec, graph: Hypergraph, seed: int) -> RunResult:
     active = degree > 0
     step_range = range(1, spec.n_steps + 1)
     for step in step_range:
+        before = opinions.copy()
+        if spec.topology.mode is TopologyMode.time_varying:
+            edge_list, _added, _removed = evolve_topology(
+                spec, edge_list, n_nodes, decision_rng
+            )
+            incidence, transposed, degree, edge_sizes = rebuild()
+            active = degree > 0
+        forced = apply_one_shot(spec, opinions, step, decision_rng)
         node_probs, zero_edges = _node_probabilities(
             spec, incidence, transposed, degree, edge_sizes, opinions, weights
         )
+        bias = probability_bias(spec, step)
+        if bias:
+            shifted = np.clip(node_probs[:, 1] + bias, 0.0, 1.0)
+            node_probs = np.column_stack([1.0 - shifted, shifted])
         if zero_edges:
             warn_counts["zero_denominator_edges"] = (
                 warn_counts.get("zero_denominator_edges", 0) + zero_edges
@@ -139,7 +157,7 @@ def run_sparse(spec: ModelSpec, graph: Hypergraph, seed: int) -> RunResult:
         ready_idx = np.nonzero(ready)[0]
         if ready_idx.size:
             new_opinions[ready_idx] = choose_opinions(spec, node_probs[ready_idx], decision_rng)
-        changed = new_opinions != opinions
+        changed = (new_opinions != before) | forced
         last_change[changed] = step
         opinions = new_opinions
 
