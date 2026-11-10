@@ -1,0 +1,10 @@
+# Vendored third-party bundle: keep it out of GitHub language statistics.
+packages/hnle/src/hnle/assets/echarts.min.js linguist-vendored linguist-generated -diff
+*.min.js linguist-vendored linguist-generated
+*.min.css linguist-vendored linguist-generated
+
+# Normalise text files.
+*.py text eol=lf
+*.md text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
