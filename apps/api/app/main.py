@@ -10,7 +10,7 @@ from typing import Any
 
 from fastapi import APIRouter, Depends, FastAPI, Header, Request
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
 from pydantic import BaseModel, Field
 from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -39,6 +39,7 @@ from app.models import (
     User,
     utcnow,
 )
+from app.observability import ObservabilityMiddleware, metrics_payload
 from app.progress import get_progress, set_progress
 from app.quota import check_quota, estimate_seconds
 from app.ratelimit import RateLimitMiddleware
@@ -60,10 +61,13 @@ api = APIRouter(prefix="/api/v1")
 auth = APIRouter(prefix="/api/v1/auth")
 
 
-@app.middleware("http")
-async def trace_middleware(request: Request, call_next: Any) -> Any:
-    request.state.trace_id = request.headers.get("X-Request-Id", str(uuid.uuid4()))
-    return await call_next(request)
+app.add_middleware(ObservabilityMiddleware)
+
+
+@app.get("/metrics")
+async def metrics() -> Response:
+    payload, media_type = metrics_payload()
+    return Response(content=payload, media_type=media_type)
 
 
 @app.exception_handler(RequestValidationError)

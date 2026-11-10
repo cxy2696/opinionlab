@@ -5,6 +5,7 @@ from __future__ import annotations
 from celery import Celery
 from kombu import Queue  # type: ignore[attr-defined]
 
+from app.observability import bind_trace_from_headers
 from app.settings import settings
 
 celery_app = Celery(
@@ -42,3 +43,13 @@ celery_app.conf.update(
         }
     },
 )
+
+
+from celery.signals import task_prerun  # noqa: E402
+
+
+@task_prerun.connect  # type: ignore[misc]
+def _bind_task_trace(task_id: str, task: object, **kwargs: object) -> None:
+    request = getattr(task, "request", None)
+    headers = getattr(request, "headers", None) or {}
+    bind_trace_from_headers(dict(headers))
