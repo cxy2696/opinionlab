@@ -1,0 +1,82 @@
+{
+  "note": "US-004 golden baseline. 'upstream' replicates the in-place, order-dependent hyperedge loop; 'fixed' is the node-centric engine. Regenerate only with UPDATE_GOLDEN=1 and explain the numeric change.",
+  "config": {
+    "engine": "sparse_vector",
+    "n_steps": 60,
+    "seed": 3,
+    "repeats": 50,
+    "q": 1.5,
+    "decision_rule": "stochastic",
+    "threshold": 0.5,
+    "init_mode": "data_driven",
+    "target_share_1": 0.5,
+    "n_opinions": 2,
+    "latency": {
+      "dist": "const",
+      "mu": 1.0,
+      "sigma": 2.0,
+      "lam": null,
+      "quantize": "integer_steps"
+    },
+    "weights": {
+      "source": "uniform",
+      "normalize": "max",
+      "custom": null
+    },
+    "aggregation": "mean",
+    "topology": {
+      "mode": "static"
+    },
+    "hyperedge": {
+      "min_size": 2,
+      "max_size": 200
+    },
+    "consensus_threshold": 0.8,
+    "absorb_check": true,
+    "shocks": [],
+    "interventions": [],
+    "metrics": [
+      "diversity_final",
+      "entropy_final",
+      "polarization_final",
+      "n_active_opinions",
+      "assortativity",
+      "time_to_consensus",
+      "consensus_stability",
+      "absorbing_rate",
+      "runaway_rate",
+      "cascade_p50",
+      "cascade_p90",
+      "cascade_p99",
+      "cascade_max",
+      "oscillation_zero_crossing_rate",
+      "oscillation_power_ratio",
+      "oscillation_dominant_freq",
+      "oscillation_autocorr"
+    ]
+  },
+  "upstream": {
+    "identity": {
+      "diversity_final": 0.0,
+      "time_to_consensus": 3.0,
+      "cascade_mean": 0.02708333333333333
+    },
+    "reversed": {
+      "diversity_final": 0.0,
+      "time_to_consensus": 3.0,
+      "cascade_mean": 0.030416666666666665
+    }
+  },
+  "fixed": {
+    "identity": {
+      "diversity_final": 0.0,
+      "time_to_consensus": 4.0,
+      "cascade_mean": 0.034583333333333334
+    },
+    "reversed": {
+      "diversity_final": 0.0,
+      "time_to_consensus": 4.0,
+      "cascade_mean": 0.034583333333333334
+    }
+  }
+}
