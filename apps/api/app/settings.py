@@ -17,6 +17,10 @@ class Settings(BaseSettings):
     redis_url: str = "redis://localhost:6379/0"
     log_level: str = "INFO"
     jwt_secret: str = "dev-secret-change-me"
+    rate_limit_global_rps: int = 100
+    rate_limit_ip_rps: int = 20
+    rate_limit_user_rps: int = 30
+    rate_limit_org_rps: int = 200
 
 
 settings = Settings()

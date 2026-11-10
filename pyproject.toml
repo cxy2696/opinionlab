@@ -50,7 +50,7 @@ warn_unreachable = true
 plugins = ["pydantic.mypy"]
 
 [[tool.mypy.overrides]]
-module = ["scipy.*", "pyarrow.*", "matplotlib.*"]
+module = ["scipy.*", "pyarrow.*", "matplotlib.*", "celery.*", "kombu.*"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]

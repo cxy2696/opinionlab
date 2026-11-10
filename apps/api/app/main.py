@@ -12,7 +12,7 @@ from fastapi import APIRouter, Depends, FastAPI, Header, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.deps import (
@@ -36,16 +36,21 @@ from app.models import (
     User,
     utcnow,
 )
+from app.progress import get_progress, set_progress
+from app.quota import check_quota, estimate_seconds
+from app.ratelimit import RateLimitMiddleware
 from app.security import (
     create_access_token,
     create_refresh_token,
     decode_token,
     verify_password,
 )
+from app.state import request_cancel
 from hnle.spec import ModelSpec
 
 app = FastAPI(title="OpinionLab API", version="0.1.0")
 app.add_exception_handler(ApiError, api_error_handler)  # type: ignore[arg-type]
+app.add_middleware(RateLimitMiddleware)
 
 api = APIRouter(prefix="/api/v1")
 auth = APIRouter(prefix="/api/v1/auth")
@@ -73,6 +78,12 @@ async def validation_handler(request: Request, exc: RequestValidationError) -> J
 
 
 class LoginRequest(BaseModel):
+    model_config = {
+        "json_schema_extra": {
+            "example": {"email": "analyst@example.com", "password": "Secret123!"}
+        }
+    }
+
     email: str
     password: str
 
@@ -101,9 +112,42 @@ class ScenarioPatch(BaseModel):
 
 
 class RunCreate(BaseModel):
+    model_config = {
+        "json_schema_extra": {
+            "example": {
+                "scenario_id": "0f8fad5b-d9cb-469f-a165-70867728950e",
+                "repeats": 50,
+                "seed": 42,
+                "confirm": False,
+            }
+        }
+    }
+
     scenario_id: uuid.UUID
     repeats: int | None = Field(default=None, ge=1, le=500)
     seed: int | None = Field(default=None, ge=0)
+    confirm: bool = False
+
+
+class DatasetCreate(BaseModel):
+    name: str
+    source_type: str = "upload_csv"
+    size_bytes: int | None = Field(default=None, ge=0)
+
+
+class CompareRequest(BaseModel):
+    model_config = {
+        "json_schema_extra": {
+            "example": {
+                "run_ids": [
+                    "0f8fad5b-d9cb-469f-a165-70867728950e",
+                    "1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d",
+                ]
+            }
+        }
+    }
+
+    run_ids: list[uuid.UUID] = Field(min_length=2, max_length=10)
 
 
 def _validate_spec(spec: dict[str, Any]) -> str:
@@ -123,7 +167,23 @@ async def health() -> dict[str, str]:
     return {"status": "ok"}
 
 
-@auth.post("/login", response_model=TokenPair)
+@auth.post(
+    "/login",
+    response_model=TokenPair,
+    responses={
+        200: {
+            "content": {
+                "application/json": {
+                    "example": {
+                        "access_token": "eyJhbGciOi...",
+                        "refresh_token": "eyJhbGciOi...",
+                        "token_type": "bearer",
+                    }
+                }
+            }
+        }
+    },
+)
 async def login(body: LoginRequest, session: AsyncSession = Depends(get_session)) -> TokenPair:
     user = await session.scalar(select(User).where(User.email == body.email))
     if user is None:
@@ -212,6 +272,126 @@ async def org_me(
         "quota_concurrent_jobs": org.quota_concurrent_jobs,
         "role": principal.role,
     }
+
+
+@api.post("/datasets", status_code=201)
+async def create_dataset(
+    body: DatasetCreate,
+    principal: Principal = Depends(
+        require_roles("researcher", "analyst", "scenario_owner", "org_admin")
+    ),
+    session: AsyncSession = Depends(get_session),
+    idempotency_key: str | None = Header(default=None, alias="X-Idempotency-Key"),
+) -> Any:
+    replay = await replay_idempotent(
+        session, principal, idempotency_key, "POST", "/api/v1/datasets"
+    )
+    if replay is not None:
+        status_code, replay_payload = replay
+        return JSONResponse(status_code=status_code, content=replay_payload)
+    dataset = Dataset(org_id=principal.org_id, name=body.name, source_type=body.source_type)
+    session.add(dataset)
+    await session.flush()
+    response_payload: dict[str, Any] = {
+        "data": {"id": str(dataset.id), "upload_url": f"/uploads/{dataset.id}"}
+    }
+    await save_idempotent(
+        session, principal, idempotency_key, "POST", "/api/v1/datasets", 201, response_payload
+    )
+    await session.commit()
+    return JSONResponse(status_code=201, content=response_payload)
+
+
+@api.get("/datasets")
+async def list_datasets(
+    principal: Principal = Depends(get_principal),
+    session: AsyncSession = Depends(get_session),
+) -> dict[str, Any]:
+    rows = (
+        await session.scalars(select(Dataset).where(Dataset.org_id == principal.org_id))
+    ).all()
+    return {"data": [{"id": str(row.id), "name": row.name} for row in rows]}
+
+
+async def _dataset_for(
+    session: AsyncSession, principal: Principal, dataset_id: uuid.UUID
+) -> Dataset:
+    dataset = await session.get(Dataset, dataset_id)
+    if dataset is None:
+        raise ApiError(404, "NOT_FOUND", "dataset not found")
+    if dataset.org_id != principal.org_id:
+        raise ApiError(403, "FORBIDDEN", "dataset belongs to another organisation")
+    return dataset
+
+
+@api.get("/datasets/{dataset_id}")
+async def get_dataset(
+    dataset_id: uuid.UUID,
+    principal: Principal = Depends(get_principal),
+    session: AsyncSession = Depends(get_session),
+) -> dict[str, Any]:
+    dataset = await _dataset_for(session, principal, dataset_id)
+    return {"data": {"id": str(dataset.id), "name": dataset.name}}
+
+
+@api.post("/datasets/{dataset_id}/ingest", status_code=202)
+async def ingest_dataset(
+    dataset_id: uuid.UUID,
+    principal: Principal = Depends(
+        require_roles("researcher", "analyst", "scenario_owner", "org_admin")
+    ),
+    session: AsyncSession = Depends(get_session),
+) -> dict[str, Any]:
+    dataset = await _dataset_for(session, principal, dataset_id)
+    return {"data": {"dataset_id": str(dataset.id), "status": "queued"}}
+
+
+@api.get("/templates")
+async def list_templates(
+    principal: Principal = Depends(get_principal),
+) -> dict[str, Any]:
+    from hnle.templates import iter_templates
+
+    payload = [
+        {
+            "key": template.key,
+            "name_zh": template.name_zh,
+            "name_en": template.name_en,
+            "enabled": template.is_enabled(),
+        }
+        for template in iter_templates("scenarios")
+    ]
+    return {"data": payload}
+
+
+@api.post("/templates/{key}/clone", status_code=201)
+async def clone_template(
+    key: str,
+    principal: Principal = Depends(
+        require_roles("researcher", "scenario_owner", "org_admin")
+    ),
+    session: AsyncSession = Depends(get_session),
+) -> dict[str, Any]:
+    from hnle.templates import iter_templates
+
+    match = next(
+        (template for template in iter_templates("scenarios") if template.key == key), None
+    )
+    if match is None:
+        raise ApiError(404, "NOT_FOUND", "template not found")
+    if not match.is_enabled():
+        raise ApiError(403, "USE_CASE_NOT_APPROVED", "template requires use-case approval")
+    scenario = Scenario(
+        org_id=principal.org_id,
+        template_key=key,
+        name=match.name_en,
+        spec=match.spec.model_dump(mode="json"),
+        created_by=principal.user_id,
+    )
+    session.add(scenario)
+    await session.flush()
+    await session.commit()
+    return {"data": {"id": str(scenario.id), "template_key": key}}
 
 
 async def _scenario_for(
@@ -385,6 +565,20 @@ async def create_run(
         return JSONResponse(status_code=status_code, content=replay_payload)
     scenario = await _scenario_for(session, principal, body.scenario_id)
     repeats = body.repeats or 1
+    active = await session.scalar(
+        select(func.count())
+        .select_from(Run)
+        .where(
+            Run.org_id == principal.org_id,
+            Run.status.in_(["queued", "running", "cancelling"]),
+        )
+    )
+    org = await session.get(Org, principal.org_id)
+    limit = org.quota_concurrent_jobs if org is not None else 4
+    steps_value = (scenario.spec or {}).get("n_steps", 1000)
+    n_steps = int(str(steps_value))
+    estimate = estimate_seconds(nnz=n_steps * 100, n_steps=n_steps, repeats=repeats)
+    check_quota(int(active or 0), limit, estimate, confirmed=body.confirm)
     seed = body.seed if body.seed is not None else 42
     spec_sha = hashlib.sha256(json.dumps(scenario.spec, sort_keys=True).encode()).hexdigest()
     run = Run(
@@ -413,6 +607,7 @@ async def create_run(
         session, principal, idempotency_key, "POST", "/api/v1/runs", 201, result_payload
     )
     await session.commit()
+    set_progress(str(run.id), 0, repeats)
     return JSONResponse(status_code=201, content=result_payload)
 
 
@@ -442,7 +637,15 @@ async def get_run(
     session: AsyncSession = Depends(get_session),
 ) -> dict[str, Any]:
     run = await _visible_run(session, principal, run_id)
-    return {"data": {"id": str(run.id), "status": run.status, "repeats": run.repeats}}
+    return {
+        "data": {
+            "id": str(run.id),
+            "status": run.status,
+            "repeats": run.repeats,
+            "done_replicas": run.done_replicas,
+            "progress": get_progress(str(run.id)),
+        }
+    }
 
 
 @api.get("/runs")
@@ -465,6 +668,98 @@ async def list_runs(
             await session.scalars(select(Run).where(Run.org_id == principal.org_id))
         ).all()
     return {"data": [{"id": str(row.id), "status": row.status} for row in rows]}
+
+
+@api.get(
+    "/runs/{run_id}/metrics",
+    responses={
+        200: {
+            "content": {
+                "application/json": {
+                    "example": {
+                        "data": {
+                            "run_id": "0f8fad5b-d9cb-469f-a165-70867728950e",
+                            "status": "succeeded",
+                            "aggregate": {
+                                "diversity_final": {
+                                    "mean": 0.11,
+                                    "ci95_lo": 0.06,
+                                    "ci95_hi": 0.16,
+                                    "n": 50,
+                                }
+                            },
+                            "disclaimer_key": "simulation_not_prediction",
+                        }
+                    }
+                }
+            }
+        }
+    },
+)
+async def run_metrics(
+    run_id: uuid.UUID,
+    principal: Principal = Depends(get_principal),
+    session: AsyncSession = Depends(get_session),
+) -> dict[str, Any]:
+    run = await _visible_run(session, principal, run_id)
+    return {
+        "data": {
+            "run_id": str(run.id),
+            "status": run.status,
+            "aggregate": run.aggregate or {},
+            "disclaimer_key": run.disclaimer_key,
+        }
+    }
+
+
+@api.get("/runs/{run_id}/artifacts")
+async def run_artifacts(
+    run_id: uuid.UUID,
+    principal: Principal = Depends(get_principal),
+    session: AsyncSession = Depends(get_session),
+) -> dict[str, Any]:
+    run = await _visible_run(session, principal, run_id)
+    return {"data": [], "run_id": str(run.id)}
+
+
+@api.post("/runs/{run_id}/cancel", status_code=202)
+async def cancel_run(
+    run_id: uuid.UUID,
+    principal: Principal = Depends(
+        require_roles("researcher", "scenario_owner", "org_admin")
+    ),
+    session: AsyncSession = Depends(get_session),
+) -> dict[str, Any]:
+    run = await _visible_run(session, principal, run_id)
+    if principal.role == "researcher" and run.created_by != principal.user_id:
+        raise ApiError(403, "FORBIDDEN", "researchers may only cancel their own runs")
+    new_status, accepted = request_cancel(run.status, run.done_replicas, run.repeats)
+    if not accepted:
+        raise ApiError(409, "INVALID_STATE", f"run is {run.status}")
+    run.status = new_status
+    await write_audit(session, principal, "run.cancel", str(run.id))
+    await session.commit()
+    return {"data": {"id": str(run.id), "status": new_status}}
+
+
+@api.post("/compare", status_code=202)
+async def compare_runs(
+    body: CompareRequest,
+    principal: Principal = Depends(
+        require_roles("researcher", "scenario_owner", "org_admin")
+    ),
+    session: AsyncSession = Depends(get_session),
+) -> dict[str, Any]:
+    runs = []
+    for run_id in body.run_ids:
+        runs.append(await _visible_run(session, principal, run_id))
+    return {
+        "data": {
+            "run_ids": [str(run.id) for run in runs],
+            "status": "queued",
+            "direction": "inconclusive",
+        }
+    }
 
 
 @api.get("/runs/{run_id}/nodes/{node_id}/trace")
