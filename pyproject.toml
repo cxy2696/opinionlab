@@ -37,6 +37,9 @@ select = ["E", "F", "I", "UP", "B", "SIM"]
 [tool.ruff.lint.isort]
 known-first-party = ["hnle"]
 
+[tool.ruff.lint.per-file-ignores]
+"packages/hnle/src/hnle/cli.py" = ["B008"]
+
 [tool.mypy]
 python_version = "3.12"
 strict = true
@@ -46,7 +49,7 @@ warn_unreachable = true
 plugins = ["pydantic.mypy"]
 
 [[tool.mypy.overrides]]
-module = ["scipy.*"]
+module = ["scipy.*", "pyarrow.*", "matplotlib.*"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
