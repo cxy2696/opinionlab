@@ -10,7 +10,9 @@
 
 ### 项目状态
 
-V1 开发中。实时进度见 [`prd/agents/progress.txt`](prd/agents/progress.txt)，任务清单见 [`prd/agents/opinionlab-prd.json`](prd/agents/opinionlab-prd.json)。
+V1 已完成（26/26 user stories）。进度见 [`prd/agents/progress.txt`](prd/agents/progress.txt)，任务清单见 [`prd/agents/opinionlab-prd.json`](prd/agents/opinionlab-prd.json)。
+
+设计文档：[架构](docs/ARCHITECTURE.md) · [数学模型](docs/MATH_MODEL.md) · [模型卡](docs/MODEL_CARD.md) · [合规](docs/COMPLIANCE.md) · [运维手册](docs/RUNBOOK.md) · [容量报告](docs/capacity-report.md) · [上线清单](docs/LAUNCH_CHECKLIST.md) · [CHANGELOG](CHANGELOG.md)
 
 ### 这是什么
 
@@ -91,7 +93,7 @@ OpinionLab upgrades the HNL Voter Model research prototype into a **reproducible
 
 ### Status
 
-V1 in progress. See [`prd/agents/progress.txt`](prd/agents/progress.txt) for live progress and [`prd/agents/opinionlab-prd.json`](prd/agents/opinionlab-prd.json) for the story backlog.
+V1 is complete (26/26 stories). See [`prd/agents/progress.txt`](prd/agents/progress.txt) for the log and [`prd/agents/opinionlab-prd.json`](prd/agents/opinionlab-prd.json) for the backlog. Docs: architecture, math model, model card, compliance, runbook, capacity, launch checklist and changelog (links in the Chinese section).
 
 ### Documents
 
