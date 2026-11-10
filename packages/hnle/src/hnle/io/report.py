@@ -7,6 +7,7 @@ to render when the disclaimer key is unknown or missing.
 
 from __future__ import annotations
 
+import gzip
 import html
 import json
 import secrets
@@ -50,7 +51,7 @@ _BUNDLE: str | None = None
 def _echarts_bundle() -> str:
     global _BUNDLE
     if _BUNDLE is None:
-        _BUNDLE = (ASSET_DIR / "echarts.min.js").read_text(encoding="utf-8")
+        _BUNDLE = gzip.decompress((ASSET_DIR / "echarts.min.js.gz").read_bytes()).decode("utf-8")
     return _BUNDLE
 
 
