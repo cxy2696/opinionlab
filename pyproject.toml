@@ -41,6 +41,7 @@ strict = true
 files = ["packages/hnle/src"]
 mypy_path = "packages/hnle/src"
 warn_unreachable = true
+plugins = ["pydantic.mypy"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
