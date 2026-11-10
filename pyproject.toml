@@ -43,6 +43,12 @@ mypy_path = "packages/hnle/src"
 warn_unreachable = true
 plugins = ["pydantic.mypy"]
 
+[[tool.mypy.overrides]]
+module = ["scipy.*"]
+ignore_missing_imports = true
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"
+python_files = ["test_*.py", "bench_*.py"]
+markers = ["slow: long-running performance benchmarks"]

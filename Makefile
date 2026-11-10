@@ -17,4 +17,4 @@ check:
 	uv run pytest
 
 bench:
-	uv run python benchmarks/bench_engine.py
+	uv run pytest benchmarks -q
