@@ -1,4 +1,4 @@
-"""US-011: deterministic ingest, hashtag cleaning, sentiment mapping and PII."""
+"""deterministic ingest, hashtag cleaning, sentiment mapping and PII."""
 
 from __future__ import annotations
 

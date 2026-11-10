@@ -1,4 +1,4 @@
-"""Run state machine with the cancelling intermediate state (US-018)."""
+"""Run state machine with the cancelling intermediate state ()."""
 
 from __future__ import annotations
 

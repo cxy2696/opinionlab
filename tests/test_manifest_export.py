@@ -1,4 +1,4 @@
-"""US-012: manifests, artifact export and offline reproduction."""
+"""manifests, artifact export and offline reproduction."""
 
 from __future__ import annotations
 

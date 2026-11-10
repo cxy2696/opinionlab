@@ -1,4 +1,4 @@
-"""US-019: disclaimer enforcement, offline bundle, watermark and sample badges."""
+"""disclaimer enforcement, offline bundle, watermark and sample badges."""
 
 from __future__ import annotations
 

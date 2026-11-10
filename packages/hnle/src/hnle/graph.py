@@ -1,7 +1,7 @@
 """Hypergraph construction helpers.
 
 The full data-ingest pipeline (pseudonymisation, cleaning, five source shapes)
-lands in US-011; this module only provides the in-memory hypergraph type and a
+is implemented in hnle/ingest.py; this module only provides the in-memory hypergraph type and a
 deterministic synthetic builder used by the engine and tests.
 """
 

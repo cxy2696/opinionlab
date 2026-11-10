@@ -1,4 +1,4 @@
-"""US-004 golden baseline: upstream (order-dependent) semantics vs fixed engine.
+""" golden baseline: upstream (order-dependent) semantics vs fixed engine.
 
 The JSON file records both the legacy prototype behaviour and the node-centric
 engine on the same graph/seed, so any future numeric drift is caught explicitly.
@@ -95,7 +95,7 @@ def _compute() -> dict[str, Any]:
     reverse = _permuted(graph, reverse=True)
     return {
         "note": (
-            "US-004 golden baseline. 'upstream' replicates the in-place, order-dependent "
+            "Pre-fix golden baseline. 'upstream' replicates the in-place, order-dependent "
             "hyperedge loop; 'fixed' is the node-centric engine. Regenerate only with "
             "UPDATE_GOLDEN=1 and explain the numeric change."
         ),

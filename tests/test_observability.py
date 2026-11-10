@@ -1,4 +1,4 @@
-"""US-022: JSON logs, masking, trace propagation and Prometheus metrics."""
+"""JSON logs, masking, trace propagation and Prometheus metrics."""
 
 from __future__ import annotations
 

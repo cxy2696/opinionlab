@@ -1,4 +1,4 @@
-"""Run manifests: hashes, versions and reproducibility (PRD OPT-11).
+"""Run manifests: hashes, versions and reproducibility.
 
 A manifest records everything needed to rebuild a run: the canonical spec, the
 graph arrays, the seed, tool versions and the git commit. ``run_id`` is derived

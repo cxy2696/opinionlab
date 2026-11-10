@@ -1,4 +1,4 @@
-"""Group-level metrics (PRD OPT-30..34).
+"""Group-level metrics.
 
 Only aggregate statistics are allowed: per-node opinion trajectories are a
 compliance red line (``NODE_TRACE_FORBIDDEN``), so every public function here

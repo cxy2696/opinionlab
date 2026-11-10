@@ -2,141 +2,116 @@
 
 [中文](#中文) · [English](#english)
 
-把 [HNL Voter Model](https://github.com/cxy2696/Hypergraph-Nonlinear-Latency-Voter-Model) 论文原型升级为**可复现、高性能、带蒙特卡洛置信区间与合规护栏**的舆论演化仿真平台 V1。
+OpinionLab 是一个**可复现、可服务化**的舆论动力学仿真平台：在超图上模拟群体观点演化，支持非线性从众、异质时延、外部冲击与干预推演，并输出带 95% 置信区间的群体指标与离线报告。
+
+OpinionLab is a reproducible opinion-dynamics simulation platform. It models group opinion evolution on hypergraphs with non-linear conformity, heterogeneous latency, external shocks and intervention scenarios, and reports group-level metrics with 95% confidence intervals.
 
 ---
 
 ## 中文
 
-### 项目状态
+### 特性
 
-V1 已完成（26/26 user stories）。进度见 [`prd/agents/progress.txt`](prd/agents/progress.txt)，任务清单见 [`prd/agents/opinionlab-prd.json`](prd/agents/opinionlab-prd.json)。
-
-设计文档：[架构](docs/ARCHITECTURE.md) · [数学模型](docs/MATH_MODEL.md) · [模型卡](docs/MODEL_CARD.md) · [合规](docs/COMPLIANCE.md) · [运维手册](docs/RUNBOOK.md) · [容量报告](docs/capacity-report.md) · [上线清单](docs/LAUNCH_CHECKLIST.md) · [CHANGELOG](CHANGELOG.md)
-
-### 这是什么
-
-- **引擎 `hnle`**：纯计算库，只依赖 numpy / scipy / pandas / pydantic，可 `pip install`、可离线 CLI 运行；超图 + 非线性采纳(q) + 异质时延。
-- **服务层**：FastAPI + Postgres + Celery + Redis，负责排队、存储、鉴权、出图；引擎与平台解耦，论文复现不被平台绑架。
-- **合规**：中国（个保法/等保二级）与欧盟（GDPR）双区一套代码，`DEPLOYMENT_MODE` 切换；只输出群体统计量，禁止单节点轨迹。
-
-### 文档
-
-| 文件 | 说明 |
-|---|---|
-| [`prd/舆情演化仿真沙盘PRD-v1.md`](prd/舆情演化仿真沙盘PRD-v1.md) | 唯一真相源：目标、缺陷审计（OPT-01…）、架构、数据模型、API、合规、部署 |
-| [`prd/agents/opinionlab-prd.json`](prd/agents/opinionlab-prd.json) | 机器可读 user story 清单（26 条，含验收标准与完成状态） |
-| [`prd/agents/progress.txt`](prd/agents/progress.txt) | 执行进度、代码库约定与每轮学习记录 |
-| [`AGENTS.md`](AGENTS.md) / [`AGENTS.en.md`](AGENTS.en.md) | Agent 入口规范（中 / 英） |
-
-### V1 目标
-
-| # | 目标 | 量化验收 |
-|---|---|---|
-| G1 | 结果可复现 | 同 `run_manifest` 两次运行，指标数组逐位一致（1e-12） |
-| G2 | 顺序无关 | 置换 `hyperedges` 顺序后同 seed 指标不变 |
-| G3 | 性能 | 10 万节点 / 30 万超边 / 500 步，8 核 ≤ 90s；较上游 ≥ 50× 加速 |
-| G4 | 统计可信 | 每个指标输出均值 + 95% CI（≥30 次独立副本） |
-| G5 | 数据可用 | 5 类真实数据结构，ID 假名化后入库 |
-| G6 | 场景可推演 | 6 个场景模板 + what-if 干预与 A/B 对比 |
-| G7 | 双区合规 | 中国大陆 + 欧盟，一套代码 |
+- **引擎 `hnle`**：纯计算库，只依赖 numpy / scipy / pandas / pydantic，可 `pip install`、可离线 CLI 运行
+- **两种内核**：CSR 稀疏向量化（默认）与事件驱动（长时延更省算力）；`L≡1` 时结果逐位一致
+- **可复现**：`ModelSpec` 单一参数源、`SeedSequence` 流拆分、manifest（config/data/git sha）、`hnle report` 逐位重建
+- **统计**：多样性、熵、极化、级联分位、收敛/吸收态、振荡四件套；Welford 均值 + 95% CI
+- **场景**：12 个中/全球模板（政策、辟谣、治理、KOL、科普、金融、学术复现等），支持 `--set` 覆盖
+- **服务层**：FastAPI + Postgres + Celery + Redis；JWT/RBAC、租户隔离、配额、限流、审计、Prometheus
+- **合规**：CN/EU 双区隔离、G5 用途审批、PII 拒收、单节点轨迹禁止、强制免责声明
+- **报告**：单文件离线 HTML（内嵌 ECharts）、CI 图表、manifest、中英免责声明
 
 ### 快速开始
 
 ```bash
-make setup   # uv sync + 可选 docker compose（db/redis/minio）
-make check   # ruff + mypy --strict + pytest
-hnle version
+make setup          # uv sync（可选 docker compose 启动 db/redis/minio）
+make check          # ruff + mypy --strict + pytest
+make bench          # 10 万节点基准（>90s 失败）
+
+hnle simulate --spec scenarios/s2_rumor_debon_timing.yaml --repeats 50
+hnle templates
+hnle report --run-id <run_id> --runs-dir runs
 ```
 
-### 开发方式（Ralph 循环）
+需要 Postgres/Redis 的集成测试通过 `TEST_DATABASE_URL` 启用；本地可用 Docker Compose：
 
-每轮：读 JSON → 取 `priority` 最小且 `passes=false` 的 story → 实现 → `make check` → commit `feat: [US-xxx] [title]` → 置 `passes=true` → 追加进度。全部完成输出 `<promise>COMPLETE</promise>`。
+```bash
+docker compose up -d db redis minio
+export DATABASE_URL=postgresql+asyncpg://app:CHANGE_ME@localhost:5432/opinionlab
+export TEST_DATABASE_URL=$DATABASE_URL
+uv run alembic upgrade head
+make check
+```
 
-### 硬性约束（摘自 PRD）
+### 文档
 
-- 禁止引入 PRD 第 22 章未列出的依赖，禁止升级 major 版本
-- 引擎核心禁止全局 `np.random.*` / `random.*`，随机性只能来自传入的 `numpy.random.Generator`
-- 禁止任何接口返回单个节点的立场轨迹，只允许群体分位数（`NODE_TRACE_FORBIDDEN`）
-- 禁止删除或改写 `tests/golden/` 基线数值而不说明原因
-- 引擎与 worker 禁止 `plt.show()`，一律 matplotlib Agg + 文件输出
-- 引擎零外部服务依赖：只依赖 numpy / scipy / pandas / pydantic，可离线运行
+| 文档 | 内容 |
+|---|---|
+| [架构](docs/ARCHITECTURE.md) | 分层、数据流、模块地图、不变量 |
+| [数学模型](docs/MATH_MODEL.md) | 公式与代码对应、sampling vs argmax、数值可复现 |
+| [模型卡](docs/MODEL_CARD.md) | 能力、局限、禁止用途、数据与合规 |
+| [合规说明](docs/COMPLIANCE.md) | 双区、用途审批、删除与留存 |
+| [运维手册](docs/RUNBOOK.md) | 指标/告警、日志、金丝雀、回滚、tainted |
+| [容量报告](docs/capacity-report.md) | 容量公式、实测 c、压测场景 |
+| [CHANGELOG](CHANGELOG.md) | 行为变更、依赖与已知偏差 |
 
-### 目录结构
+### 目录
 
 ```
-packages/hnle/   # 引擎 + CLI（可独立安装）
-apps/{api,worker,web}/
-tests/           # 单测、黄金基线、置换不变、API 集成
-benchmarks/      # 10 万节点基准
-scenarios/       # 中/全球场景模板
-migrations/      # alembic
-docs/            # 架构、数学模型、合规、模型卡、运维手册
-prd/             # PRD、任务清单、进度日志
+packages/hnle/   # 引擎 + CLI
+apps/api/        # FastAPI 服务层
+apps/worker/     # Celery worker 入口
+tests/           # 单测、金标、集成测试
+benchmarks/      # 性能基准与 locust 场景
+scenarios/       # 场景模板与情绪映射
+migrations/      # Alembic 迁移
+deploy/          # Compose、K8s values、离线交付
+docs/            # 设计、模型卡、合规、运维
 ```
+
+### 部署
+
+- 单机：`docker-compose.yml`（db / redis / minio / api / worker）
+- 集群：`deploy/k8s/helm-cn` 与 `helm-global` 两套 values
+- 私有化：`deploy/private/OFFLINE.md`，无公网依赖
 
 ### License
 
-MIT，与上游论文原型一致。
+MIT
 
 ---
 
 ## English
 
-### What this is
+### Features
 
-OpinionLab upgrades the HNL Voter Model research prototype into a **reproducible, high-performance opinion-dynamics sandbox** with Monte-Carlo confidence intervals and compliance guardrails.
-
-- **`hnle` engine**: a pure-computation library (numpy / scipy / pandas / pydantic only) with hypergraph interactions, non-linear adoption `q`, and heterogeneous latency. Installable and runnable offline via CLI.
-- **Service layer**: FastAPI + Postgres + Celery + Redis for queueing, storage, auth, and reporting. The engine stays decoupled from the platform so paper reproduction never depends on the service stack.
-- **Compliance**: one codebase for mainland China (PIPL / MLPS level 2) and the EU (GDPR), switched by `DEPLOYMENT_MODE`. Group-level statistics only — per-node trajectories are forbidden by design.
-
-### Status
-
-V1 is complete (26/26 stories). See [`prd/agents/progress.txt`](prd/agents/progress.txt) for the log and [`prd/agents/opinionlab-prd.json`](prd/agents/opinionlab-prd.json) for the backlog. Docs: architecture, math model, model card, compliance, runbook, capacity, launch checklist and changelog (links in the Chinese section).
-
-### Documents
-
-| File | Purpose |
-|---|---|
-| [`prd/舆情演化仿真沙盘PRD-v1.md`](prd/舆情演化仿真沙盘PRD-v1.md) | Single source of truth (Chinese): goals, defect audit, architecture, data model, API, compliance, deployment |
-| [`prd/agents/opinionlab-prd.json`](prd/agents/opinionlab-prd.json) | Machine-readable 26-story backlog with acceptance criteria and pass state |
-| [`prd/agents/progress.txt`](prd/agents/progress.txt) | Execution log, conventions, per-round learnings |
-| [`AGENTS.md`](AGENTS.md) / [`AGENTS.en.md`](AGENTS.en.md) | Agent entry rules (Chinese / English) |
-
-### V1 goals
-
-| # | Goal | Quantified acceptance |
-|---|---|---|
-| G1 | Reproducible | Same `run_manifest` twice → metrics identical (1e-12) |
-| G2 | Order-independent | Permuting `hyperedges` leaves metrics unchanged for the same seed |
-| G3 | Fast | 100k nodes / 300k hyperedges / 500 steps in ≤ 90s on 8 cores; ≥ 50× upstream |
-| G4 | Statistically sound | Every metric reports mean + 95% CI (≥ 30 replicas) |
-| G5 | Usable data | Five real-world structures, IDs pseudonymised at ingest |
-| G6 | Scenario sandbox | Six templates plus what-if interventions and A/B comparison |
-| G7 | Dual-region compliance | China + EU on one codebase |
+- **`hnle` engine**: pure computation, depends only on numpy / scipy / pandas / pydantic; installable and runnable offline
+- **Two kernels**: CSR sparse (default) and event-driven (cheaper for long latencies); bit-identical at `L≡1`
+- **Reproducible**: single `ModelSpec`, `SeedSequence` stream splitting, manifest with config/data/git hashes, `hnle report` rebuilds curves exactly
+- **Statistics**: diversity, entropy, polarisation, cascade quantiles, convergence/absorption, oscillation measures; Welford mean + 95% CI
+- **Scenarios**: 12 CN/global templates (policy, debunking, governance, KOL, health, finance, academic, …) with `--set` overrides
+- **Service layer**: FastAPI + Postgres + Celery + Redis; JWT/RBAC, tenant isolation, quotas, rate limits, audit, Prometheus
+- **Compliance**: CN/EU region isolation, G5 use-case approval, PII rejection, no node-level traces, mandatory disclaimer
+- **Reports**: single-file offline HTML with an embedded ECharts bundle, CI charts, manifest, bilingual disclaimer
 
 ### Quick start
 
 ```bash
-make setup   # uv sync + optional docker compose (db/redis/minio)
-make check   # ruff + mypy --strict + pytest
-hnle version
+make setup          # uv sync (optional compose for db/redis/minio)
+make check          # ruff + mypy --strict + pytest
+make bench          # 100k-node benchmark (fails above 90s)
+
+hnle simulate --spec scenarios/s2_rumor_debon_timing.yaml --repeats 50
+hnle templates
+hnle report --run-id <run_id> --runs-dir runs
 ```
 
-### Development loop (Ralph)
+Database-backed tests are enabled through `TEST_DATABASE_URL`. Use Docker Compose locally as shown above.
 
-Each round: read the JSON → pick the lowest `priority` story with `passes=false` → implement → `make check` → commit `feat: [US-xxx] [title]` → set `passes=true` → append the progress log. Emit `<promise>COMPLETE</promise>` once every story passes.
+### Docs
 
-### Hard constraints (from the PRD)
-
-- No dependency outside PRD chapter 22; no major-version upgrades
-- Engine core must not use global `np.random.*` / `random.*`; randomness comes from an injected `numpy.random.Generator`
-- No endpoint may return a single node's opinion trajectory; group quantiles only (`NODE_TRACE_FORBIDDEN`)
-- Never rewrite `tests/golden/` baselines without an explicit explanation
-- No `plt.show()` in engine or worker; matplotlib Agg plus file output only
-- The engine has zero external service dependencies and runs offline
+Architecture, math model, model card, compliance, runbook, capacity report and changelog live under [`docs/`](docs) with links in the Chinese section.
 
 ### License
 
-MIT, same as the upstream paper prototype.
+MIT

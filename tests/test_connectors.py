@@ -1,4 +1,4 @@
-"""US-020: whitelist, token bucket, circuit breaker and L1 degradation."""
+"""whitelist, token bucket, circuit breaker and L1 degradation."""
 
 from __future__ import annotations
 

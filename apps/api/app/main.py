@@ -1,4 +1,4 @@
-"""FastAPI application: auth, RBAC, tenant isolation and audit (US-017)."""
+"""FastAPI application: auth, RBAC, tenant isolation and audit ()."""
 
 from __future__ import annotations
 

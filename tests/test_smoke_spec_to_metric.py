@@ -1,6 +1,6 @@
-"""US-003: the pytest + asyncio + numpy/scipy + pydantic combination works.
+"""the pytest + asyncio + numpy/scipy + pydantic combination works.
 
-This is the first functional test by design (PRD 12.2): a spec, a 20-node
+This is the first functional test by design: a spec, a 20-node
 random hypergraph, the sparse placeholder engine and one metric.
 """
 

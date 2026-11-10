@@ -1,4 +1,4 @@
-"""US-004: node-centric aggregation, decision rules and latency gating."""
+"""node-centric aggregation, decision rules and latency gating."""
 
 from __future__ import annotations
 

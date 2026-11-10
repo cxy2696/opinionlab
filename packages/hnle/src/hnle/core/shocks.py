@@ -1,4 +1,4 @@
-"""External shocks, interventions and time-varying topology (PRD OPT-23/35).
+"""External shocks, interventions and time-varying topology.
 
 Shocks are one-shot events at a given step; interventions act over a window.
 Both only touch aggregate state (opinions/probabilities), never per-node

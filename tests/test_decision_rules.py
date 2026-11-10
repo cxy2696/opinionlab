@@ -1,4 +1,4 @@
-"""US-005: the three decision rules and the RNG contract."""
+"""the three decision rules and the RNG contract."""
 
 from __future__ import annotations
 

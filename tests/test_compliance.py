@@ -1,4 +1,4 @@
-"""US-021: region isolation, G5 approval, deletion cascade and report red lines."""
+"""region isolation, G5 approval, deletion cascade and report red lines."""
 
 from __future__ import annotations
 
@@ -188,7 +188,7 @@ def test_docs_cover_model_card_and_compliance() -> None:
     assert "禁止用途" in model_card and "Prohibited uses" in model_card
     assert "留存" in compliance and "retention" in compliance
     assert "NODE_TRACE_FORBIDDEN" in compliance
-    assert "不接入 LLM" in model_card
+    assert "不调用生成式模型" in model_card
 
 
 def test_report_has_ai_label_and_no_node_traces(tmp_path: Path) -> None:
@@ -202,6 +202,6 @@ def test_report_has_ai_label_and_no_node_traces(tmp_path: Path) -> None:
     result = run_sparse(spec, graph, seed=1)
     paths = export_run(spec, graph, result, tmp_path)
     html = paths["report"].read_text(encoding="utf-8")
-    assert "未使用生成式 AI" in html
-    assert "No generative AI" in html
+    assert "确定性仿真引擎" in html
+    assert "deterministic simulation engine" in html
     assert "node_trace" not in html.lower()

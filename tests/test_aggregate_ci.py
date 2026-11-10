@@ -1,4 +1,4 @@
-"""US-009: Welford confidence intervals and sample-size guardrails."""
+"""Welford confidence intervals and sample-size guardrails."""
 
 from __future__ import annotations
 

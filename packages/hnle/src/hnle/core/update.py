@@ -1,4 +1,4 @@
-"""Node-centric synchronous update semantics (PRD OPT-01, OPT-03, OPT-12).
+"""Node-centric synchronous update semantics.
 
 Why this shape: the upstream prototype wrote ``new_opinions[node]`` and
 ``last_change_time[node]`` inside the hyperedge loop, so a node covered by
@@ -102,7 +102,7 @@ def initial_opinions(
             opinions[rng.choice(n_nodes, size=ones, replace=False)] = 1
         return opinions
     # data_driven without a dataset and balanced_random both draw uniformly; the
-    # ingest layer (US-011) supplies label-derived shares for real data.
+    # ingest layer supplies label-derived shares for real data.
     draws = rng.integers(0, spec.n_opinions, size=n_nodes, dtype=np.int64)
     return np.asarray(draws, dtype=np.int64)
 

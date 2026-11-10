@@ -1,4 +1,4 @@
-"""US-013: the typer CLI exposes every command and validates overrides."""
+"""the typer CLI exposes every command and validates overrides."""
 
 from __future__ import annotations
 

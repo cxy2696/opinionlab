@@ -1,4 +1,4 @@
-"""US-010: schema, partitioning, RLS and cascade behaviour on a real Postgres.
+"""schema, partitioning, RLS and cascade behaviour on a real Postgres.
 
 Skipped unless TEST_DATABASE_URL (or DATABASE_URL) points at a disposable
 database; CI provides a postgres:16 service.

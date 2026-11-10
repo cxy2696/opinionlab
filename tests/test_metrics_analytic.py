@@ -1,4 +1,4 @@
-"""US-008: analytic checks for the rebuilt metric set."""
+"""analytic checks for the rebuilt metric set."""
 
 from __future__ import annotations
 

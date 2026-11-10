@@ -1,4 +1,4 @@
-"""US-002: ModelSpec is the single source of truth and validates everywhere."""
+"""ModelSpec is the single source of truth and validates everywhere."""
 
 from __future__ import annotations
 
@@ -24,7 +24,7 @@ from hnle.spec import (
 )
 
 
-def test_defaults_match_prd() -> None:
+def test_defaults_match_spec() -> None:
     spec = ModelSpec()
     assert spec.engine is Engine.sparse_vector
     assert spec.n_steps == 1000

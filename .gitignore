@@ -20,6 +20,10 @@ build/
 # Runtime artifacts
 runs/
 out/
+sensitivity.json
+sweep.csv
+compare.json
+calibration.json
 *.parquet
 *.sqlite
 *.db

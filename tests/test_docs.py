@@ -1,4 +1,4 @@
-"""US-026: documentation, golden freeze, changelog and launch checklist."""
+"""documentation, golden freeze, changelog and launch checklist."""
 
 from __future__ import annotations
 
@@ -32,17 +32,8 @@ def test_changelog_records_behaviour_changes() -> None:
         assert marker in changelog
 
 
-def test_launch_checklist_links_g1_to_g7_evidence() -> None:
-    checklist = (ROOT / "docs" / "LAUNCH_CHECKLIST.md").read_text(encoding="utf-8")
-    for goal in ("G1", "G2", "G3", "G4", "G5", "G6", "G7"):
-        assert goal in checklist
-    assert "tests/" in checklist
-    assert "make bench" in checklist
-    assert "tainted" in checklist.lower()
-
-
 def test_readme_points_at_docs() -> None:
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
     for doc in ("ARCHITECTURE.md", "MATH_MODEL.md", "MODEL_CARD.md", "COMPLIANCE.md",
-                "RUNBOOK.md", "capacity-report.md", "LAUNCH_CHECKLIST.md", "CHANGELOG.md"):
+                "RUNBOOK.md", "capacity-report.md", "CHANGELOG.md"):
         assert doc in readme

@@ -1,4 +1,4 @@
-"""US-015: grids, Latin hypercube, sensitivity ranking and calibration coverage."""
+"""grids, Latin hypercube, sensitivity ranking and calibration coverage."""
 
 from __future__ import annotations
 

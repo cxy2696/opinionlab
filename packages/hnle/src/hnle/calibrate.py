@@ -1,4 +1,4 @@
-"""Calibration of model parameters against a target series (PRD OPT-34)."""
+"""Calibration of model parameters against a target series."""
 
 from __future__ import annotations
 

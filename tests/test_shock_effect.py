@@ -1,4 +1,4 @@
-"""US-014: shocks produce a cascade distinguishable from the baseline."""
+"""shocks produce a cascade distinguishable from the baseline."""
 
 from __future__ import annotations
 

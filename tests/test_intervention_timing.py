@@ -1,4 +1,4 @@
-"""US-014: earlier debunk timing is distinguishable from later timing."""
+"""earlier debunk timing is distinguishable from later timing."""
 
 from __future__ import annotations
 

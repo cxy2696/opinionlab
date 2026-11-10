@@ -1,4 +1,4 @@
-"""Event-driven engine with latency clocks (PRD OPT-21).
+"""Event-driven engine with latency clocks.
 
 Each node carries a clock; only nodes whose clock expires are evaluated, and
 per-hyperedge opinion counts are maintained incrementally, so a batch touches

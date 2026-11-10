@@ -1,6 +1,6 @@
-"""Performance benchmarks (PRD G3 / OPT-20).
+"""Performance benchmarks for the sparse and event engines.
 
-Run with ``make bench``. The 100k-node tier asserts the PRD budget (<= 90 s for
+Run with ``make bench``. The 100k-node tier asserts the budget (<= 90 s for
 500 steps); CI fails the job at 120 s.
 """
 

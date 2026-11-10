@@ -1,4 +1,4 @@
-"""US-025: capacity formula and locust scenarios."""
+"""capacity formula and locust scenarios."""
 
 from __future__ import annotations
 

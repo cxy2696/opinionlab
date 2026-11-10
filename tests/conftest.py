@@ -1,4 +1,4 @@
-"""Shared test fixtures: isolation first, features second (PRD 12.4 / 13.1).
+"""Shared test fixtures: isolation first, features second.
 
 Every fixture keeps tests away from the working directory, from the developer
 database and from global environment state.
@@ -86,7 +86,7 @@ def artifact_dir(tmp_path: Path) -> Path:
 
 @pytest.fixture
 def test_db_name() -> str:
-    """Tests never touch the dev database (PRD 12.4)."""
+    """Tests never touch the dev database."""
     return TEST_DATABASE_NAME
 
 

@@ -1,4 +1,4 @@
-"""US-007: event-driven engine matches the sparse engine when L_i == 1."""
+"""event-driven engine matches the sparse engine when L_i == 1."""
 
 from __future__ import annotations
 

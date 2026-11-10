@@ -1,4 +1,4 @@
-"""Scenario template library (PRD OPT-40).
+"""Scenario template library.
 
 Every template carries bilingual narrative metadata (question, data shape,
 interpretation, assumptions, limitations) plus a validated ``ModelSpec`` and

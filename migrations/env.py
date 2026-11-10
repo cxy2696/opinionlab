@@ -1,4 +1,4 @@
-"""Alembic environment: async engine (asyncpg) with run_sync (PRD 12.2)."""
+"""Alembic environment: async engine (asyncpg) with run_sync."""
 
 from __future__ import annotations
 

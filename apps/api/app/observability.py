@@ -1,4 +1,4 @@
-"""Structured JSON logging, trace propagation and Prometheus metrics (US-022)."""
+"""Structured JSON logging, trace propagation and Prometheus metrics ()."""
 
 from __future__ import annotations
 
@@ -80,7 +80,7 @@ def get_logger() -> Any:
 
 
 def build_file_handler(path: str | Path) -> logging.Handler:
-    """Daily rotation with 7-day retention (PRD 11.2)."""
+    """Daily rotation with 7-day retention."""
     target = Path(path)
     target.parent.mkdir(parents=True, exist_ok=True)
     handler = logging.handlers.TimedRotatingFileHandler(

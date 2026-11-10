@@ -1,4 +1,4 @@
-"""CSR-vectorised sparse engine (PRD OPT-20).
+"""CSR-vectorised sparse engine.
 
 ``H`` is the (n_edges x n_nodes) incidence matrix. One step becomes:
 

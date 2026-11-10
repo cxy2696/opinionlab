@@ -27,6 +27,7 @@
 - Default retention is 180 days with cascading dataset deletion.
 - CN/EU dual-region deployment; cross-region tenant access returns 403.
 
-## AI 使用 / AI usage
-V1 不接入 LLM 生成结论；报告中的任何 AI 段落必须显式标识并人工复核。
-V1 does not call an LLM; any AI-written section must be labelled and human-reviewed.
+## 生成式内容 / Generative content
+平台不调用生成式模型产出结论；如未来引入生成式段落，必须显式标识并人工复核。
+The platform does not call generative models for conclusions; any future generated
+section must be labelled and human-reviewed.

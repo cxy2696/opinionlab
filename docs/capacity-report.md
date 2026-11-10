@@ -3,7 +3,7 @@
 ## 结论 / Summary
 - 读流量不是瓶颈：20 org / 200 席位下峰值读 ≈ 5 QPS，2 个 API 实例有 50× 余量。
 - 真正的瓶颈是 CPU 作业：单副本成本 ≈ **c × nnz(H) × n_steps**。
-- 实测标定系数 **c ≈ 1.5e-8 s / 非零元 / 步**（比 PRD 初始假设 3e-9 高约 5×，以实测为准）。
+- 实测标定系数 **c ≈ 1.5e-8 s / 非零元 / 步**（比早期假设 3e-9 高约 5×，以实测为准）。
 - 推荐起步：**2 × 8C16G worker + 1 × 4C8G API/DB**；集中触发靠配额/优先级/预估，不靠横向扩容。
 - Read traffic is not the bottleneck (~5 QPS peak); CPU simulation is.
 - Measured **c ≈ 1.5e-8 s per non-zero per step**, ~5× the initial 3e-9 assumption.

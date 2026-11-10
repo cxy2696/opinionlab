@@ -1,4 +1,4 @@
-"""Locust scenarios A/B/C for the OpinionLab API (PRD 13.8).
+"""Locust scenarios A/B/C for the OpinionLab API.
 
 Run against a staging API:
 

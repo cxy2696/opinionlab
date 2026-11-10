@@ -2,7 +2,7 @@
 
 Only public, whitelisted sites and user-owned exports are allowed. Any login
 wall / captcha / credential-bearing request is a policy violation and trips the
-breaker immediately (PRD OPT-41, chapter 17).
+breaker immediately.
 """
 
 from __future__ import annotations

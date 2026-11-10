@@ -1,5 +1,5 @@
 {
-  "note": "US-004 golden baseline. 'upstream' replicates the in-place, order-dependent hyperedge loop; 'fixed' is the node-centric engine. Regenerate only with UPDATE_GOLDEN=1 and explain the numeric change.",
+  "note": "Pre-fix golden baseline. 'upstream' replicates the in-place, order-dependent hyperedge loop; 'fixed' is the node-centric engine. Regenerate only with UPDATE_GOLDEN=1 and explain the numeric change.",
   "config": {
     "engine": "sparse_vector",
     "n_steps": 60,

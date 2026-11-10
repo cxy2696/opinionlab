@@ -1,4 +1,4 @@
-"""Token-bucket rate limiting: global / IP / user / org (PRD 10.4)."""
+"""Token-bucket rate limiting: global / IP / user / org."""
 
 from __future__ import annotations
 

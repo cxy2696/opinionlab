@@ -104,7 +104,7 @@ UPGRADE: list[str] = [
       updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
     )
     """,
-    # runs/run_replicas are range-partitioned by created_at (PRD 6.3 / 6.5).
+    # runs/run_replicas are range-partitioned by created_at.
     # Partitioned uniqueness must include the partition key, so the external
     # run key is unique per (org_id, run_id_external, created_at).
     """
@@ -180,7 +180,7 @@ UPGRADE: list[str] = [
     "CREATE TABLE run_replicas_2026_12 PARTITION OF run_replicas "
     "FOR VALUES FROM ('2026-12-01') TO ('2027-01-01')",
     "CREATE TABLE run_replicas_default PARTITION OF run_replicas DEFAULT",
-    # indexes (PRD 6.3)
+    # indexes
     "CREATE INDEX idx_runs_org_status ON runs (org_id, status, queued_at DESC)",
     "CREATE INDEX idx_runs_scenario ON runs (scenario_id, queued_at DESC)",
     "CREATE INDEX idx_scenarios_org ON scenarios (org_id, updated_at DESC)",

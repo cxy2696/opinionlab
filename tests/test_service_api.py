@@ -1,4 +1,4 @@
-"""US-017: auth, RBAC, tenant isolation, optimistic locking and idempotency."""
+"""auth, RBAC, tenant isolation, optimistic locking and idempotency."""
 
 from __future__ import annotations
 

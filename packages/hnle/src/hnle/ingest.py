@@ -1,4 +1,4 @@
-"""CSV ingest, hashtag cleaning and pseudonymisation (PRD M1 / OPT-04/05/06).
+"""CSV ingest, hashtag cleaning and pseudonymisation.
 
 The engine never sees raw user identifiers: IDs are HMAC-SHA256 hashed with an
 org-specific salt before any grouping happens, and columns that look like raw

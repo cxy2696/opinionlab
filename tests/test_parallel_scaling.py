@@ -1,4 +1,4 @@
-"""US-009: 64 replicas on 8 jobs stay within a lenient wall-clock bound."""
+"""64 replicas on 8 jobs stay within a lenient wall-clock bound."""
 
 from __future__ import annotations
 

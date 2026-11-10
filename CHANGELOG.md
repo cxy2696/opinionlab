@@ -13,12 +13,12 @@
 - **报告护栏**：单文件离线 HTML（内嵌 ECharts）、强制免责声明、样本不足徽标、单副本水印。
 
 ### 依赖与基础设施 / Dependencies & infra
-- 引擎锁定 PRD 22 版本；新增 `pyyaml==6.0.1`（YAML 加载验收要求）、`click==8.1.7`（typer 0.12.3 兼容）、dev `pandas-stubs`/`locust`/`pip-audit`。
+- 引擎依赖按版本表锁定；新增 `pyyaml==6.0.1`（YAML 加载验收要求）、`click==8.1.7`（typer 0.12.3 兼容）、dev `pandas-stubs`/`locust`/`pip-audit`。
 - 服务层：FastAPI + SQLAlchemy async + Alembic；Postgres 分区 + RLS；Celery 三队列。
 - 迁移 0001..0005：初始 schema、refresh/idempotency/shares、cancelling 状态、合规字段与用途审批、runs.tainted。
 
 ### 已知偏差 / Known deviations
 - 分区表唯一键必须含 `created_at`；`(org_id, run_id_external)` 唯一约束包含它。
 - `runs`/`run_replicas` 增加 `created_at`；`run_replicas`/`artifacts` 增加 `run_created_at` 以做复合外键。
-- `TopologySpec` 增加 `arrival_rate`/`decay_rate`（PRD 5.4 仅列 mode）。
+- `TopologySpec` 增加 `arrival_rate`/`decay_rate`（原 spec 表只列 mode）。
 - `edge_boost` 暂以概率偏置近似（引擎尚无超边权重）。

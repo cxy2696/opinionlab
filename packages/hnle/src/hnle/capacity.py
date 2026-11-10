@@ -1,4 +1,4 @@
-"""Capacity model for simulation jobs (PRD 10.1).
+"""Capacity model for simulation jobs.
 
     single replica ≈ c × nnz(H) × n_steps
     job wall clock ≈ single replica × repeats / jobs

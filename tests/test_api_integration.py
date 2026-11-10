@@ -1,4 +1,4 @@
-"""US-024: end-to-end API suite against real Postgres with FK-order cleanup."""
+"""end-to-end API suite against real Postgres with FK-order cleanup."""
 
 from __future__ import annotations
 

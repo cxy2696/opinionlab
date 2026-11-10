@@ -12,7 +12,7 @@ from jose import JWTError, jwt  # type: ignore[import-untyped]
 
 from app.settings import settings
 
-# PRD 9: argon2id m=64MB, t=3, p=4
+# argon2id with m=64MB, t=3, p=4
 PASSWORD_HASHER = PasswordHasher(time_cost=3, memory_cost=65536, parallelism=4)
 ACCESS_MINUTES = 30
 REFRESH_DAYS = 14

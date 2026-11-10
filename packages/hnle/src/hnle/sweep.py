@@ -1,4 +1,4 @@
-"""Parameter sweeps and sensitivity ranking (PRD OPT-34).
+"""Parameter sweeps and sensitivity ranking.
 
 Supports full grids and Latin-hypercube samples. Sensitivity defaults to
 Pearson correlation; ``method="sobol"`` reports a first-order variance effect

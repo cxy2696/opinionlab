@@ -1,7 +1,7 @@
 # 数学模型 / Math model
 
 ## 公式与代码逐条对应 / Formula-to-code map
-| 论文/PRD 公式 | 代码 |
+| 公式 / Formula | 代码 / Code |
 |---|---|
 | `S_x(e) = Σ_{j∈e} α_j · 1(X_j=x)` | `core/update.py::edge_distributions`、`core/sparse.py::_node_probabilities` |
 | `P(X_i=1|e) = S_1^q / (S_0^q + S_1^q)` | 同上（多立场时对每个 v） |

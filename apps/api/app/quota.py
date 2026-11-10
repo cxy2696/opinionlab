@@ -1,4 +1,4 @@
-"""Concurrency quota and long-run confirmation (US-018)."""
+"""Concurrency quota and long-run confirmation ()."""
 
 from __future__ import annotations
 
@@ -16,7 +16,7 @@ class QuotaDecision:
 
 
 def estimate_seconds(nnz: int, n_steps: int, repeats: int, cores: int = 8) -> float:
-    """Same shape as PRD 10.1: work / (cores * throughput)."""
+    """Capacity shape: work / (cores * throughput)."""
     throughput = 250_000.0  # edges*steps per second per core (calibrated placeholder)
     return max(1.0, nnz * n_steps * repeats / (cores * throughput))
 

@@ -1,4 +1,4 @@
-"""US-008: hypothesis invariants for metrics and the latency gate."""
+"""hypothesis invariants for metrics and the latency gate."""
 
 from __future__ import annotations
 

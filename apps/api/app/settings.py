@@ -1,4 +1,4 @@
-"""Runtime settings loaded from the environment (PRD chapter 20)."""
+"""Runtime settings loaded from the environment."""
 
 from __future__ import annotations
 

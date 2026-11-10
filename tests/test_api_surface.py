@@ -1,4 +1,4 @@
-"""US-018: the 24-endpoint surface, state machine, quota, rate limit, queue."""
+"""the 24-endpoint surface, state machine, quota, rate limit, queue."""
 
 from __future__ import annotations
 
@@ -35,7 +35,7 @@ DATABASE_URL = os.environ.get("TEST_DATABASE_URL") or os.environ.get("DATABASE_U
 pytestmark = pytest.mark.skipif(not DATABASE_URL, reason="TEST_DATABASE_URL not configured")
 PASSWORD = "Secret123!"
 
-PRD_PATHS = {
+EXPECTED_PATHS = {
     "/api/v1/auth/login",
     "/api/v1/auth/refresh",
     "/api/v1/auth/logout",
@@ -129,7 +129,7 @@ def _auth(token: str) -> dict[str, str]:
 def test_openapi_contains_the_24_endpoints() -> None:
     schema = app.openapi()
     paths = set(schema["paths"])
-    assert paths >= PRD_PATHS, PRD_PATHS - paths
+    assert paths >= EXPECTED_PATHS, EXPECTED_PATHS - paths
     methods = {
         (path, verb)
         for path, operations in schema["paths"].items()

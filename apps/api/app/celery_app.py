@@ -1,4 +1,4 @@
-"""Celery queues and limits (PRD 10.4)."""
+"""Celery queues and limits."""
 
 from __future__ import annotations
 

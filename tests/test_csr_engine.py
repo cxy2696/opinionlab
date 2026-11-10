@@ -1,4 +1,4 @@
-"""US-006: the CSR kernel matches the readable node-centric reference."""
+"""the CSR kernel matches the readable node-centric reference."""
 
 from __future__ import annotations
 

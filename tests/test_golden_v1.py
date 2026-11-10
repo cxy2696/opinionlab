@@ -1,7 +1,7 @@
-"""US-026: freeze five representative V1 benchmark configurations.
+"""freeze five representative V1 benchmark configurations.
 
 Regenerate only with ``UPDATE_GOLDEN=1`` and explain the numeric change in the
-commit message (PRD 13.2).
+commit message.
 """
 
 from __future__ import annotations

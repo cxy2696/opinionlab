@@ -1,4 +1,4 @@
-"""US-023: compose topology, non-root images, dual-region values and CI jobs."""
+"""compose topology, non-root images, dual-region values and CI jobs."""
 
 from __future__ import annotations
 

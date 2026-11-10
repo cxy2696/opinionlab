@@ -1,4 +1,4 @@
-"""PRD 9.1 permission matrix: 6 roles x features x data scope."""
+"""Permission matrix: 6 roles x features x data scope."""
 
 from __future__ import annotations
 

@@ -85,7 +85,7 @@ class InterventionType(StrEnum):
 
 
 class MetricName(StrEnum):
-    """Whitelist of computable metrics (PRD OPT-30..34)."""
+    """Whitelist of computable metrics."""
 
     diversity_final = "diversity_final"
     entropy_final = "entropy_final"
@@ -208,7 +208,7 @@ class ModelSpec(_Base):
         return json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
 
     def config_sha256(self) -> str:
-        """Content hash of this spec, for run manifests (PRD OPT-11)."""
+        """Content hash of this spec, for run manifests."""
         return hashlib.sha256(self.canonical_json().encode("utf-8")).hexdigest()
 
 

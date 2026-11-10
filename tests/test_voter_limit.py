@@ -1,4 +1,4 @@
-"""US-008: classical voter-model limit (q=1, L=1, pairs, uniform weights)."""
+"""classical voter-model limit (q=1, L=1, pairs, uniform weights)."""
 
 from __future__ import annotations
 
