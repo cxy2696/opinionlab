@@ -2,7 +2,7 @@
 
 PYTEST := uv run pytest
 
-.PHONY: setup test check bench
+.PHONY: setup test check bench migrate
 
 setup:
 	uv sync
@@ -15,6 +15,9 @@ check:
 	uv run ruff check .
 	uv run mypy
 	uv run pytest
+
+migrate:
+	uv run alembic upgrade head
 
 bench:
 	uv run pytest benchmarks -q

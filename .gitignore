@@ -24,6 +24,9 @@ out/
 *.sqlite
 *.db
 
+# Local database cluster
+.pgdata/
+
 # OS / editor
 .DS_Store
 .idea/

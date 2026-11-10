@@ -1,0 +1,21 @@
+"""Runtime settings loaded from the environment (PRD chapter 20)."""
+
+from __future__ import annotations
+
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+class Settings(BaseSettings):
+    """Environment-backed configuration; secrets never carry defaults in prod."""
+
+    model_config = SettingsConfigDict(env_file=".env", extra="ignore", case_sensitive=False)
+
+    opinionlab_env: str = "dev"
+    deployment_mode: str = "saas"
+    region: str = "cn"
+    database_url: str = "postgresql+asyncpg://app:CHANGE_ME@localhost:5432/opinionlab"
+    redis_url: str = "redis://localhost:6379/0"
+    log_level: str = "INFO"
+
+
+settings = Settings()

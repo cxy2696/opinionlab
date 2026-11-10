@@ -3,16 +3,17 @@ name = "opinionlab"
 version = "0.1.0"
 description = "OpinionLab — reproducible, high-performance opinion-dynamics simulation sandbox (hnle engine + service layer)."
 requires-python = ">=3.12,<3.13"
-dependencies = ["hnle"]
+dependencies = ["hnle", "opinionlab-api"]
 
 [tool.uv]
 package = false
 
 [tool.uv.workspace]
-members = ["packages/hnle"]
+members = ["packages/hnle", "apps/api"]
 
 [tool.uv.sources]
 hnle = { workspace = true }
+opinionlab-api = { workspace = true }
 
 [dependency-groups]
 dev = [
@@ -38,8 +39,8 @@ known-first-party = ["hnle"]
 [tool.mypy]
 python_version = "3.12"
 strict = true
-files = ["packages/hnle/src"]
-mypy_path = "packages/hnle/src"
+files = ["packages/hnle/src", "apps/api/app"]
+mypy_path = "packages/hnle/src:apps/api"
 warn_unreachable = true
 plugins = ["pydantic.mypy"]
 
