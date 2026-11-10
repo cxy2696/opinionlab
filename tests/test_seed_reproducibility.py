@@ -22,10 +22,11 @@ def _spec() -> ModelSpec:
 def test_jobs_do_not_change_results() -> None:
     spec = _spec()
     graph = random_hypergraph(40, 80, np.random.default_rng(21), spec.hyperedge)
-    serial = run_monte_carlo(spec, graph, repeats=4, jobs=1)
-    parallel = run_monte_carlo(spec, graph, repeats=4, jobs=8)
-    assert len(serial) == len(parallel) == 4
-    for one, many in zip(serial, parallel, strict=True):
+    serial = run_monte_carlo(spec, graph, repeats=4, jobs=1, collect_raw=True)
+    parallel = run_monte_carlo(spec, graph, repeats=4, jobs=8, collect_raw=True)
+    assert serial.raw is not None and parallel.raw is not None
+    assert len(serial.raw) == len(parallel.raw) == 4
+    for one, many in zip(serial.raw, parallel.raw, strict=True):
         np.testing.assert_array_equal(one.opinions, many.opinions)
         np.testing.assert_allclose(one.diversity_series, many.diversity_series, atol=1e-12)
         assert one.time_to_consensus == many.time_to_consensus
