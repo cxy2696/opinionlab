@@ -47,6 +47,8 @@ class RunResult:
     cascade_series: list[float]
     time_to_consensus: int
     warn_counts: dict[str, int] = field(default_factory=dict)
+    mean_opinion_series: list[float] = field(default_factory=list)
+    max_latency: float = 0.0
 
 
 def derive_streams(
@@ -229,6 +231,7 @@ def run_simulation(spec: ModelSpec, graph: Hypergraph, seed: SeedLike) -> RunRes
 
     diversity_series = [diversity(opinions)]
     cascade_series: list[float] = []
+    mean_opinion_series = [float(opinions.mean() / (spec.n_opinions - 1))]
     reached = _reached_consensus(opinions, spec)
     time_to_consensus = 0 if reached else -1
 
@@ -254,6 +257,7 @@ def run_simulation(spec: ModelSpec, graph: Hypergraph, seed: SeedLike) -> RunRes
 
         cascade_series.append(float(np.count_nonzero(changed)) / n_nodes)
         diversity_series.append(diversity(opinions))
+        mean_opinion_series.append(float(opinions.mean() / (spec.n_opinions - 1)))
         if time_to_consensus < 0 and _reached_consensus(opinions, spec):
             time_to_consensus = step
 
@@ -264,4 +268,6 @@ def run_simulation(spec: ModelSpec, graph: Hypergraph, seed: SeedLike) -> RunRes
         cascade_series=cascade_series,
         time_to_consensus=time_to_consensus,
         warn_counts=warn_counts,
+        mean_opinion_series=mean_opinion_series,
+        max_latency=float(latencies.max()) if latencies.size else 0.0,
     )

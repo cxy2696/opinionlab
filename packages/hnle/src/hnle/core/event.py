@@ -156,6 +156,7 @@ def run_event(spec: ModelSpec, graph: Hypergraph, seed: int) -> RunResult:
 
     diversity_series = [diversity(opinions)]
     cascade_series: list[float] = []
+    mean_opinion_series = [float(opinions.mean() / (k - 1))]
     time_to_consensus = 0 if _reached(opinions, spec) else -1
     horizon = float(spec.n_steps)
     active = [int(node) for node in np.nonzero(degree > 0)[0]]
@@ -164,13 +165,13 @@ def run_event(spec: ModelSpec, graph: Hypergraph, seed: int) -> RunResult:
         time_to_consensus = _run_bucketed(
             spec, active, latencies, opinions, counts, transposed, edge_sizes,
             decision_rng, warn_counts, diversity_series, cascade_series,
-            time_to_consensus, int(horizon),
+            mean_opinion_series, time_to_consensus, int(horizon),
         )
     else:
         time_to_consensus = _run_heap(
             spec, active, latencies, opinions, counts, transposed, edge_sizes,
             decision_rng, warn_counts, diversity_series, cascade_series,
-            time_to_consensus, horizon,
+            mean_opinion_series, time_to_consensus, horizon,
         )
 
     return RunResult(
@@ -180,6 +181,8 @@ def run_event(spec: ModelSpec, graph: Hypergraph, seed: int) -> RunResult:
         cascade_series=cascade_series,
         time_to_consensus=time_to_consensus,
         warn_counts=warn_counts,
+        mean_opinion_series=mean_opinion_series,
+        max_latency=float(latencies.max()) if latencies.size else 0.0,
     )
 
 
@@ -190,10 +193,12 @@ def _record(
     now: float,
     diversity_series: list[float],
     cascade_series: list[float],
+    mean_opinion_series: list[float],
     time_to_consensus: int,
 ) -> int:
     cascade_series.append(float(np.count_nonzero(changed)) / opinions.size)
     diversity_series.append(diversity(opinions))
+    mean_opinion_series.append(float(opinions.mean() / (spec.n_opinions - 1)))
     if time_to_consensus < 0 and _reached(opinions, spec):
         return int(now)
     return time_to_consensus
@@ -211,6 +216,7 @@ def _run_bucketed(
     warn_counts: dict[str, int],
     diversity_series: list[float],
     cascade_series: list[float],
+    mean_opinion_series: list[float],
     time_to_consensus: int,
     horizon: int,
 ) -> int:
@@ -230,7 +236,7 @@ def _run_bucketed(
         )
         time_to_consensus = _record(
             spec, opinions, changed, float(now), diversity_series,
-            cascade_series, time_to_consensus,
+            cascade_series, mean_opinion_series, time_to_consensus,
         )
         for node in nodes:
             next_time = now + max(int(latencies[node]), 1)
@@ -251,6 +257,7 @@ def _run_heap(
     warn_counts: dict[str, int],
     diversity_series: list[float],
     cascade_series: list[float],
+    mean_opinion_series: list[float],
     time_to_consensus: int,
     horizon: float,
 ) -> int:
@@ -271,7 +278,7 @@ def _run_heap(
         )
         time_to_consensus = _record(
             spec, opinions, changed, now, diversity_series, cascade_series,
-            time_to_consensus,
+            mean_opinion_series, time_to_consensus,
         )
         for node in nodes:
             heapq.heappush(clock, (now + max(float(latencies[node]), 1.0), int(node)))
