@@ -10,11 +10,12 @@ from typing import Any
 
 from fastapi import APIRouter, Depends, FastAPI, Header, Request
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse, Response
+from fastapi.responses import JSONResponse, RedirectResponse, Response
 from pydantic import BaseModel, Field
 from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.demo import router as demo_router
 from app.deps import (
     Principal,
     get_principal,
@@ -929,3 +930,9 @@ async def admin_settings(
 
 app.include_router(auth)
 app.include_router(api)
+app.include_router(demo_router)
+
+
+@app.get("/")
+async def root() -> RedirectResponse:
+    return RedirectResponse(url="/api/v1/demo/app")

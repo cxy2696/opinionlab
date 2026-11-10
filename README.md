@@ -21,6 +21,19 @@ OpinionLab is a reproducible opinion-dynamics simulation platform. It models gro
 - **合规**：CN/EU 双区隔离、G5 用途审批、PII 拒收、单节点轨迹禁止、强制免责声明
 - **报告**：单文件离线 HTML（内嵌 ECharts）、CI 图表、manifest、中英免责声明
 
+### 产品演示 / Demo
+
+```bash
+make demo
+# 打开 http://127.0.0.1:8000
+```
+
+浏览器中即可选择场景、调整从众强度/时延/副本数，查看带 95% CI 的指标与多样性曲线，并下载单文件离线报告。详见 [演示说明](docs/DEMO.md)。
+
+![OpinionLab demo](docs/demo.png)
+
+A no-login browser demo is included: pick a scenario, tune parameters, inspect metrics with confidence intervals and download an offline report. See [docs/DEMO.md](docs/DEMO.md).
+
 ### 快速开始
 
 ```bash
@@ -53,6 +66,7 @@ make check
 | [合规说明](docs/COMPLIANCE.md) | 双区、用途审批、删除与留存 |
 | [运维手册](docs/RUNBOOK.md) | 指标/告警、日志、金丝雀、回滚、tainted |
 | [容量报告](docs/capacity-report.md) | 容量公式、实测 c、压测场景 |
+| [产品演示](docs/DEMO.md) | 演示页、公开 API、限制与适用场景 |
 | [CHANGELOG](CHANGELOG.md) | 行为变更、依赖与已知偏差 |
 
 ### 目录

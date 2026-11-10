@@ -48,7 +48,7 @@ class ReportError(Exception):
 _BUNDLE: str | None = None
 
 
-def _echarts_bundle() -> str:
+def echarts_bundle() -> str:
     global _BUNDLE
     if _BUNDLE is None:
         _BUNDLE = gzip.decompress((ASSET_DIR / "echarts.min.js.gz").read_bytes()).decode("utf-8")
@@ -200,7 +200,7 @@ This report is produced by a deterministic simulation engine and contains no
 generative content; any future generated section will be labelled and reviewed.</p>
 <details><summary>manifest / 运行清单</summary><pre>{manifest_json}</pre></details>
 {watermark}
-<script nonce="{token}">{_echarts_bundle()}</script>
+<script nonce="{token}">{echarts_bundle()}</script>
 <script nonce="{token}">
 (function () {{
   var series = {json.dumps(series)};

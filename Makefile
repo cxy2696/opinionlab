@@ -2,7 +2,7 @@
 
 PYTEST := uv run pytest
 
-.PHONY: setup test check bench migrate
+.PHONY: setup test check bench migrate demo
 
 setup:
 	uv sync
@@ -18,6 +18,9 @@ check:
 
 migrate:
 	uv run alembic upgrade head
+
+demo:
+	uv run uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
 
 bench:
 	uv run pytest benchmarks -q
