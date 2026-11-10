@@ -1,4 +1,4 @@
-"""Node-centric synchronous update semantics (PRD OPT-01).
+"""Node-centric synchronous update semantics (PRD OPT-01, OPT-03, OPT-12).
 
 Why this shape: the upstream prototype wrote ``new_opinions[node]`` and
 ``last_change_time[node]`` inside the hyperedge loop, so a node covered by
@@ -7,11 +7,15 @@ happened to come last. Results therefore depended on hyperedge list order and
 were not reproducible. Here every hyperedge probability is computed first, then
 aggregated per node, then sampled once, and finally written back atomically at
 the end of the step.
+
+Randomness: every stream is derived from the caller's seed through
+``SeedSequence.spawn`` (initial opinions, latencies, decisions). No module-level
+RNG is touched, so results do not depend on process state or parallelism.
 """
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import cast
 
 import numpy as np
@@ -26,7 +30,11 @@ from hnle.spec import (
     LatencyDist,
     LatencyQuantize,
     ModelSpec,
+    WeightNormalize,
+    WeightSource,
 )
+
+SeedLike = int | np.random.SeedSequence
 
 
 @dataclass
@@ -38,6 +46,20 @@ class RunResult:
     diversity_series: list[float]
     cascade_series: list[float]
     time_to_consensus: int
+    warn_counts: dict[str, int] = field(default_factory=dict)
+
+
+def derive_streams(
+    seed: SeedLike,
+) -> tuple[np.random.Generator, np.random.Generator, np.random.Generator]:
+    """Split a seed into independent init / latency / decision streams."""
+    root = np.random.SeedSequence(seed) if isinstance(seed, int) else seed
+    init_seq, latency_seq, decision_seq = root.spawn(3)
+    return (
+        np.random.default_rng(init_seq),
+        np.random.default_rng(latency_seq),
+        np.random.default_rng(decision_seq),
+    )
 
 
 def draw_latencies(
@@ -63,43 +85,77 @@ def draw_latencies(
 
 
 def initial_opinions(
-    spec: ModelSpec, n_nodes: int, rng: np.random.Generator
+    spec: ModelSpec,
+    n_nodes: int,
+    rng: np.random.Generator,
+    data: tuple[int, ...] | None = None,
 ) -> npt.NDArray[np.int64]:
-    """Initialise opinions with the injected generator only."""
+    """Initialise opinions from data or from the injected generator."""
+    if spec.init_mode is InitMode.data_driven and data is not None:
+        return np.asarray(data, dtype=np.int64)
     if spec.init_mode is InitMode.fixed_ratio:
         ones = int(round(spec.target_share_1 * n_nodes))
         opinions = np.zeros(n_nodes, dtype=np.int64)
         if ones:
             opinions[rng.choice(n_nodes, size=ones, replace=False)] = 1
         return opinions
-    if spec.init_mode is InitMode.balanced_random:
-        draws = rng.integers(0, spec.n_opinions, size=n_nodes, dtype=np.int64)
-        return np.asarray(draws, dtype=np.int64)
-    # data_driven needs a dataset; synthetic graphs fall back to a balanced draw
-    # until the ingest layer supplies label-derived shares (US-011).
+    # data_driven without a dataset and balanced_random both draw uniformly; the
+    # ingest layer (US-011) supplies label-derived shares for real data.
     draws = rng.integers(0, spec.n_opinions, size=n_nodes, dtype=np.int64)
     return np.asarray(draws, dtype=np.int64)
 
 
+def node_weights(
+    spec: ModelSpec, graph: Hypergraph
+) -> tuple[npt.NDArray[np.float64], dict[str, int]]:
+    """Node influence weights, normalised per ``spec.weights``."""
+    n_nodes = graph.n_nodes
+    weights = np.ones(n_nodes, dtype=np.float64)
+    warnings: dict[str, int] = {}
+    if spec.weights.source is WeightSource.custom:
+        custom = spec.weights.custom or {}
+        weights = np.zeros(n_nodes, dtype=np.float64)
+        for key, value in custom.items():
+            index = int(key)
+            if 0 <= index < n_nodes:
+                weights[index] = value
+        missing = int(np.count_nonzero(weights == 0.0))
+        if missing:
+            warnings["missing_node_weights"] = missing
+    if spec.weights.normalize is WeightNormalize.max:
+        peak = float(weights.max()) if weights.size else 0.0
+        if peak > 0.0:
+            weights = weights / peak
+    elif spec.weights.normalize is WeightNormalize.zscore:
+        std = float(weights.std())
+        if std > 0.0:
+            weights = (weights - weights.mean()) / std
+    return weights, warnings
+
+
 def edge_distributions(
-    spec: ModelSpec, edges: tuple[tuple[int, ...], ...], opinions: npt.NDArray[np.int64]
-) -> npt.NDArray[np.float64]:
-    """``P_v(e)`` for every hyperedge, computed before any node is updated."""
+    spec: ModelSpec,
+    edges: tuple[tuple[int, ...], ...],
+    opinions: npt.NDArray[np.int64],
+    weights: npt.NDArray[np.float64],
+) -> tuple[npt.NDArray[np.float64], int]:
+    """``P_v(e)`` for every hyperedge; zero-total edges fall back to uniform."""
     k = spec.n_opinions
-    counts = np.zeros((len(edges), k), dtype=np.float64)
+    scores = np.zeros((len(edges), k), dtype=np.float64)
     for edge_idx, edge in enumerate(edges):
         for node in edge:
-            counts[edge_idx, opinions[node]] += 1.0
-    powered = np.power(counts, spec.q)
+            scores[edge_idx, opinions[node]] += weights[node]
+    powered = np.power(scores, spec.q)
     denominator = powered.sum(axis=1)
     uniform = np.full((len(edges), k), 1.0 / k, dtype=np.float64)
+    zero_edges = int(np.count_nonzero(denominator <= 0.0))
     merged = np.divide(
         powered,
         denominator[:, None],
         out=uniform.copy(),
         where=denominator[:, None] > 0,
     )
-    return np.asarray(merged, dtype=np.float64)
+    return np.asarray(merged, dtype=np.float64), zero_edges
 
 
 def aggregate_node_probabilities(
@@ -126,12 +182,12 @@ def aggregate_node_probabilities(
     return node_probs
 
 
-def _choose(
+def choose_opinions(
     spec: ModelSpec,
     node_probs: npt.NDArray[np.float64],
     rng: np.random.Generator,
 ) -> npt.NDArray[np.int64]:
-    """Sample the next opinion for every active node (one draw per node)."""
+    """Apply the configured decision rule (one draw per active node)."""
     k = spec.n_opinions
     if spec.decision_rule is DecisionRule.argmax:
         return np.asarray(np.argmax(node_probs, axis=1), dtype=np.int64)
@@ -147,22 +203,21 @@ def _choose(
     return np.asarray(np.minimum(choice, k - 1), dtype=np.int64)
 
 
-def _reached_consensus(
-    opinions: npt.NDArray[np.int64], spec: ModelSpec
-) -> bool:
+def _reached_consensus(opinions: npt.NDArray[np.int64], spec: ModelSpec) -> bool:
     counts = np.bincount(opinions, minlength=spec.n_opinions)
     return bool(counts.max() / opinions.size >= spec.consensus_threshold)
 
 
-def run_simulation(spec: ModelSpec, graph: Hypergraph, seed: int) -> RunResult:
+def run_simulation(spec: ModelSpec, graph: Hypergraph, seed: SeedLike) -> RunResult:
     """Run one replica; all randomness derives from ``seed``."""
     # Canonical edge order makes aggregation bit-for-bit independent of the
     # order in which the caller supplied hyperedges (OPT-01 / G2).
     edges = tuple(sorted(graph.hyperedges))
-    rng = np.random.default_rng(seed)
+    init_rng, latency_rng, decision_rng = derive_streams(seed)
     n_nodes = graph.n_nodes
-    opinions = initial_opinions(spec, n_nodes, rng)
-    latencies = draw_latencies(spec, n_nodes, rng)
+    opinions = initial_opinions(spec, n_nodes, init_rng, graph.initial_opinions)
+    latencies = draw_latencies(spec, n_nodes, latency_rng)
+    weights, warn_counts = node_weights(spec, graph)
     last_change = np.zeros(n_nodes, dtype=np.int64)
 
     incident: list[list[int]] = [[] for _ in range(n_nodes)]
@@ -178,7 +233,11 @@ def run_simulation(spec: ModelSpec, graph: Hypergraph, seed: int) -> RunResult:
     time_to_consensus = 0 if reached else -1
 
     for step in range(1, spec.n_steps + 1):
-        edge_probs = edge_distributions(spec, edges, opinions)
+        edge_probs, zero_edges = edge_distributions(spec, edges, opinions, weights)
+        if zero_edges:
+            warn_counts["zero_denominator_edges"] = (
+                warn_counts.get("zero_denominator_edges", 0) + zero_edges
+            )
         node_probs = aggregate_node_probabilities(
             edge_probs, edge_sizes, incident, spec.aggregation
         )
@@ -186,7 +245,7 @@ def run_simulation(spec: ModelSpec, graph: Hypergraph, seed: int) -> RunResult:
         new_opinions = opinions.copy()
         ready_idx = np.nonzero(ready)[0]
         if ready_idx.size:
-            chosen = _choose(spec, node_probs[ready_idx], rng)
+            chosen = choose_opinions(spec, node_probs[ready_idx], decision_rng)
             new_opinions[ready_idx] = chosen
         changed = new_opinions != opinions
         last_change = cast("npt.NDArray[np.int64]", last_change.copy())
@@ -197,7 +256,6 @@ def run_simulation(spec: ModelSpec, graph: Hypergraph, seed: int) -> RunResult:
         diversity_series.append(diversity(opinions))
         if time_to_consensus < 0 and _reached_consensus(opinions, spec):
             time_to_consensus = step
-            reached = True
 
     return RunResult(
         opinions=opinions,
@@ -205,4 +263,5 @@ def run_simulation(spec: ModelSpec, graph: Hypergraph, seed: int) -> RunResult:
         diversity_series=diversity_series,
         cascade_series=cascade_series,
         time_to_consensus=time_to_consensus,
+        warn_counts=warn_counts,
     )

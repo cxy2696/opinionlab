@@ -18,7 +18,7 @@ def _node_probs(
     opinions = np.asarray([1, 0, 0], dtype=np.int64)
     spec = ModelSpec(q=1.0, n_opinions=2)
     edges = ((0, 1), (0, 1, 2))
-    edge_probs = edge_distributions(spec, edges, opinions)
+    edge_probs, _ = edge_distributions(spec, edges, opinions, np.ones(3, dtype=np.float64))
     incident = [[0, 1], [0, 1], [1]]
     sizes = np.asarray([2.0, 3.0])
     return aggregate_node_probabilities(edge_probs, sizes, incident, aggregation)

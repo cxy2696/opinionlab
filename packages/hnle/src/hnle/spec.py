@@ -136,6 +136,8 @@ class WeightsSpec(_Base):
             raise ValueError(
                 "weights.custom: must be a non-empty mapping when weights.source='custom'"
             )
+        if self.custom is not None and any(value < 0 for value in self.custom.values()):
+            raise ValueError("weights.custom: weights must be non-negative")
         return self
 
 

@@ -21,6 +21,7 @@ class Hypergraph:
 
     n_nodes: int
     hyperedges: tuple[tuple[int, ...], ...]
+    initial_opinions: tuple[int, ...] | None = None
 
     def __post_init__(self) -> None:
         if self.n_nodes <= 0:
@@ -30,6 +31,8 @@ class Hypergraph:
                 raise ValueError("graph.hyperedges: every hyperedge needs at least 2 nodes")
             if any(node < 0 or node >= self.n_nodes for node in edge):
                 raise ValueError("graph.hyperedges: node id out of range")
+        if self.initial_opinions is not None and len(self.initial_opinions) != self.n_nodes:
+            raise ValueError("graph.initial_opinions: length must equal n_nodes")
 
 
 def random_hypergraph(

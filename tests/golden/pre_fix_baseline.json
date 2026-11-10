@@ -71,12 +71,12 @@
     "identity": {
       "diversity_final": 0.0,
       "time_to_consensus": 4.0,
-      "cascade_mean": 0.034583333333333334
+      "cascade_mean": 0.03333333333333333
     },
     "reversed": {
       "diversity_final": 0.0,
       "time_to_consensus": 4.0,
-      "cascade_mean": 0.034583333333333334
+      "cascade_mean": 0.03333333333333333
     }
   }
 }
