@@ -14,15 +14,17 @@ from typing import Any
 import pytest
 from hypothesis import HealthCheck, settings
 
+TEST_REDIS_URL = "redis://localhost:6379/15"
+
 # The service-layer tests read app.settings at import time; point it at the
 # disposable test database before any app module is imported.
 if os.environ.get("TEST_DATABASE_URL") and not os.environ.get("DATABASE_URL"):
     os.environ["DATABASE_URL"] = os.environ["TEST_DATABASE_URL"]
+if os.environ.get("TEST_DATABASE_URL"):
+    # never point tests at the developer Redis database
+    os.environ["REDIS_URL"] = os.environ.get("TEST_REDIS_URL", TEST_REDIS_URL)
 
 TEST_DATABASE_NAME = "opinionlab_test"
-TEST_REDIS_URL = "redis://localhost:6379/15"
-
-
 settings.register_profile(
     "ci", max_examples=200, deadline=None, suppress_health_check=[HealthCheck.too_slow]
 )

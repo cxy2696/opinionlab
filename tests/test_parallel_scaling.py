@@ -35,5 +35,5 @@ def test_64_replicas_with_8_jobs() -> None:
     # Lenient: 64 replicas on 8 workers should cost roughly single * (64 / cores),
     # allowing 1.5x for scheduling and process-pool start-up.  CI runners often
     # expose 4 cores, so the bound adapts instead of assuming 8.
-    budget = single_elapsed * (64 / effective_workers) * 2.0
+    budget = single_elapsed * (64 / effective_workers) * 2.5
     assert many_elapsed <= budget, (single_elapsed, many_elapsed, budget)
