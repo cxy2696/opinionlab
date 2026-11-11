@@ -23,7 +23,7 @@ database or network dependency, so the same code powers the CLI, the API workers
 
 1. A scenario YAML is parsed into a validated `ModelSpec` (the single source of truth).
 2. `ModelSpec` + graph seed produce a hypergraph and per-replica RNG streams.
-3. Replicas run on the CSR sparse kernel (default) or the event-driven kernel.
+3. Replicas run on the CSR sparse kernel (default) or the event-driven kernel; the event kernel requires integer latency steps.
 4. Metrics are aggregated across replicas with 95% confidence intervals.
 5. Runs, manifests, series and reports are written as immutable artifacts.
 6. The API/report layer reads artifacts; it never returns per-node opinion traces.
@@ -34,9 +34,10 @@ database or network dependency, so the same code powers the CLI, the API workers
 |---|---|
 | `hnle/spec.py` | `ModelSpec`, validation, config hash |
 | `hnle/graph.py` | random and loaded hypergraphs |
+| `hnle/core/kernel.py` | shared conformity map, row normalisation, consensus test |
 | `hnle/core/update.py` | node-centric reference kernel |
 | `hnle/core/sparse.py` | CSR vectorised kernel |
-| `hnle/core/event.py` | event-driven kernel |
+| `hnle/core/event.py` | event-driven kernel (integer latency) |
 | `hnle/metrics.py` | diversity, entropy, cascade, consensus, oscillation |
 | `hnle/mc.py` | replicas, Welford aggregation, CIs |
 | `hnle/io/` | manifests, artifacts, offline HTML reports |

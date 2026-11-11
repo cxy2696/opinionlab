@@ -45,8 +45,11 @@ def test_fixed_seed_snapshot() -> None:
     result = run_sparse(spec, graph, seed=7)
     # Frozen snapshot: changing the update semantics or RNG streams must be
     # explained and regenerated on purpose.
-    npt.assert_allclose(result.diversity_series[-1], 0.16, atol=1e-12)
-    assert result.time_to_consensus == 75
+    # The synthetic graph now samples 400 *distinct* pairwise hyperedges;
+    # duplicate edges would otherwise double the influence of a pair and
+    # change the voter-limit snapshot.
+    npt.assert_allclose(result.diversity_series[-1], 0.115, atol=1e-12)
+    assert result.time_to_consensus == 68
 
     summary = summarize(result, spec, graph.hyperedges)
     assert summary.absorbing

@@ -19,6 +19,8 @@
 - Parameters and topology come from the supplied data; conclusions hold only inside the declared
   assumption space.
 - Coarse parameters give directional insight, not precise forecasts.
+- Population-level `absorbing`/`runaway` labels assume a connected graph. On a fragmented graph,
+  components can freeze while the population flag stays false; inspect the component structure.
 
 ## Prohibited uses
 

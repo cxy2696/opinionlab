@@ -29,7 +29,7 @@
 
 ## 数据流 / Data flow
 1. `ingest_csv`：UTF-8 → 假名化（HMAC）→ hashtag 清洗 → 情绪映射 → 确定性节点序 → `Hypergraph` + 权重。
-2. `simulate`：`ModelSpec` → `run_sparse`/`run_event`（注入 Generator）→ `RunResult`（群体序列）。
+2. `simulate`：`ModelSpec` → `run_sparse`/`run_event`（注入 Generator；事件引擎只支持整数时延）→ `RunResult`（群体序列）。
 3. `run_monte_carlo`：`SeedSequence.spawn` 派生副本 → Welford 聚合 + 95% CI。
 4. `export_run`：manifest（sha/版本/耗时）→ series.csv / metrics.parquet / 单文件 HTML（内嵌 ECharts）/ graph.npz。
 5. 服务层：`runs.aggregate` 存聚合指标；产物引用对象存储；审计只追加。
@@ -40,6 +40,7 @@
 | `hnle/spec.py` | 唯一参数真相源 `ModelSpec` |
 | `hnle/graph.py` | 超图、确定性排序、权重归一 |
 | `hnle/ingest.py` | CSV 接入、清洗、假名化、PII 拒绝 |
+| `hnle/core/kernel.py` | 共享从众映射、行归一化、共识判定 |
 | `hnle/core/update.py` | 节点中心参考实现（OPT-01） |
 | `hnle/core/sparse.py` | CSR 向量化引擎（OPT-20） |
 | `hnle/core/event.py` | 事件驱动引擎（OPT-21） |

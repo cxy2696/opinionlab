@@ -6,6 +6,47 @@
 > - Results intentionally differ from the upstream prototype.
 > - Known deviations and capacity coefficients are environment-dependent; recalibrate before release.
 
+## v1.1.0 — 2026-11-12
+
+### Corrected mathematics
+
+- The `threshold` rule now keeps the current stance unless a strictly more likely stance reaches the
+  threshold; ties keep the status quo. The previous implementation set the binary opinion from
+  `p1 >= τ` alone and ignored the current opinion.
+- `max` aggregation is renormalised row-wise. An element-wise maximum of distributions is not a
+  distribution; the previous code could pass rows summing to more than one to the sampler.
+- `zscore` weight normalisation was removed. It could produce negative weights, which make the
+  weighted counts negative and the fractional power `q` undefined. Weights are documented as
+  non-negative; a zero-total edge falls back to uniform with a warning.
+- The event kernel now uses the same change-triggered clock as the CSR engine, weighted opinion
+  counts (it previously counted nodes rather than weights), and per-sweep series. It is restricted
+  to integer latency steps; continuous latency is handled by the CSR engine.
+- The conformity map, row normalisation, ordinal mean opinion and consensus test live in the shared
+  `core/kernel.py`; the three engines no longer duplicate these formulas.
+- `engagement` and `centrality` weight sources are now consumed. Ingested weights are attached to the
+  `Hypergraph` and used by the engine; `centrality` is the incidence degree. Previously both sources
+  silently fell back to uniform weights.
+
+### Behaviour changes (breaking)
+
+- Threshold semantics changed as above; a run that switched to 1 at `p1 >= τ` may now keep its
+  current stance.
+- `weights.normalize = "zscore"` is rejected at validation time; use `none` or `max`.
+- `engine = "event_driven"` with `latency.quantize = "continuous"` is rejected; use
+  `engine = "sparse_vector"`.
+- Duplicate hyperedges are merged and duplicate node ids inside an edge are rejected. The synthetic
+  generator now samples **distinct** edges, so the voter-limit golden baseline changed.
+
+### Tests and documentation
+
+- Added tests for threshold status-quo, max renormalisation, integer event/CSR equivalence at
+  `L = 2` and `L = 5`, weighted event counts, and binary-only controls.
+- `docs/MATH_MODEL_en.md` / `_cn.md` rewritten: `q > 0`, non-negative weights, normalised `max`,
+  explicit threshold semantics, integer event clocks, Student-*t* intervals, and the censoring
+  meaning of `time_to_consensus = -1`.
+- Regenerated `tests/golden/v1_baseline.json` for the distinct-edge generator; `pre_fix_baseline.json`
+  is unchanged.
+
 ## v1.0.0 — 2026-11-11 (upgraded from the upstream research prototype)
 
 ### Behaviour changes

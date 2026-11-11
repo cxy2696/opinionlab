@@ -21,6 +21,12 @@ from typing import cast
 import numpy as np
 import numpy.typing as npt
 
+from hnle.core.kernel import (
+    conformity_probabilities,
+    normalize_rows,
+    ordinal_mean_opinion,
+    reached_consensus,
+)
 from hnle.graph import Hypergraph
 from hnle.metrics import diversity, opinion_shares
 from hnle.spec import (
@@ -95,7 +101,14 @@ def initial_opinions(
 ) -> npt.NDArray[np.int64]:
     """Initialise opinions from data or from the injected generator."""
     if spec.init_mode is InitMode.data_driven and data is not None:
-        return np.asarray(data, dtype=np.int64)
+        values = np.asarray(data, dtype=np.int64)
+        if values.size != n_nodes:
+            raise ValueError("graph.initial_opinions: length must equal n_nodes")
+        if values.size and (values.min() < 0 or values.max() >= spec.n_opinions):
+            raise ValueError(
+                "graph.initial_opinions: values must lie in [0, n_opinions)"
+            )
+        return values
     if spec.init_mode is InitMode.fixed_ratio:
         ones = int(round(spec.target_share_1 * n_nodes))
         opinions = np.zeros(n_nodes, dtype=np.int64)
@@ -125,14 +138,23 @@ def node_weights(
         missing = int(np.count_nonzero(weights == 0.0))
         if missing:
             warnings["missing_node_weights"] = missing
+    elif spec.weights.source is WeightSource.engagement:
+        if graph.weights is None:
+            warnings["missing_engagement_weights"] = n_nodes
+        else:
+            weights = np.asarray(graph.weights, dtype=np.float64)
+    elif spec.weights.source is WeightSource.centrality:
+        degree = np.zeros(n_nodes, dtype=np.float64)
+        for edge in graph.hyperedges:
+            degree[list(edge)] += 1.0
+        weights = degree
     if spec.weights.normalize is WeightNormalize.max:
         peak = float(weights.max()) if weights.size else 0.0
         if peak > 0.0:
             weights = weights / peak
-    elif spec.weights.normalize is WeightNormalize.zscore:
-        std = float(weights.std())
-        if std > 0.0:
-            weights = (weights - weights.mean()) / std
+    # A global rescaling cancels in the conformity map. Zero weights are
+    # permitted for custom sources; an all-zero edge falls back to uniform in
+    # ``conformity_probabilities`` and is counted as a warning.
     return weights, warnings
 
 
@@ -148,17 +170,7 @@ def edge_distributions(
     for edge_idx, edge in enumerate(edges):
         for node in edge:
             scores[edge_idx, opinions[node]] += weights[node]
-    powered = np.power(scores, spec.q)
-    denominator = powered.sum(axis=1)
-    uniform = np.full((len(edges), k), 1.0 / k, dtype=np.float64)
-    zero_edges = int(np.count_nonzero(denominator <= 0.0))
-    merged = np.divide(
-        powered,
-        denominator[:, None],
-        out=uniform.copy(),
-        where=denominator[:, None] > 0,
-    )
-    return np.asarray(merged, dtype=np.float64), zero_edges
+    return conformity_probabilities(scores, spec.q)
 
 
 def aggregate_node_probabilities(
@@ -178,7 +190,9 @@ def aggregate_node_probabilities(
         if aggregation is Aggregation.mean:
             node_probs[node] = block.mean(axis=0)
         elif aggregation is Aggregation.max:
-            node_probs[node] = block.max(axis=0)
+            # An element-wise maximum of distributions is not itself a
+            # distribution; renormalise it before sampling.
+            node_probs[node] = normalize_rows(block.max(axis=0))
         else:
             sizes = edge_sizes[edge_ids]
             node_probs[node] = (block * sizes[:, None]).sum(axis=0) / sizes.sum()
@@ -189,26 +203,41 @@ def choose_opinions(
     spec: ModelSpec,
     node_probs: npt.NDArray[np.float64],
     rng: np.random.Generator,
+    current: npt.NDArray[np.int64] | None = None,
 ) -> npt.NDArray[np.int64]:
-    """Apply the configured decision rule (one draw per active node)."""
+    """Apply the configured decision rule (one draw per active node).
+
+    The threshold rule keeps the current stance unless the most likely stance
+    reaches ``spec.threshold``. It therefore needs ``current``; the other rules
+    ignore it.
+    """
     k = spec.n_opinions
     if spec.decision_rule is DecisionRule.argmax:
         return np.asarray(np.argmax(node_probs, axis=1), dtype=np.int64)
     if spec.decision_rule is DecisionRule.threshold:
-        choice = np.zeros(node_probs.shape[0], dtype=np.int64)
-        if k > 1:
-            choice[node_probs[:, 1] >= spec.threshold] = 1
+        if current is None:
+            raise ValueError("threshold decision rule requires current opinions")
+        best = np.argmax(node_probs, axis=1)
+        confidence = node_probs[np.arange(node_probs.shape[0]), best]
+        current_prob = node_probs[np.arange(node_probs.shape[0]), current]
+        choice = np.asarray(current, dtype=np.int64).copy()
+        # Keep the status quo on a tie; switch only to a stance that is
+        # strictly more likely and whose probability reaches the threshold.
+        switch = (confidence >= spec.threshold) & (confidence > current_prob)
+        choice[switch] = best[switch]
         return choice
     cdf = np.cumsum(node_probs, axis=1)
-    cdf = cdf / cdf[:, -1:]
+    totals = cdf[:, -1:]
+    if np.any(totals <= 0.0):
+        raise ValueError("node probabilities must have positive total mass")
+    cdf = cdf / totals
     draws = rng.random(node_probs.shape[0])[:, None]
     choice = np.sum(draws >= cdf, axis=1)
     return np.asarray(np.minimum(choice, k - 1), dtype=np.int64)
 
 
 def _reached_consensus(opinions: npt.NDArray[np.int64], spec: ModelSpec) -> bool:
-    counts = np.bincount(opinions, minlength=spec.n_opinions)
-    return bool(counts.max() / opinions.size >= spec.consensus_threshold)
+    return reached_consensus(opinions, spec.n_opinions, spec.consensus_threshold)
 
 
 def run_simulation(spec: ModelSpec, graph: Hypergraph, seed: SeedLike) -> RunResult:
@@ -232,7 +261,7 @@ def run_simulation(spec: ModelSpec, graph: Hypergraph, seed: SeedLike) -> RunRes
 
     diversity_series = [diversity(opinions)]
     cascade_series: list[float] = []
-    mean_opinion_series = [float(opinions.mean() / (spec.n_opinions - 1))]
+    mean_opinion_series = [ordinal_mean_opinion(opinions, spec.n_opinions)]
     share_series = [opinion_shares(opinions, spec.n_opinions).tolist()]
     reached = _reached_consensus(opinions, spec)
     time_to_consensus = 0 if reached else -1
@@ -250,7 +279,9 @@ def run_simulation(spec: ModelSpec, graph: Hypergraph, seed: SeedLike) -> RunRes
         new_opinions = opinions.copy()
         ready_idx = np.nonzero(ready)[0]
         if ready_idx.size:
-            chosen = choose_opinions(spec, node_probs[ready_idx], decision_rng)
+            chosen = choose_opinions(
+                spec, node_probs[ready_idx], decision_rng, opinions[ready_idx]
+            )
             new_opinions[ready_idx] = chosen
         changed = new_opinions != opinions
         last_change = cast("npt.NDArray[np.int64]", last_change.copy())
@@ -259,7 +290,7 @@ def run_simulation(spec: ModelSpec, graph: Hypergraph, seed: SeedLike) -> RunRes
 
         cascade_series.append(float(np.count_nonzero(changed)) / n_nodes)
         diversity_series.append(diversity(opinions))
-        mean_opinion_series.append(float(opinions.mean() / (spec.n_opinions - 1)))
+        mean_opinion_series.append(ordinal_mean_opinion(opinions, spec.n_opinions))
         share_series.append(opinion_shares(opinions, spec.n_opinions).tolist())
         if time_to_consensus < 0 and _reached_consensus(opinions, spec):
             time_to_consensus = step

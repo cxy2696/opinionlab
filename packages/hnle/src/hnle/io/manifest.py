@@ -161,6 +161,7 @@ def load_graph(path: str | Path) -> tuple[Hypergraph, npt.NDArray[np.float64]]:
             n_nodes=n_nodes,
             hyperedges=edges,
             initial_opinions=tuple(int(v) for v in initial) if initial.size else None,
+            weights=tuple(float(v) for v in weights),
         ),
         weights,
     )

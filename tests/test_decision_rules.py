@@ -20,6 +20,7 @@ def _graph() -> Hypergraph:
 def test_threshold_rule_uses_spec_threshold() -> None:
     low = ModelSpec(
         n_steps=1,
+        q=1.0,
         decision_rule=DecisionRule.threshold,
         threshold=0.01,
         latency={"dist": "const", "mu": 1},
@@ -33,9 +34,34 @@ def test_threshold_rule_uses_spec_threshold() -> None:
     )
     low_run = run_sparse(low, graph, seed=4)
     high_run = run_sparse(high, graph, seed=4)
-    # p1 on the only edge is 0.5: threshold 0.01 flips to 1, 0.99 keeps 0.
-    assert low_run.opinions[0] == 1
-    assert high_run.opinions[0] == 0
+    # p1 = 1/3 on the only edge. The low threshold accepts the strict
+    # improvement to 0; the high threshold keeps the status quo at 1.
+    assert low_run.opinions[0] == 0
+    assert high_run.opinions[0] == 1
+
+
+def test_threshold_rule_switches_only_on_a_confident_strict_improvement() -> None:
+    graph = Hypergraph(
+        n_nodes=10,
+        hyperedges=((0, 1, 2, 3, 4, 5, 6, 7, 8, 9),),
+        initial_opinions=(0, 1, 1, 1, 1, 1, 1, 1, 1, 1),
+    )
+    spec = ModelSpec(
+        n_steps=1,
+        q=1.0,
+        decision_rule=DecisionRule.threshold,
+        threshold=0.8,
+        latency={"dist": "const", "mu": 1},
+        init_mode="data_driven",
+    )
+    run = run_sparse(spec, graph, seed=3)
+    # p1 = 0.9 > p0 = 0.1 and the threshold is met: node 0 flips to 1.
+    assert run.opinions[0] == 1
+
+    strict = spec.model_copy(update={"threshold": 0.95})
+    run = run_sparse(strict, graph, seed=3)
+    # The improvement is real but does not reach the requested confidence.
+    assert run.opinions[0] == 0
 
 
 def test_argmax_mode_has_zero_variance_across_replicas() -> None:

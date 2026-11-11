@@ -633,7 +633,7 @@ wheels = [
 
 [[package]]
 name = "hnle"
-version = "0.1.0"
+version = "1.1.0"
 source = { editable = "packages/hnle" }
 dependencies = [
     { name = "click" },
@@ -1015,7 +1015,7 @@ wheels = [
 
 [[package]]
 name = "opinionlab"
-version = "0.1.0"
+version = "1.1.0"
 source = { virtual = "." }
 dependencies = [
     { name = "hnle" },
@@ -1056,7 +1056,7 @@ dev = [
 
 [[package]]
 name = "opinionlab-api"
-version = "0.1.0"
+version = "1.1.0"
 source = { editable = "apps/api" }
 dependencies = [
     { name = "alembic" },

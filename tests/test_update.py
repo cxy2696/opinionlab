@@ -31,10 +31,13 @@ def test_aggregation_mean_matches_hand_calculation() -> None:
     assert probs[2, 1] == np.float64(1.0 / 3.0)
 
 
-def test_aggregation_max_takes_strongest_edge() -> None:
+def test_aggregation_max_takes_strongest_edge_and_normalises() -> None:
     probs = _node_probs(Aggregation.max)
-    assert probs[0, 1] == np.float64(0.5)
+    # node 0: element-wise max of [0.5, 0.5] and [2/3, 1/3] is [2/3, 0.5],
+    # renormalised to [4/7, 3/7].
+    np.testing.assert_allclose(probs[0, 1], 3.0 / 7.0)
     assert probs[2, 1] == np.float64(1.0 / 3.0)
+    np.testing.assert_allclose(probs.sum(axis=1), 1.0)
 
 
 def test_aggregation_size_weighted_uses_edge_sizes() -> None:

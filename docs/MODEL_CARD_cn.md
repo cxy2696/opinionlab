@@ -18,6 +18,8 @@
 - 参数与拓扑来自给定数据，结论只对假设空间成立。
 - Does not model recommender systems, media agenda, offline behaviour or prices.
 - Conclusions hold only inside the declared assumption space.
+- 人群层面的 `absorbing`/`runaway` 标签假设图连通；图碎片化时分量可能已冻结而人群标签仍为假，
+  应检查连通分量结构。
 
 ## 禁止用途 / Prohibited uses
 - 禁止对真实个人进行观点预测、画像或打分。

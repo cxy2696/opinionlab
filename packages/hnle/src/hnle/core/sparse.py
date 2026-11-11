@@ -20,6 +20,12 @@ import numpy as np
 import numpy.typing as npt
 from scipy.sparse import csr_matrix
 
+from hnle.core.kernel import (
+    conformity_probabilities,
+    normalize_rows,
+    ordinal_mean_opinion,
+    reached_consensus,
+)
 from hnle.core.shocks import apply_one_shot, evolve_topology, probability_bias
 from hnle.core.update import (
     RunResult,
@@ -66,25 +72,13 @@ def _node_probabilities(
     onehot[np.arange(n_nodes), opinions] = 1.0
     scores = np.asarray(incidence @ (onehot * weights[:, None]), dtype=np.float64)
 
-    powered = np.power(scores, spec.q)
-    denominator = powered.sum(axis=1)
-    uniform = np.full((scores.shape[0], k), 1.0 / k, dtype=np.float64)
-    edge_probs = np.asarray(
-        np.divide(
-            powered,
-            denominator[:, None],
-            out=uniform.copy(),
-            where=denominator[:, None] > 0,
-        ),
-        dtype=np.float64,
-    )
-    zero_edges = int(np.count_nonzero(denominator <= 0.0))
+    edge_probs, zero_edges = conformity_probabilities(scores, spec.q)
 
     if spec.aggregation is Aggregation.max:
         coo = transposed.tocoo()
         node_probs = np.zeros((n_nodes, k), dtype=np.float64)
         np.maximum.at(node_probs, coo.row, edge_probs[coo.col])
-        return node_probs, zero_edges
+        return normalize_rows(node_probs), zero_edges
 
     if spec.aggregation is Aggregation.size_weighted:
         numerator = np.asarray(
@@ -127,7 +121,7 @@ def run_sparse(spec: ModelSpec, graph: Hypergraph, seed: int) -> RunResult:
 
     diversity_series = [diversity(opinions)]
     cascade_series: list[float] = []
-    mean_opinion_series = [float(opinions.mean() / (k - 1))]
+    mean_opinion_series = [ordinal_mean_opinion(opinions, k)]
     share_series = [opinion_shares(opinions, k).tolist()]
     time_to_consensus = 0 if _reached(opinions, spec) else -1
 
@@ -147,6 +141,8 @@ def run_sparse(spec: ModelSpec, graph: Hypergraph, seed: int) -> RunResult:
         )
         bias = probability_bias(spec, step)
         if bias:
+            if k != 2:
+                raise ValueError("probability bias interventions require n_opinions=2")
             shifted = np.clip(node_probs[:, 1] + bias, 0.0, 1.0)
             node_probs = np.column_stack([1.0 - shifted, shifted])
         if zero_edges:
@@ -157,14 +153,16 @@ def run_sparse(spec: ModelSpec, graph: Hypergraph, seed: int) -> RunResult:
         new_opinions = opinions.copy()
         ready_idx = np.nonzero(ready)[0]
         if ready_idx.size:
-            new_opinions[ready_idx] = choose_opinions(spec, node_probs[ready_idx], decision_rng)
+            new_opinions[ready_idx] = choose_opinions(
+                spec, node_probs[ready_idx], decision_rng, opinions[ready_idx]
+            )
         changed = (new_opinions != before) | forced
         last_change[changed] = step
         opinions = new_opinions
 
         cascade_series.append(float(np.count_nonzero(changed)) / n_nodes)
         diversity_series.append(diversity(opinions))
-        mean_opinion_series.append(float(opinions.mean() / (k - 1)))
+        mean_opinion_series.append(ordinal_mean_opinion(opinions, k))
         share_series.append(opinion_shares(opinions, k).tolist())
         if time_to_consensus < 0 and _reached(opinions, spec):
             time_to_consensus = step
@@ -183,5 +181,4 @@ def run_sparse(spec: ModelSpec, graph: Hypergraph, seed: int) -> RunResult:
 
 
 def _reached(opinions: npt.NDArray[np.int64], spec: ModelSpec) -> bool:
-    counts = np.bincount(opinions, minlength=spec.n_opinions)
-    return bool(counts.max() / opinions.size >= spec.consensus_threshold)
+    return reached_consensus(opinions, spec.n_opinions, spec.consensus_threshold)

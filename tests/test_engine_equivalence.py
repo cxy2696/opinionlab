@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import numpy as np
+import pytest
+from pydantic import ValidationError
 from scipy.stats import ks_2samp
 
 from hnle.core.event import run_event
@@ -36,12 +38,66 @@ def test_unit_latency_distributions_are_equivalent() -> None:
     assert sparse_final == event_final
 
 
-def test_event_engine_supports_continuous_latency() -> None:
+@pytest.mark.parametrize("latency", (2, 5))
+def test_integer_latency_engines_are_equivalent(latency: int) -> None:
+    payload = _spec().model_dump()
+    payload["latency"] = {"dist": "const", "mu": latency}
+    spec = ModelSpec.model_validate(payload)
+    graph = random_hypergraph(50, 90, np.random.default_rng(17), spec.hyperedge)
+    seeds = replica_seeds(spec, 20)
+    for seed in seeds:
+        sparse = run_sparse(spec, graph, seed)
+        event = run_event(spec, graph, seed)
+        np.testing.assert_allclose(sparse.diversity_series, event.diversity_series, atol=0.0)
+        np.testing.assert_allclose(sparse.cascade_series, event.cascade_series, atol=0.0)
+        np.testing.assert_array_equal(sparse.opinions, event.opinions)
+        assert sparse.time_to_consensus == event.time_to_consensus
+
+
+@pytest.mark.parametrize("aggregation", ("mean", "max", "size_weighted"))
+def test_event_matches_sparse_for_every_aggregation(aggregation: str) -> None:
+    payload = _spec().model_dump()
+    payload["latency"] = {"dist": "const", "mu": 2}
+    payload["aggregation"] = aggregation
+    spec = ModelSpec.model_validate(payload)
+    graph = random_hypergraph(50, 90, np.random.default_rng(29), spec.hyperedge)
+    for seed in replica_seeds(spec, 10):
+        sparse = run_sparse(spec, graph, seed)
+        event = run_event(spec, graph, seed)
+        np.testing.assert_allclose(sparse.diversity_series, event.diversity_series, atol=1e-12)
+        np.testing.assert_allclose(sparse.cascade_series, event.cascade_series, atol=1e-12)
+        np.testing.assert_array_equal(sparse.opinions, event.opinions)
+
+
+def test_event_matches_sparse_with_custom_weights() -> None:
+    payload = _spec().model_dump()
+    payload["latency"] = {"dist": "const", "mu": 2}
+    payload["weights"] = {
+        "source": "custom",
+        "custom": {str(i): float((i % 4) + 1) for i in range(50)},
+    }
+    spec = ModelSpec.model_validate(payload)
+    graph = random_hypergraph(50, 90, np.random.default_rng(23), spec.hyperedge)
+    for seed in replica_seeds(spec, 10):
+        sparse = run_sparse(spec, graph, seed)
+        event = run_event(spec, graph, seed)
+        np.testing.assert_allclose(sparse.diversity_series, event.diversity_series, atol=1e-12)
+        np.testing.assert_allclose(sparse.cascade_series, event.cascade_series, atol=1e-12)
+        np.testing.assert_array_equal(sparse.opinions, event.opinions)
+
+
+def test_event_engine_rejects_continuous_latency() -> None:
     payload = _spec(LatencyQuantize.continuous).model_dump()
     payload["engine"] = "event_driven"
     payload["latency"] = {"dist": "exponential", "mu": 3, "quantize": "continuous"}
-    spec = ModelSpec.model_validate(payload)
-    graph = random_hypergraph(60, 120, np.random.default_rng(8), spec.hyperedge)
-    result = run_event(spec, graph, seed=8)
+    with pytest.raises(ValidationError):
+        ModelSpec.model_validate(payload)
+
+    # Continuous latency remains available through the CSR engine.
+    sparse_payload = dict(payload)
+    sparse_payload["engine"] = "sparse_vector"
+    sparse_spec = ModelSpec.model_validate(sparse_payload)
+    graph = random_hypergraph(60, 120, np.random.default_rng(8), sparse_spec.hyperedge)
+    result = run_sparse(sparse_spec, graph, seed=8)
     assert result.opinions.shape == (60,)
     assert np.isfinite(result.diversity_series).all()

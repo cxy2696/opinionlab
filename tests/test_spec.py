@@ -178,3 +178,36 @@ def test_all_enum_values_are_lower_snake_case() -> None:
         for member in enum_cls:
             assert re.fullmatch(r"[a-z][a-z0-9_]*", member.value), member
             assert member.value == member.value.lower()
+
+
+def test_event_engine_requires_integer_latency() -> None:
+    with pytest.raises(ValidationError):
+        ModelSpec(
+            engine="event_driven",
+            latency={"dist": "const", "mu": 1, "quantize": "continuous"},
+        )
+
+
+def test_binary_only_controls_require_two_stances() -> None:
+    with pytest.raises(ValidationError):
+        ModelSpec(
+            n_opinions=3,
+            shocks=[{"at_step": 1, "type": "flip_share", "magnitude": 0.1}],
+        )
+    # seed_opinion is defined for any K and should remain available.
+    spec = ModelSpec(
+        n_opinions=3,
+        interventions=[{"at_step": 1, "type": "seed_opinion", "magnitude": 0.1, "duration": 1}],
+    )
+    assert spec.n_opinions == 3
+
+
+def test_zscore_weight_normalization_is_rejected() -> None:
+    with pytest.raises(ValidationError):
+        ModelSpec(
+            weights={
+                "source": "custom",
+                "custom": {"0": 1.0},
+                "normalize": "zscore",
+            }
+        )

@@ -111,6 +111,7 @@
     let timeToConsensus = -1;
 
     for (let step = 1; step <= steps; step += 1) {
+      const before = opinions.slice();
       const oneShot = applyOneShot(params.intervention, opinions, step, rng);
       const bias = biasFor(params.intervention, step);
       const sums = new Float64Array(n);
@@ -126,7 +127,6 @@
         if (bias) p1 = Math.max(0, Math.min(1, p1 + bias));
         edge.forEach((node) => { sums[node] += p1; counts[node] += 1; });
       });
-      const before = opinions.slice();
       const next = opinions.slice();
       for (let node = 0; node < n; node += 1) {
         if (!counts[node]) continue;
@@ -159,11 +159,27 @@
       diversity,
       shares: shareSeries,
       cascade,
-      timeToConsensus: stableConsensus,
+      // First sweep at which the 80% majority appears (engine semantics),
+      // and the later onset of a majority that holds to the horizon.
+      timeToConsensus,
+      stableConsensus,
       absorbing: stableConsensus >= 0,
       finalDiversity: diversity[diversity.length - 1],
       finalShares: shareSeries[shareSeries.length - 1],
     };
+  }
+
+  // Two-sided 95% Student-t critical values for small replica counts; the
+  // normal value 1.96 is used once the table runs out (df >= 30).
+  function tCritical(df) {
+    const table = {
+      1: 12.706, 2: 4.303, 3: 3.182, 4: 2.776, 5: 2.571, 6: 2.447,
+      7: 2.365, 8: 2.306, 9: 2.262, 10: 2.228, 11: 2.201, 12: 2.179,
+      13: 2.160, 14: 2.145, 15: 2.131, 16: 2.120, 17: 2.110, 18: 2.101,
+      19: 2.093, 20: 2.086, 21: 2.080, 22: 2.074, 23: 2.069, 24: 2.064,
+      25: 2.060, 26: 2.056, 27: 2.052, 28: 2.048, 29: 2.045, 30: 2.042,
+    };
+    return table[df] || 1.96;
   }
 
   function percentile(values, p) {
@@ -195,7 +211,7 @@
       if (values.length < 2) return [mean(values), mean(values)];
       const mu = mean(values);
       const sd = Math.sqrt(values.reduce((acc, value) => acc + (value - mu) ** 2, 0) / (values.length - 1));
-      const half = 1.96 * sd / Math.sqrt(values.length);
+      const half = tCritical(values.length - 1) * sd / Math.sqrt(values.length);
       return [mu - half, mu + half];
     };
     const diversityMean = mean(finalDiversity);

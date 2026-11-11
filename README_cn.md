@@ -95,7 +95,7 @@ uv run hnle report --run-id <run_id> --runs-dir runs
 
 | 路径 | 一句话说明 |
 |---|---|
-| `packages/hnle/` | 可独立运行的仿真引擎：模型、超图、两种内核、指标、Monte Carlo、报告；不依赖数据库 |
+| `packages/hnle/` | 可独立运行的仿真引擎：模型、超图、两种内核（事件内核仅支持整数时延）、指标、Monte Carlo、报告；不依赖数据库 |
 | `apps/api/` | FastAPI 服务：登录/RBAC、配额、作业、连接器、合规、演示 API |
 | `apps/web/` | 本地演示前端源码：HTML/CSS/JS、3D 场景、粒子、星系；数据来自 API |
 | `site/` | GitHub Pages 站点：只保留站点专属文件，构建时从 `apps/web` 复制共享资源 |

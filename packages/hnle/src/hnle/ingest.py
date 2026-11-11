@@ -255,6 +255,7 @@ def ingest_dataframe(
         n_nodes=len(nodes),
         hyperedges=numeric_edges,
         initial_opinions=tuple(opinions_array) if opinions_array else None,
+        weights=tuple(float(value) for value in weights),
     )
     return IngestResult(graph=graph, weights=weights, stats=stats, warnings=warnings)
 

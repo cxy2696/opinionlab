@@ -55,7 +55,6 @@ class WeightSource(StrEnum):
 
 class WeightNormalize(StrEnum):
     max = "max"
-    zscore = "zscore"
     none = "none"
 
 
@@ -201,6 +200,42 @@ class ModelSpec(_Base):
     shocks: list[ShockSpec] = Field(default_factory=list)
     interventions: list[InterventionSpec] = Field(default_factory=list)
     metrics: list[MetricName] = Field(default_factory=lambda: list(MetricName))
+
+    @model_validator(mode="after")
+    def _check_engine_latency(self) -> Self:
+        """The event kernel is defined for integer latency steps only."""
+        if (
+            self.engine is Engine.event_driven
+            and self.latency.quantize is LatencyQuantize.continuous
+        ):
+            raise ValueError(
+                "engine=event_driven requires latency.quantize='integer_steps'; "
+                "use engine=sparse_vector for continuous latency"
+            )
+        return self
+
+    @model_validator(mode="after")
+    def _check_binary_only_controls(self) -> Self:
+        """Shocks and interventions that assume two stances require k = 2."""
+        binary_shocks = {ShockType.flip_share, ShockType.edge_boost}
+        binary_interventions = {
+            InterventionType.boost,
+            InterventionType.dampen,
+            InterventionType.debunk,
+            InterventionType.weight_shift,
+        }
+        if self.n_opinions == 2:
+            return self
+        bad_shocks = [s.type.value for s in self.shocks if s.type in binary_shocks]
+        bad_interventions = [
+            i.type.value for i in self.interventions if i.type in binary_interventions
+        ]
+        if bad_shocks or bad_interventions:
+            raise ValueError(
+                "binary-only shocks/interventions require n_opinions=2; "
+                f"got shocks={bad_shocks}, interventions={bad_interventions}"
+            )
+        return self
 
     def canonical_json(self) -> str:
         """Stable, key-sorted JSON used for hashing and equality checks."""

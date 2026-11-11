@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from collections.abc import Iterable
 from dataclasses import dataclass
+from math import comb
 
 import numpy as np
 import numpy.typing as npt
@@ -23,17 +24,40 @@ class Hypergraph:
     n_nodes: int
     hyperedges: tuple[tuple[int, ...], ...]
     initial_opinions: tuple[int, ...] | None = None
+    # Ingested influence weights. ``None`` means the graph carries no external
+    # weights and the engine falls back to the spec's weight source.
+    weights: tuple[float, ...] | None = None
 
     def __post_init__(self) -> None:
         if self.n_nodes <= 0:
             raise ValueError("graph.n_nodes: must be positive")
+        canonical: list[tuple[int, ...]] = []
+        seen: set[tuple[int, ...]] = set()
         for edge in self.hyperedges:
             if len(edge) < 2:
                 raise ValueError("graph.hyperedges: every hyperedge needs at least 2 nodes")
             if any(node < 0 or node >= self.n_nodes for node in edge):
                 raise ValueError("graph.hyperedges: node id out of range")
+            unique = tuple(sorted(set(edge)))
+            if len(unique) < 2:
+                raise ValueError(
+                    "graph.hyperedges: a hyperedge has fewer than 2 distinct nodes"
+                )
+            if unique in seen:
+                # Identical groups would otherwise be counted twice in every
+                # weighted opinion count.
+                continue
+            seen.add(unique)
+            canonical.append(unique)
+        object.__setattr__(self, "hyperedges", tuple(canonical))
         if self.initial_opinions is not None and len(self.initial_opinions) != self.n_nodes:
             raise ValueError("graph.initial_opinions: length must equal n_nodes")
+        if self.weights is not None:
+            if len(self.weights) != self.n_nodes:
+                raise ValueError("graph.weights: length must equal n_nodes")
+            values = np.asarray(self.weights, dtype=np.float64)
+            if not np.isfinite(values).all() or (values < 0.0).any():
+                raise ValueError("graph.weights: values must be finite and non-negative")
 
 
 def random_hypergraph(
@@ -49,11 +73,22 @@ def random_hypergraph(
             f"graph.n_nodes: {n_nodes} is smaller than hyperedge.min_size={spec.min_size}"
         )
     max_size = min(spec.max_size, n_nodes)
+    possible = sum(comb(n_nodes, size) for size in range(spec.min_size, max_size + 1))
+    if n_edges > possible:
+        raise ValueError(
+            f"graph.n_edges: {n_edges} distinct hyperedges requested, "
+            f"but only {possible} are possible for these bounds"
+        )
     edges: list[tuple[int, ...]] = []
-    for _ in range(n_edges):
+    seen: set[tuple[int, ...]] = set()
+    while len(edges) < n_edges:
         size = int(rng.integers(spec.min_size, max_size + 1))
         members = rng.choice(n_nodes, size=size, replace=False)
-        edges.append(tuple(sorted(int(node) for node in members)))
+        edge = tuple(sorted(int(node) for node in members))
+        if edge in seen:
+            continue
+        seen.add(edge)
+        edges.append(edge)
     return Hypergraph(n_nodes=n_nodes, hyperedges=tuple(edges))
 
 

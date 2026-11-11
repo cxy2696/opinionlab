@@ -101,7 +101,7 @@ uv run hnle report --run-id <run_id> --runs-dir runs
 
 | Path | What it is |
 |---|---|
-| `packages/hnle/` | Standalone engine: model, hypergraph, two kernels, metrics, Monte Carlo, reports; no database |
+| `packages/hnle/` | Standalone engine: model, hypergraph, two kernels (event kernel: integer latency), metrics, Monte Carlo, reports; no database |
 | `apps/api/` | FastAPI service: auth/RBAC, quotas, jobs, connectors, compliance, demo API |
 | `apps/web/` | Source for the local demo UI: HTML/CSS/JS, 3D scenes, particles, galaxy |
 | `site/` | GitHub Pages site; only site-specific files, shared assets copied at build time |
