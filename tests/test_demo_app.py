@@ -81,6 +81,12 @@ def test_demo_simulation_is_reproducible() -> None:
     assert len(left["series"]["shares"][0]) == 2
     assert len(left["series"]["bands"]["p50"]) == 41
     assert {"verdict_zh", "verdict_en", "text_zh", "text_en"} <= set(left["summary_text"])
+    decision = left["decision"]
+    assert {"decision_zh", "decision_en", "window_zh", "window_en"} <= set(decision)
+    assert {"takeoff_step", "peak_step", "consensus_step", "intervention_step"} <= set(
+        decision["timing"]
+    )
+    assert decision["followups_zh"]
     assert left["disclaimer_key"] == "simulation_not_prediction"
 
 
@@ -98,6 +104,8 @@ def test_demo_report_contains_disclaimer_and_ci() -> None:
     assert "非对真实舆情的预测" in html
     assert "not a prediction" in html
     assert "95% CI" in html
+    assert "决策提示" in html
+    assert "建议后续" in html
     assert "echarts" in html.lower()
 
 

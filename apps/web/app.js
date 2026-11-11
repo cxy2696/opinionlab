@@ -106,6 +106,17 @@ function sliceUpto(values, index) {
 }
 
 function renderCharts(data, upto) {
+  const decision = data.decision || {};
+  const timing = decision.timing || {};
+  const cascadeMarkers = [
+    timing.takeoff_step
+      ? { xAxis: timing.takeoff_step, label: { formatter: "起势", position: "insideEndTop", rotate: 0 } }
+      : null,
+    timing.peak_step
+      ? { xAxis: timing.peak_step, label: { formatter: "峰值", position: "insideEndTop", rotate: 0 } }
+      : null,
+  ].filter(Boolean);
+
   const series = data.series;
   const index = upto === undefined ? series.steps.length - 1 : upto;
   const steps = series.steps.slice(0, index + 1);
@@ -163,15 +174,39 @@ function renderCharts(data, upto) {
   charts.cascade.setOption({
     animationDurationUpdate: 60,
     tooltip: {},
-    grid: { left: 44, right: 14, top: 18, bottom: 26 },
+    grid: { left: 44, right: 14, top: 30, bottom: 26 },
     xAxis: { type: "category", data: steps },
     yAxis: { type: "value" },
     series: [{
       type: "bar",
       data: sliceUpto(series.cascade, index),
       itemStyle: { color: "#dd6b20", opacity: 0.75 },
+      markLine: cascadeMarkers.length ? { symbol: "none", data: cascadeMarkers } : undefined,
     }],
   });
+}
+
+function renderDecision(decision) {
+  const panel = $("decision");
+  if (!decision) { panel.hidden = true; return; }
+  panel.hidden = false;
+  $("decisionText").textContent = `${decision.decision_zh} / ${decision.decision_en}`;
+  const timing = decision.timing || {};
+  const labels = [
+    ["takeoff_step", "起势 / take-off"],
+    ["peak_step", "峰值 / peak"],
+    ["consensus_step", "多数 / majority"],
+    ["intervention_step", "干预 / intervention"],
+  ];
+  $("timing").innerHTML = labels
+    .filter(([key]) => timing[key] !== null && timing[key] !== undefined)
+    .map(([key, label]) => `<span class="chip">${label} <b>step ${timing[key]}</b></span>`)
+    .join("");
+  $("window").innerHTML = `${decision.window_zh}<br><span class="muted">${decision.window_en}</span>`;
+  $("followups").innerHTML = decision.followups_zh
+    .map((zh, index) => `<li>${zh}<br><span class="muted">${decision.followups_en[index] || ""}</span></li>`)
+    .join("");
+  $("caveat").textContent = `${decision.caveat_zh} ${decision.caveat_en}`;
 }
 
 function render(data) {
@@ -183,6 +218,7 @@ function render(data) {
   $("verdict").className = data.summary.absorbing ? "verdict good" : "verdict";
   $("summary").innerHTML = `${summary.text_zh}<br><span class="muted">${summary.text_en}</span>`;
   renderMetrics(data.metrics);
+  renderDecision(data.decision);
   renderCharts(data);
   $("scrub").disabled = false;
   $("scrub").max = String(data.series.steps.length - 1);

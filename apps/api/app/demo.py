@@ -17,6 +17,7 @@ from pydantic import BaseModel, Field
 
 from app.errors import ApiError
 from app.settings import settings
+from hnle.decision import build_decision_brief
 from hnle.io.export import series_frame
 from hnle.io.report import DISCLAIMERS, echarts_bundle, render_report
 from hnle.mc import run_monte_carlo
@@ -183,6 +184,15 @@ async def demo_simulate(request: DemoRequest) -> dict[str, Any]:
     summary = summarize(result, spec, graph.hyperedges).to_dict()
     frame = series_frame(result)
     narrative = _summary(result, summary, spec)
+    decision = build_decision_brief(
+        template.key,
+        template.name_zh,
+        template.name_en,
+        spec,
+        result,
+        repeats=spec.repeats,
+        absorbing=float(summary["absorbing"]) >= 0.5,
+    ).to_dict()
     return {
         "data": {
             "template": {
@@ -208,6 +218,7 @@ async def demo_simulate(request: DemoRequest) -> dict[str, Any]:
                 "bands": _bands(aggregate),
             },
             "summary_text": narrative,
+            "decision": decision,
             "opinion_count": spec.n_opinions,
             "disclaimer": DISCLAIMERS["simulation_not_prediction"],
             "disclaimer_key": "simulation_not_prediction",
@@ -221,6 +232,15 @@ async def demo_report(request: DemoRequest) -> HTMLResponse:
     spec, graph, aggregate, result = _run(template, request)
     summary = summarize(result, spec, graph.hyperedges).to_dict()
     frame = series_frame(result)
+    decision = build_decision_brief(
+        template.key,
+        template.name_zh,
+        template.name_en,
+        spec,
+        result,
+        repeats=spec.repeats,
+        absorbing=float(summary["absorbing"]) >= 0.5,
+    ).to_dict()
     manifest = {
         "run_id": f"demo-{spec.config_sha256()[:12]}-{spec.seed}",
         "mode": "public-demo",
@@ -233,6 +253,7 @@ async def demo_report(request: DemoRequest) -> HTMLResponse:
         frame=frame,
         manifest=manifest,
         aggregate=aggregate,
+        decision=decision,
         narrative={
             "interpretation_zh": template.interpretation_zh,
             "interpretation_en": template.interpretation_en,

@@ -86,6 +86,7 @@ def render_report(
     narrative: dict[str, str] | None = None,
     nonce: str | None = None,
     single_replica: bool | None = None,
+    decision: dict[str, Any] | None = None,
 ) -> str:
     if not disclaimer_key or disclaimer_key not in DISCLAIMERS:
         raise ReportError(
@@ -136,6 +137,41 @@ def render_report(
             )
 
     params = _table(_flatten(spec.model_dump(mode="json", by_alias=True)))
+
+    decision_html = ""
+    if decision:
+        timing = decision.get("timing", {})
+        def _cell(value: object) -> str:
+            return "—" if value is None else str(value)
+
+        rows = "".join(
+            f"<tr><th>{label}</th><td>{_cell(timing.get(key))}</td></tr>"
+            for key, label in (
+                ("takeoff_step", "级联起势 / Cascade take-off"),
+                ("peak_step", "级联峰值 / Cascade peak"),
+                ("consensus_step", "达到多数 / Majority"),
+                ("intervention_step", "本次干预 / Intervention"),
+            )
+        )
+        followups = "".join(
+            f"<li>{html.escape(zh)}<br><span class='en'>{html.escape(en)}</span></li>"
+            for zh, en in zip(
+                decision.get("followups_zh", []), decision.get("followups_en", []), strict=False
+            )
+        )
+        decision_html = f"""
+<h2>决策提示 / Decision brief</h2>
+<p><strong>这项推演帮助判断 / What it informs:</strong>
+ {html.escape(decision.get("decision_zh", ""))} / {html.escape(decision.get("decision_en", ""))}</p>
+<table>{rows}</table>
+<p><strong>时机窗口 / Window:</strong> {html.escape(decision.get("window_zh", ""))}<br>
+<span class="en">{html.escape(decision.get("window_en", ""))}</span></p>
+<h3>建议后续 / Next steps</h3>
+<ul>{followups}</ul>
+<p class="note">{html.escape(decision.get("caveat_zh", ""))}<br>
+{html.escape(decision.get("caveat_en", ""))}</p>
+"""
+
     manifest_json = html.escape(json.dumps(manifest, ensure_ascii=False, indent=2))
     series = {
         "steps": frame["step"].tolist(),
@@ -169,6 +205,8 @@ td, th {{ border-bottom: 1px solid #e4e7eb; padding: .35rem .6rem; text-align: l
 code {{ background: #f5f7fa; padding: .1rem .3rem; }}
 .chart {{ width: 100%; max-width: 900px; height: 320px; }}
 details pre {{ background: #f5f7fa; padding: .8rem; overflow-x: auto; max-height: 320px; }}
+.en {{ color: #627d98; font-size: .9em; }}
+.note {{ background: #f5f7fa; padding: .6rem .8rem; font-size: .85rem; color: #486581; }}
 .watermark {{ position: fixed; inset: 0; display: flex; align-items: center;
   justify-content: center; pointer-events: none; font-size: 3rem; color: rgba(200,0,0,.12);
   transform: rotate(-25deg); font-weight: 700; text-align: center; }}
@@ -180,6 +218,7 @@ details pre {{ background: #f5f7fa; padding: .8rem; overflow-x: auto; max-height
 {sample_badge}
 <p>run_id: <code>{html.escape(run_id)}</code> · engine: {spec.engine} · q={spec.q}
  · seed={spec.seed} · repeats={spec.repeats}</p>
+{decision_html}
 <h2>多样性曲线 / Diversity series</h2>
 <div id="diversityChart" class="chart"></div>
 <h2>蒙特卡洛 95% CI / Monte-Carlo CI</h2>
