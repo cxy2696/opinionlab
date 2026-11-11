@@ -49,5 +49,6 @@ def test_every_markdown_has_chinese_and_english_editions() -> None:
         if path.name == "README.md":
             continue
         assert path.name.endswith(("_cn.md", "_en.md")), f"unpaired doc: {path}"
-        counterpart = path.with_name(path.name[:-6] + ("_en.md" if path.name.endswith("_cn.md") else "_cn.md"))
+        suffix = "_en.md" if path.name.endswith("_cn.md") else "_cn.md"
+        counterpart = path.with_name(path.name[:-6] + suffix)
         assert counterpart.exists(), f"missing {counterpart}"
