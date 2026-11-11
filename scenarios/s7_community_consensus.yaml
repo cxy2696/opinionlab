@@ -1,0 +1,34 @@
+key: S7
+name_zh: 社区议事共识
+name_en: Community consensus
+question_zh: 一次社区议事中，适度引导能否让分歧收敛，而不是压成沉默的多数？
+question_en: Can light-touch facilitation help a community discussion converge without silencing the minority?
+data_shape_zh: 社区论坛或议事群：成员-议题标签-发言/互动；按议题聚合即可，无需个人画像。
+data_shape_en: 'Community forum or working group: member–topic tag–activity; aggregate by topic, no profiling needed.'
+interpretation_zh: 收敛步变短且多样性没有塌到 0，说明讨论在形成共识而非被压制。
+interpretation_en: A shorter consensus step without diversity collapsing to zero suggests consensus rather than suppression.
+assumptions_zh: 假设成员对议题的初始态度可由发帖/投票粗略映射。
+assumptions_en: Assumes initial stances can be roughly mapped from posts or votes.
+limitations_zh: 不建模线下关系、议程设置与主持人权力差异。
+limitations_en: Does not model offline ties, agenda-setting or facilitator power differences.
+feature_flag: null
+enabled_by_default: true
+spec:
+  n_steps: 90
+  q: 1.3
+  latency:
+    dist: normal
+    mu: 4
+    sigma: 1.5
+  repeats: 3
+  interventions:
+  - at_step: 10
+    type: seed_opinion
+    target:
+      opinion: '1'
+    magnitude: 0.15
+    duration: 1
+graph:
+  n_nodes: 180
+  n_edges: 450
+  seed: 31

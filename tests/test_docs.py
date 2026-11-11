@@ -35,5 +35,6 @@ def test_changelog_records_behaviour_changes() -> None:
 def test_readme_points_at_docs() -> None:
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
     for doc in ("ARCHITECTURE.md", "MATH_MODEL.md", "MODEL_CARD.md", "COMPLIANCE.md",
-                "RUNBOOK.md", "capacity-report.md", "CHANGELOG.md"):
+                "RUNBOOK.md", "capacity-report.md", "DEMO.md", "USE_CASES.md",
+                "CHANGELOG.md"):
         assert doc in readme

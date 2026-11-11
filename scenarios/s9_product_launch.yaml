@@ -1,0 +1,36 @@
+key: S9
+name_zh: 新品发布口碑
+name_en: Product launch
+question_zh: 新品发布时，创作者与真实用户的不同配比，会怎样影响口碑扩散与长期多样性？
+question_en: At launch, how does the mix of creators and real users affect word-of-mouth spread and long-run diversity?
+data_shape_zh: 品牌/产品话题：用户-标签-互动；可标注创作者与普通用户权重。
+data_shape_en: 'Brand or product topics: user–hashtag–engagement, with creator vs regular-user weights.'
+interpretation_zh: 早期级联大不代表长期口碑好；需要同时看后期多样性与负向占比。
+interpretation_en: A large early cascade is not the same as durable word of mouth; watch late diversity and negative share.
+assumptions_zh: 假设互动量可近似影响力，且投放策略在窗口内不变。
+assumptions_en: Assumes engagement approximates influence and the media plan is stable in the window.
+limitations_zh: 不建模价格、竞品与真实销量反馈。
+limitations_en: Does not model price, competitors or actual sales feedback.
+feature_flag: null
+enabled_by_default: true
+spec:
+  n_steps: 90
+  q: 1.8
+  latency:
+    dist: exponential
+    mu: 2
+  repeats: 3
+  weights:
+    source: engagement
+    normalize: max
+  interventions:
+  - at_step: 8
+    type: boost
+    target:
+      opinion: '1'
+    magnitude: 0.3
+    duration: 8
+graph:
+  n_nodes: 260
+  n_edges: 700
+  seed: 33

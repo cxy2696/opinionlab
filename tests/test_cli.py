@@ -59,7 +59,7 @@ def test_simulate_help_lists_options_and_defaults() -> None:
         "--out-dir",
     ):
         assert option in plain
-    assert "scenarios/cn_rumor_debon_timing.yaml" in plain
+    assert "scenarios/s2_rumor_debunk_timing.yaml" in plain
 
 
 def test_simulate_runs_and_exports(scenario: Path, tmp_path: Path) -> None:
@@ -208,7 +208,7 @@ def test_repo_scenario_and_report_roundtrip(tmp_path: Path) -> None:
         [
             "simulate",
             "--spec",
-            "scenarios/cn_rumor_debon_timing.yaml",
+            "scenarios/s2_rumor_debunk_timing.yaml",
             "--repeats",
             "1",
             "--out-dir",

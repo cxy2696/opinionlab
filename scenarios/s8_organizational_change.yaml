@@ -1,0 +1,34 @@
+key: S8
+name_zh: 组织变革沟通
+name_en: Organizational change
+question_zh: 变革消息分阶段释放时，员工情绪会在哪一步反弹，沟通节奏能否降低对立？
+question_en: When change news is released in stages, where does sentiment rebound and can cadence reduce polarisation?
+data_shape_zh: 内部社区或匿名问卷：员工-部门/话题-互动；匿名到部门粒度。
+data_shape_en: 'Internal community or anonymous survey: employee–department/topic–activity, anonymised to department level.'
+interpretation_zh: 若降温和干预后级联 P99 下降、多样性保持中等，说明沟通留住了讨论空间。
+interpretation_en: Lower cascade P99 with moderate diversity after damping suggests the conversation remains open.
+assumptions_zh: 假设部门内互动强度相近，正式层级影响被简化。
+assumptions_en: Assumes comparable intra-department interaction and simplifies formal hierarchy.
+limitations_zh: 不包含真实人事决策、离职与外部就业市场影响。
+limitations_en: Excludes real HR decisions, attrition and labour-market effects.
+feature_flag: null
+enabled_by_default: true
+spec:
+  n_steps: 100
+  q: 1.7
+  latency:
+    dist: normal
+    mu: 5
+    sigma: 2
+  repeats: 3
+  interventions:
+  - at_step: 20
+    type: dampen
+    target:
+      opinion: '1'
+    magnitude: 0.25
+    duration: 15
+graph:
+  n_nodes: 220
+  n_edges: 550
+  seed: 32

@@ -19,7 +19,7 @@ The demo only needs the engine and static assets; it does not require Postgres/R
 
 ## 功能 / Features
 
-- 12 个默认场景模板（S1–S6、G1–G4、G6、G7），显示中英双语“提问”
+- 15 个默认场景模板（S1–S9、G1–G4、G6、G7），显示中英双语“提问”
 - 可调 `q`、平均时延、步数、副本数、随机种子
 - 实时展示多样性曲线
 - 指标卡片带 95% 置信区间（多样性、级联 P99、收敛步、吸收态）

@@ -33,7 +33,7 @@ from hnle.spec import ModelSpec
 
 app = typer.Typer(add_completion=False, no_args_is_help=True)
 
-DEFAULT_SPEC = Path("scenarios/cn_rumor_debon_timing.yaml")
+DEFAULT_SPEC = Path("scenarios/s2_rumor_debunk_timing.yaml")
 
 
 @app.callback()

@@ -11,10 +11,13 @@ from hnle.spec import ModelSpec
 from hnle.templates import iter_templates, load_template
 
 SCENARIOS = Path(__file__).parents[1] / "scenarios"
-ENABLED_KEYS = {"S1", "S2", "S3", "S4", "S5", "S6", "G1", "G2", "G3", "G4", "G6", "G7"}
+ENABLED_KEYS = {
+    "S1", "S2", "S3", "S4", "S5", "S6", "S7", "S8", "S9",
+    "G1", "G2", "G3", "G4", "G6", "G7",
+}
 
 
-def test_twelve_enabled_templates_plus_gated_election() -> None:
+def test_enabled_templates_plus_gated_election() -> None:
     templates = iter_templates(SCENARIOS)
     enabled = {template.key for template in templates if template.is_enabled()}
     assert enabled >= ENABLED_KEYS
