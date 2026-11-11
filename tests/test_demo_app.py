@@ -40,6 +40,7 @@ def test_demo_page_is_self_contained() -> None:
     assert response.status_code == 200
     html = response.text
     assert "OpinionLab" in html
+    assert 'lang="en"' in html
     assert "/api/v1/demo/echarts.js" in html
     assert "/api/v1/demo/static/app.js" in html
     assert "/api/v1/demo/static/style.css" in html

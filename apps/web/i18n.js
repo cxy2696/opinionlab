@@ -118,7 +118,7 @@
     if (fromUrl === "en" || fromUrl === "zh") return fromUrl;
     const saved = localStorage.getItem("opinionlab-lang");
     if (saved === "en" || saved === "zh") return saved;
-    return (navigator.language || "zh").toLowerCase().startsWith("en") ? "en" : "zh";
+    return "en";
   }
 
   const api = {

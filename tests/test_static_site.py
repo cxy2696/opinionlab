@@ -19,6 +19,7 @@ def test_static_site_sources_exist() -> None:
         assert (SITE / name).exists(), name
     html = (SITE / "index.html").read_text(encoding="utf-8")
     assert "OpinionLab" in html
+    assert 'lang="en"' in html
     assert "非对真实舆情的预测" in html
     assert "./sim.js" in html
     assert "这些参数到底在做什么" in html
