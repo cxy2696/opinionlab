@@ -42,6 +42,7 @@ make demo        # http://127.0.0.1:8000
 - 15 个中英双语场景模板 / 15 bilingual templates
 - 3D 工业风追踪视图，中英一键切换 / 3D industrial tracker with EN/中文 switch
 - 每个参数都有“是什么 / 为什么调”的解释 / every parameter explained in plain language
+- 3D 观测阵列：观点地形、级联柱阵、立场粒子云 / 3D terrain, cascade bars and stance cloud
 - 决策提示、关键时点与后续验证 / decision brief, timing nodes and next checks
 - 可选本地 Ollama 辅助解读（默认关闭，只解释不结论）/ optional local Ollama narration (off by default, assistive only)
 

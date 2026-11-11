@@ -2,6 +2,8 @@
 
 ![OpinionLab demo](demo.png)
 
+![3D 观测阵列](telemetry-3d.png)
+
 OpinionLab 自带一个无需登录的浏览器演示页，用来快速体验“选场景 → 调参数 → 看演化 → 下载报告”的完整产品流程。
 
 OpinionLab ships a public, no-login browser demo covering the full flow: choose a scenario, tune parameters, watch opinion dynamics, download a report.
@@ -33,6 +35,7 @@ The demo only needs the engine and static assets; it does not require Postgres/R
 - **3D 工业追踪**：页面顶部是持续旋转的 3D 舆情网络，节点颜色随立场占比变化，带目标锁定框、扫描线、节点/步数/分歧遥测
 - **中英切换**：右上角一键切换，界面、模板、图表和结论文案同步切换
 - **数形结合**：多样性曲线（本次运行 + 跨副本 10–90% 区间 + 中位数）、观点占比堆叠图、每步级联柱状图
+- **3D 观测阵列**：点阵观点地形、带高度的级联柱阵、旋转的立场粒子云
 - **粒子演示**：三张图分别有沿曲线流动、在占比区内漂浮、从级联峰值迸发的粒子
 - **系统操作舱**：顶部状态条、编号面板、实时 UTC 时钟与遥测，桌面/平板/手机自适应
 - 一句话结论：自动写出“多样性从多少到多少、约第几步达到多数、级联峰值在第几步”

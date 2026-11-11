@@ -19,6 +19,13 @@ const charts = {
 };
 if (window.TrackGalaxy && $("galaxyScene")) TrackGalaxy.create($("galaxyScene"));
 
+const fields = [];
+if (window.TrackField) {
+  [["fieldWave", "wave"], ["fieldBars", "bars"], ["fieldCloud", "cloud"]].forEach(([id, mode]) => {
+    if ($(id)) fields.push(TrackField.create($(id), mode));
+  });
+}
+
 const particleFields = [];
 function addParticles(id, chart, mode) {
   if (window.TrackParticles && $(id)) particleFields.push(TrackParticles.create($(id), chart, mode));
@@ -279,6 +286,11 @@ function renderCharts(data, upto) {
     particleFields[0].setData(series.diversity.slice(0, index + 1));
     particleFields[1].setData(series.shares.slice(0, index + 1));
     particleFields[2].setData(series.cascade.slice(0, index + 1));
+  }
+  if (fields.length === 3) {
+    const payload = { diversity: series.diversity.slice(0, index + 1),
+      cascade: series.cascade.slice(0, index + 1), shares: series.shares.slice(0, index + 1) };
+    fields.forEach((field) => field.setData(payload));
   }
 }
 

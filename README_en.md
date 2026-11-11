@@ -14,6 +14,8 @@ single numbers.
 
 ![OpinionLab demo](docs/demo.png)
 
+![3D telemetry array](docs/telemetry-3d.png)
+
 ## The problem
 
 A message goes out. Some people share it immediately; others react two days later. Small groups
@@ -33,6 +35,7 @@ number.
 - **Teaching and research:** show how conformity `q` changes consensus; reproduce the classical voter
   limit.
 
+A **3D telemetry array** adds a dotted opinion terrain, a cascade bar field and a rotating stance cloud.
 Optional **local Ollama narration** restates a run in plain language and suggests the next experiment.
 It is disabled by default, clearly labelled assistive, and never computes metrics or decisions.
 

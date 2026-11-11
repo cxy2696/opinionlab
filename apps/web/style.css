@@ -402,3 +402,14 @@ body { overflow-x: hidden; }
            border-left: 2px solid var(--amber); padding-left: 10px; }
 .ai-text:empty { display: none; }
 #aiRun { margin-top: 2px; }
+
+/* 3D telemetry fields */
+.field-deck { padding: 14px 16px 16px; }
+.field-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 8px; }
+.field-card { border: 1px solid var(--line); background: rgba(3, 9, 14, .62); padding: 8px 9px; }
+.field-card h4 { margin: 0 0 2px; font: 700 9.5px/1.4 var(--mono); letter-spacing: .08em; color: #bfe8f5; text-transform: uppercase; }
+.field-card p { margin: 4px 0 0; font-size: 9.5px; line-height: 1.5; color: #6f97ac; }
+.field-wrap { position: relative; width: 100%; height: 150px; }
+.field-wrap canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+@media (max-width: 900px) { .field-grid { grid-template-columns: 1fr 1fr; } .field-card:last-child { grid-column: 1 / -1; } }
+@media (max-width: 560px) { .field-grid { grid-template-columns: 1fr; } .field-card:last-child { grid-column: auto; } .field-wrap { height: 140px; } }

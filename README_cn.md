@@ -15,6 +15,8 @@ A sandbox for exploring how opinions spread through groups — reproducible, wit
 
 ![OpinionLab demo](docs/demo.png)
 
+![3D 观测阵列](docs/telemetry-3d.png)
+
 ---
 
 ## 中文
@@ -39,7 +41,8 @@ OpinionLab 让你在发之前，先在沙盘里试：如果从众更强一点、
 
 **在线试用**（无需安装）：打开 https://cxy2696.github.io/opinionlab/
 
-可选 **Ollama 本地辅助解读**：默认关闭，只把结果翻译成人话并建议下一步推演，不计算指标、不替代结论。界面采用 3D 工业追踪风格：旋转的舆情网络、目标锁定框、遥测与扫描线；右上角可一键切换中/英。每个参数都有“是什么/为什么调”的说明、悬停提示和一键预置（快速看 / 稳健估计 / 高从众 / 慢反应），不用先读文档。
+- **3D 观测阵列**：观点地形（点阵波面）、级联柱阵、立场粒子云，三块全动态 3D 视图
+- 可选 **Ollama 本地辅助解读**：默认关闭，只把结果翻译成人话并建议下一步推演，不计算指标、不替代结论。界面采用 3D 工业追踪风格：旋转的舆情网络、目标锁定框、遥测与扫描线；右上角可一键切换中/英。每个参数都有“是什么/为什么调”的说明、悬停提示和一键预置（快速看 / 稳健估计 / 高从众 / 慢反应），不用先读文档。
 
 **本地运行**（完整服务）：
 
@@ -147,6 +150,8 @@ OpinionLab turns a group-opinion question into a reproducible experiment with un
 **在线试用 / Live demo:** https://cxy2696.github.io/opinionlab/
 
 ![OpinionLab demo](docs/demo.png)
+
+![3D 观测阵列](docs/telemetry-3d.png)
 
 ### What it is for
 

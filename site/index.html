@@ -10,6 +10,7 @@
 <script defer src="./scene.js"></script>
 <script defer src="./sim.js"></script>
 <script defer src="./galaxy.js"></script>
+<script defer src="./field3d.js"></script>
 <script defer src="./particles.js"></script>
 <script defer src="./app.js"></script>
 </head>
@@ -182,6 +183,30 @@
         <ul id="followups"></ul>
       </div>
       <p id="caveat" class="note"></p>
+    </section>
+
+    <section id="fieldDeck" class="card field-deck">
+      <div class="section-head">
+        <h3 data-i18n="fieldTitle">3D 观测阵列</h3>
+        <span class="tag">HOLOGRAPHIC TELEMETRY</span>
+      </div>
+      <div class="field-grid">
+        <div class="field-card">
+          <h4 data-i18n="fieldWave">观点地形</h4>
+          <div class="field-wrap"><canvas id="fieldWave" aria-hidden="true"></canvas></div>
+          <p data-i18n="fieldWaveDesc">高度 = 多样性；波峰是分歧最大的时刻。</p>
+        </div>
+        <div class="field-card">
+          <h4 data-i18n="fieldBars">级联柱阵</h4>
+          <div class="field-wrap"><canvas id="fieldBars" aria-hidden="true"></canvas></div>
+          <p data-i18n="fieldBarsDesc">柱高 = 该步改变立场的人数比例。</p>
+        </div>
+        <div class="field-card">
+          <h4 data-i18n="fieldCloud">立场粒子云</h4>
+          <div class="field-wrap"><canvas id="fieldCloud" aria-hidden="true"></canvas></div>
+          <p data-i18n="fieldCloudDesc">颜色比例 = 当前双方占比，旋转观察。</p>
+        </div>
+      </div>
     </section>
 
     <section class="card ai-card">
