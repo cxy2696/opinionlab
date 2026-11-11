@@ -6,37 +6,53 @@
 <title>OpinionLab · 情景推演沙盘 / Scenario sandbox</title>
 <link rel="stylesheet" href="/api/v1/demo/static/style.css">
 <script src="/api/v1/demo/echarts.js"></script>
+<script defer src="/api/v1/demo/static/i18n.js"></script>
+<script defer src="/api/v1/demo/static/scene.js"></script>
 <script defer src="/api/v1/demo/static/app.js"></script>
 </head>
 <body>
 <header class="hero">
   <div class="hero-copy">
-    <span class="eyebrow">OPINION DYNAMICS · WHAT-IF SANDBOX</span>
-    <h1>OpinionLab · 情景推演沙盘</h1>
-    <p class="lede">先问“如果这样，会怎样”，再看数字和图形。<br>
-      一个可以反复试、能看到误差范围的群体观点沙盘。</p>
+    <span class="eyebrow">INDUSTRIAL OPINION TRACKER // HNL-VM</span>
+    <h1>OpinionLab <span data-i18n="heroTitle">情景推演沙盘</span></h1>
+    <p class="lede" data-i18n="lede">把一群人会怎么想，变成一套可以反复试、能看到误差范围的追踪系统。</p>
     <div class="hero-badges">
-      <span>可复现</span><span>95% 置信区间</span><span>只看群体统计</span>
+      <span><i class="led"></i> <span data-i18n="badgeTracking">追踪在线</span></span>
+      <span data-i18n="badgeCi">95% 置信区间</span><span data-i18n="badgeAggregate">仅群体统计</span>
     </div>
   </div>
-  <div class="hero-glow" aria-hidden="true"></div>
+  <button id="langToggle" class="lang-toggle" type="button" aria-label="Switch language">EN</button>
+  <div class="track-panel">
+    <div class="track-head">
+      <span class="led"></span> <span data-i18n="trackingLabel">实时追踪</span>
+      <span id="trackStatus" class="track-status" data-i18n="trackStandby">待机</span>
+    </div>
+    <canvas id="trackScene" aria-label="3D opinion network tracking"></canvas>
+    <div class="track-scan"></div>
+    <div class="track-telemetry">
+      <div><span>NODES</span><b id="trackNodes">—</b></div>
+      <div><span>STEP</span><b id="trackStep">000</b></div>
+      <div><span>DIVERGENCE</span><b id="trackDiv">0.00</b></div>
+    </div>
+    <div class="track-note" data-i18n="trackNote">模拟信号 / 非真实实时数据</div>
+  </div>
 </header>
 
 <main>
   <aside class="card controls">
     <div class="banner">
-      <strong>先看边界</strong>
-      本结果为给定假设下的情景推演，非对真实舆情的预测。
-      <span>Scenario simulation, not a prediction.</span>
+      <strong data-i18n="bannerStrong">先看边界</strong>
+      <span class="banner-main" data-i18n="bannerText">本结果为给定假设下的情景推演，非对真实舆情的预测。</span>
+      <span data-i18n="bannerSub">仅用于方向性讨论。</span>
     </div>
 
     <div class="label-row">
-      <label for="template">场景模板 / Scenario</label>
+      <label for="template" data-i18n="scenario">场景模板</label>
     </div>
     <select id="template"></select>
     <div id="question" class="question"></div>
 
-    <div class="section-title">调参 / Knobs</div>
+    <div class="section-title" data-i18n="knobs">调参</div>
 
     <div class="label-row">
       <label for="q">从众强度 <code>q</code> <span id="qVal" class="pill">1.6</span></label>
@@ -44,65 +60,73 @@
         data-tip="越大越容易跟随所在群体的多数；q=1 接近经典 Voter，q>2 会更快压平分歧。">?</button>
     </div>
     <input id="q" type="range" min="0.5" max="3" step="0.1" value="1.6">
-    <div class="range-labels"><span>0.5 温和</span><span>1.6</span><span>3.0 强从众</span></div>
-    <p class="hint">为什么调它：判断讨论是自然收敛，还是被从众压力“压”成单一声音。</p>
+    <div class="range-labels"><span data-i18n="qLow">温和</span><span>1.6</span><span data-i18n="qHigh">强从众</span></div>
+    <p class="hint" data-i18n="qHint">为什么调它：判断讨论是自然收敛，还是被从众压力“压”成单一声音。</p>
 
     <div class="row">
       <div>
         <div class="label-row">
-          <label for="mu">平均时延 / Latency</label>
-          <button class="help" type="button" aria-label="时延说明"
+          <label for="mu" data-i18n="latencyLabel">平均时延</label>
+          <button class="help" type="button" aria-label="latency help"
+            data-tip-zh="每个人平均隔多久重新考虑一次立场。时延越长，级联拖得越久，峰值越晚。"
+            data-tip-en="How often people reconsider. Longer latency drags the cascade and pushes the peak later."
             data-tip="每个人平均隔多久重新考虑一次立场。时延越长，级联拖得越久，峰值越晚。">?</button>
         </div>
         <input id="mu" type="number" min="1" max="60" step="1" value="3">
-        <p class="hint">反应越慢，窗口越靠后。</p>
+        <p class="hint" data-i18n="latencyHint">反应越慢，窗口越靠后。</p>
       </div>
       <div>
         <div class="label-row">
-          <label for="steps">观察步数 / Steps</label>
-          <button class="help" type="button" aria-label="步数说明"
+          <label for="steps" data-i18n="stepsLabel">观察步数</label>
+          <button class="help" type="button" aria-label="steps help"
+            data-tip-zh="模拟推进多少轮。太短可能还没收敛；太长只是让尾部更完整。"
+            data-tip-en="How many rounds to advance. Too short can look unconverged; longer just completes the tail."
             data-tip="模拟推进多少轮。太短可能还没收敛；太长只是让尾部更完整。">?</button>
         </div>
         <input id="steps" type="number" min="20" max="200" step="10" value="100">
-        <p class="hint">看多远；建议覆盖峰值后。</p>
+        <p class="hint" data-i18n="stepsHint">看多远；建议覆盖峰值后。</p>
       </div>
     </div>
 
     <div class="row">
       <div>
         <div class="label-row">
-          <label for="repeats">副本数 / Replicas</label>
-          <button class="help" type="button" aria-label="副本说明"
+          <label for="repeats" data-i18n="repeatsLabel">副本数</label>
+          <button class="help" type="button" aria-label="replicas help"
+            data-tip-zh="同一组参数独立跑多少次。副本越多，置信区间越窄；30 以上更稳。"
+            data-tip-en="How many independent runs. More replicas narrow the CI; 30+ is steadier."
             data-tip="同一组参数独立跑多少次。副本越多，置信区间越窄；30 以上更稳。">?</button>
         </div>
         <input id="repeats" type="number" min="2" max="20" step="1" value="8">
-        <p class="hint">越多越稳，但更慢。</p>
+        <p class="hint" data-i18n="repeatsHint">越多越稳，但更慢。</p>
       </div>
       <div>
         <div class="label-row">
-          <label for="seed">随机种子 / Seed</label>
-          <button class="help" type="button" aria-label="种子说明"
+          <label for="seed" data-i18n="seedLabel">随机种子</label>
+          <button class="help" type="button" aria-label="seed help"
+            data-tip-zh="同参数 + 同种子可复现；换种子能看结论是否依赖运气。"
+            data-tip-en="Same parameters + same seed reproduce; change the seed to see if the result was luck."
             data-tip="同参数 + 同种子可复现；换种子能看结论是否依赖运气。">?</button>
         </div>
         <input id="seed" type="number" min="0" step="1" value="42">
-        <p class="hint">复现用；换一个看稳健性。</p>
+        <p class="hint" data-i18n="seedHint">复现用；换一个看稳健性。</p>
       </div>
     </div>
 
     <div class="presets">
-      <button type="button" class="chip" data-preset="quick">快速看</button>
-      <button type="button" class="chip" data-preset="robust">稳健估计</button>
-      <button type="button" class="chip" data-preset="highq">高从众</button>
-      <button type="button" class="chip" data-preset="slow">慢反应</button>
-      <button type="button" class="chip ghost" id="reset">重置</button>
+      <button type="button" class="chip" data-preset="quick" data-i18n="quick">快速看</button>
+      <button type="button" class="chip" data-preset="robust" data-i18n="robust">稳健估计</button>
+      <button type="button" class="chip" data-preset="highq" data-i18n="highq">高从众</button>
+      <button type="button" class="chip" data-preset="slow" data-i18n="slow">慢反应</button>
+      <button type="button" class="chip ghost" id="reset" data-i18n="reset">重置</button>
     </div>
 
     <button id="run" class="primary">
       <span class="spinner" aria-hidden="true"></span>
-      <span class="label">运行推演 / Run</span>
+      <span class="label" data-i18n="run">运行推演</span>
       <kbd>Enter</kbd>
     </button>
-    <div id="status" class="status">结果在浏览器外计算，可复现。Tap Enter to run.</div>
+    <div id="status" class="status" data-i18n="statusIdle">结果在浏览器外计算，可复现。</div>
     <div id="error" class="error"></div>
   </aside>
 
@@ -114,30 +138,29 @@
     <div class="card result-head">
       <div class="result-top">
         <div>
-          <span class="eyebrow small">RESULTS</span>
+          <span class="eyebrow small" data-i18n="results">结果</span>
           <div id="verdict" class="verdict">等待运行 / Waiting</div>
         </div>
         <div class="toolbar">
-          <button id="compare" class="ghost" disabled>对比上一次</button>
-          <button id="download" class="ghost" disabled>报告</button>
-          <button id="copy" class="ghost" disabled>复制链接</button>
+          <button id="compare" class="ghost" disabled data-i18n="compare">对比上一次</button>
+          <button id="download" class="ghost" disabled data-i18n="report">报告</button>
+          <button id="copy" class="ghost" disabled data-i18n="copy">复制链接</button>
         </div>
       </div>
-      <p id="summary" class="summary">选择场景并运行，看看这群人可能怎么走。<br>
-        <span class="muted">Pick a scenario and run it to see how the group might evolve.</span></p>
+      <p id="summary" class="summary" data-i18n="summaryIdle">选择场景并运行，看看这群人可能怎么走。</p>
       <div id="reading" class="reading"></div>
     </div>
 
     <section id="decision" class="card decision" hidden>
       <div class="section-head">
-        <h3>决策提示 / Decision brief</h3>
-        <span class="tag">模拟窗口，不是预测</span>
+        <h3 data-i18n="decisionTitle">决策提示</h3>
+        <span class="tag" data-i18n="decisionTag">模拟窗口，不是预测</span>
       </div>
-      <p><strong>这项推演帮助判断：</strong><span id="decisionText"></span></p>
+      <p><strong data-i18n="decisionWhat">这项推演帮助判断：</strong><span id="decisionText"></span></p>
       <div id="timing" class="chips"></div>
       <p id="window" class="window"></p>
       <div class="next">
-        <strong>建议后续 / Next steps</strong>
+        <strong data-i18n="nextTitle">建议后续</strong>
         <ul id="followups"></ul>
       </div>
       <p id="caveat" class="note"></p>
@@ -146,48 +169,48 @@
     <div class="chart-grid">
       <div class="card chart-card wide">
         <div class="section-head">
-          <h3>多样性随时间 <small>线 = 本次运行 · 带 = 副本 10–90%</small></h3>
+          <h3><span data-i18n="chartDiversity">多样性随时间</span> <small data-i18n="chartDiversitySub">线 = 本次运行 · 带 = 副本 10–90%</small></h3>
         </div>
         <div id="chartDiversity" class="chart tall"></div>
       </div>
       <div class="card chart-card">
-        <div class="section-head"><h3>观点占比</h3></div>
+        <div class="section-head"><h3 data-i18n="chartShares">观点占比</h3></div>
         <div id="chartShares" class="chart"></div>
       </div>
       <div class="card chart-card">
-        <div class="section-head"><h3>每步改变立场的人数</h3></div>
+        <div class="section-head"><h3 data-i18n="chartCascade">每步改变立场的人数</h3></div>
         <div id="chartCascade" class="chart"></div>
       </div>
     </div>
 
     <div class="card">
-      <div class="section-head"><h3>回放演化 / Replay</h3><span class="tag">逐帧看占比变化</span></div>
+      <div class="section-head"><h3 data-i18n="replayTitle">回放演化</h3><span class="tag" data-i18n="replayTag">逐帧看占比变化</span></div>
       <div class="playback">
-        <button id="play" class="ghost" disabled>播放 / Play</button>
+        <button id="play" class="ghost" disabled data-i18n="play">播放</button>
         <input id="scrub" type="range" min="0" max="0" value="0" disabled>
       </div>
     </div>
 
     <div class="card">
-      <div class="section-head"><h3>指标卡</h3><span class="tag">95% CI · n = 副本</span></div>
+      <div class="section-head"><h3 data-i18n="metricsTitle">指标卡</h3><span class="tag" data-i18n="metricsTag">95% CI · n = 副本</span></div>
       <div id="metrics" class="metrics"></div>
       <div id="delta" class="delta"></div>
     </div>
 
     <details class="card guide" open>
-      <summary>这些参数到底在做什么？ / Why these knobs</summary>
+      <summary data-i18n="guideSummary">这些参数到底在做什么？</summary>
       <div class="guide-grid">
-        <div><b>从众强度 q</b><p>一个人看到群体里多数是某立场时，跟随的概率有多强。q 越大，群体越容易快速同化；q=1 时接近经典 Voter 模型。</p></div>
-        <div><b>时延 μ</b><p>反应不是同步的。μ 越大，更新越慢，级联峰值更晚，也更容易出现“拖尾”。</p></div>
-        <div><b>步数</b><p>观察窗口。太短会误判“没收敛”；建议至少覆盖峰值后再多看 30–50 步。</p></div>
-        <div><b>副本数</b><p>同参数独立重复。副本越多，中位数和 CI 越稳；公开演示最多 20，完整产品可到 30+。</p></div>
-        <div><b>随机种子</b><p>固定种子保证同参数可复现；换种子重复，能判断结论是不是“运气好”。</p></div>
+        <div><b data-i18n="guideQ">从众强度 q</b><p data-i18n="guideQText">一个人看到群体里多数是某立场时，跟随的概率有多强。q 越大，群体越容易快速同化；q=1 时接近经典 Voter 模型。</p></div>
+        <div><b data-i18n="guideLatency">时延 μ</b><p data-i18n="guideLatencyText">反应不是同步的。μ 越大，更新越慢，级联峰值更晚，也更容易出现“拖尾”。</p></div>
+        <div><b data-i18n="guideSteps">步数</b><p data-i18n="guideStepsText">观察窗口。太短会误判“没收敛”；建议至少覆盖峰值后再多看 30–50 步。</p></div>
+        <div><b data-i18n="guideRepeats">副本数</b><p data-i18n="guideRepeatsText">同参数独立重复。副本越多，中位数和 CI 越稳；公开演示最多 20，完整产品可到 30+。</p></div>
+        <div><b data-i18n="guideSeed">随机种子</b><p data-i18n="guideSeedText">固定种子保证同参数可复现；换种子重复，能判断结论是不是“运气好”。</p></div>
       </div>
     </details>
 
     <footer class="fineprint">
-      只展示群体统计量，不展示任何单节点观点轨迹。Only group-level statistics.
-      · 报告为单文件离线 HTML · <a href="/docs">API docs</a>
+      <span data-i18n="footer">只展示群体统计量，不展示任何单节点观点轨迹。</span>
+      · <span data-i18n="footerReport">报告为单文件离线 HTML</span> · <a href="/docs" data-i18n="footerApi">API 文档</a>
     </footer>
   </section>
 </main>

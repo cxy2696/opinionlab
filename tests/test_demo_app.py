@@ -44,7 +44,9 @@ def test_demo_page_is_self_contained() -> None:
     assert "/api/v1/demo/static/app.js" in html
     assert "/api/v1/demo/static/style.css" in html
     assert "非对真实舆情的预测" in html
-    assert "not a prediction" in html
+    assert 'id="langToggle"' in html
+    assert "/api/v1/demo/static/scene.js" in html
+    assert "/api/v1/demo/static/i18n.js" in html
     assert "这些参数到底在做什么" in html
     assert 'data-preset="robust"' in html
 
@@ -116,4 +118,4 @@ def test_demo_static_assets() -> None:
     style = _request("GET", "/api/v1/demo/static/style.css")
     assert script.status_code == style.status_code == 200
     assert "renderCharts" in script.text
-    assert "--accent" in style.text
+    assert "--cyan" in style.text

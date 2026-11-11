@@ -1,4 +1,6 @@
 const $ = (id) => document.getElementById(id);
+const T = (key) => (window.I18N ? I18N.t(key) : key);
+const P = (zh, en) => (window.I18N ? I18N.pick(zh, en) : zh);
 const state = {
   templates: [],
   last: null,
@@ -8,20 +10,36 @@ const state = {
   index: 0,
 };
 
-const COLORS = ["#2b6cb0", "#dd6b20", "#38a169", "#805ad5", "#d53f8c", "#319795"];
+const COLORS = ["#22d3ee", "#ffb020", "#34d399", "#a78bfa", "#fb7185", "#2dd4bf"];
 const chartOptions = { renderer: "canvas" };
 const charts = {
   diversity: echarts.init($("chartDiversity"), null, chartOptions),
   shares: echarts.init($("chartShares"), null, chartOptions),
   cascade: echarts.init($("chartCascade"), null, chartOptions),
 };
+let tracker = null;
+if (window.TrackScene && $("trackScene")) {
+  tracker = TrackScene.create($("trackScene"), {
+    count: 150,
+    onTick: ({ step, divergence, active }) => {
+      $("trackStep").textContent = String(step).padStart(3, "0");
+      $("trackDiv").textContent = divergence.toFixed(2);
+      if (active) $("trackStatus").textContent = P("已锁定", "LOCKED");
+    },
+  });
+  $("trackNodes").textContent = "150";
+}
+const AXIS = { axisLine: { lineStyle: { color: "#1e4a5f" } }, axisLabel: { color: "#7fa6bd", fontSize: 9, fontFamily: "ui-monospace" } };
+const SPLIT = { lineStyle: { color: "rgba(30,74,95,.55)" } };
 
-const METRICS = [
-  ["diversity_final", "多样性 / Diversity"],
-  ["cascade_p99", "级联 P99 / Cascade P99"],
-  ["time_to_consensus", "收敛步 / Consensus step"],
-  ["absorbing", "吸收态比例 / Absorbing rate"],
-];
+const METRICS = ["diversity_final", "cascade_p99", "time_to_consensus", "absorbing"];
+
+const METRIC_LABELS = {
+  diversity_final: ["多样性", "Diversity"],
+  cascade_p99: ["级联 P99", "Cascade P99"],
+  time_to_consensus: ["收敛步", "Consensus step"],
+  absorbing: ["吸收态比例", "Absorbing rate"],
+};
 
 function fmt(value) {
   if (value === null || value === undefined) return "—";
@@ -40,18 +58,16 @@ function currentTemplate() {
 function showQuestion() {
   const template = currentTemplate();
   if (!template) return;
-  $("question").innerHTML = `${template.question_zh}<small>${template.question_en}</small>`;
+  $("question").innerHTML = `${P(template.question_zh, template.question_en)}`;
   $("reading").innerHTML =
-    `<strong>怎么读 / How to read:</strong> ${template.interpretation_zh}<br>${template.interpretation_en}`;
+    `<strong>${T("readPrefix")}</strong> ${P(template.interpretation_zh, template.interpretation_en)}`;
 }
 
 async function loadTemplates() {
   const response = await fetch("/api/v1/demo/templates");
   const payload = await response.json();
   state.templates = payload.data;
-  $("template").innerHTML = state.templates
-    .map((item) => `<option value="${item.key}">${item.key} · ${item.name_zh} / ${item.name_en}</option>`)
-    .join("");
+  refreshOptions();
   const requested = new URLSearchParams(location.search).get("template") || "S2";
   if (state.templates.some((item) => item.key === requested)) {
     $("template").value = requested;
@@ -66,6 +82,15 @@ async function loadTemplates() {
   }
   showQuestion();
   updateLabels();
+}
+
+function refreshOptions() {
+  if (!state.templates.length) return;
+  const selected = $("template").value;
+  $("template").innerHTML = state.templates
+    .map((item) => `<option value="${item.key}">${item.key} · ${P(item.name_zh, item.name_en)}</option>`)
+    .join("");
+  if (state.templates.some((item) => item.key === selected)) $("template").value = selected;
 }
 
 function readParam(name, fallback) {
@@ -117,7 +142,7 @@ function animateMetrics() {
 
 function renderMetrics(metrics) {
   $("metrics").innerHTML = METRICS
-    .map(([key, label]) => metricCard(key, label, metrics[key]))
+    .map((key) => metricCard(key, P(...METRIC_LABELS[key]), metrics[key]))
     .join("");
   animateMetrics();
 }
@@ -131,10 +156,10 @@ function renderCharts(data, upto) {
   const timing = decision.timing || {};
   const cascadeMarkers = [
     timing.takeoff_step
-      ? { xAxis: timing.takeoff_step, label: { formatter: "起势", position: "insideEndTop", rotate: 0 } }
+      ? { xAxis: timing.takeoff_step, label: { formatter: P("起势", "take-off"), position: "insideEndTop", rotate: 0 } }
       : null,
     timing.peak_step
-      ? { xAxis: timing.peak_step, label: { formatter: "峰值", position: "insideEndTop", rotate: 0 } }
+      ? { xAxis: timing.peak_step, label: { formatter: P("峰值", "peak"), position: "insideEndTop", rotate: 0 } }
       : null,
   ].filter(Boolean);
 
@@ -145,21 +170,24 @@ function renderCharts(data, upto) {
   const width = bands.p90.map((high, i) => high - bands.p10[i]);
 
   const runGradient = new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-    { offset: 0, color: "rgba(37,99,235,.22)" },
-    { offset: 1, color: "rgba(37,99,235,0)" },
+    { offset: 0, color: "rgba(34,211,238,.28)" },
+    { offset: 1, color: "rgba(34,211,238,0)" },
   ]);
   charts.diversity.setOption({
     animationDuration: 700,
     animationEasing: "cubicOut",
     animationDurationUpdate: 120,
-    tooltip: { trigger: "axis" },
-    color: ["#e2e8f0", "rgba(43,108,176,.16)", "#718096", "#2b6cb0"],
+    textStyle: { color: "#7fa6bd", fontFamily: "ui-monospace" },
+    tooltip: { trigger: "axis", backgroundColor: "#02070b", borderColor: "#1e4a5f",
+               textStyle: { color: "#d5edf7" } },
+    color: ["transparent", "rgba(34,211,238,.16)", "#ffb020", "#22d3ee"],
     legend: { top: 0, right: 0, itemWidth: 10, itemHeight: 8, type: "scroll",
-              data: ["本次 / run", "中位数 / median", "10–90%"] },
+              textStyle: { color: "#9ec3d6", fontSize: 10 },
+              data: [P("本次运行", "this run"), P("中位数", "median"), "10–90%"] },
     grid: { left: 44, right: 14, top: 30, bottom: 26 },
-    xAxis: { type: "category", data: steps, boundaryGap: false },
+    xAxis: { type: "category", data: steps, boundaryGap: false, ...AXIS, splitLine: { show: false } },
     yAxis: {
-      type: "value", min: 0,
+      type: "value", min: 0, ...AXIS, splitLine: SPLIT,
       max: Math.min(1, Math.max(0.5, Math.ceil(Math.max(...series.diversity) * 10) / 10)),
     },
     series: [
@@ -168,17 +196,17 @@ function renderCharts(data, upto) {
       { name: "10–90%", type: "line", stack: "band", data: sliceUpto(width, index),
         lineStyle: { opacity: 0 }, areaStyle: { color: "rgba(43,108,176,.16)" },
         symbol: "none", silent: true },
-      { name: "中位数 / median", type: "line", data: sliceUpto(bands.p50, index),
-        smooth: true, showSymbol: false, lineStyle: { type: "dashed", width: 1.5 } },
-      { name: "本次 / run", type: "line", data: sliceUpto(series.diversity, index),
-        smooth: true, showSymbol: false, lineStyle: { width: 2.6, color: "#2563eb" },
+      { name: P("中位数", "median"), type: "line", data: sliceUpto(bands.p50, index),
+        smooth: true, showSymbol: false, lineStyle: { type: "dashed", width: 1.4, color: "#ffb020" } },
+      { name: P("本次运行", "this run"), type: "line", data: sliceUpto(series.diversity, index),
+        smooth: true, showSymbol: false, lineStyle: { width: 2.4, color: "#22d3ee" },
         areaStyle: { color: runGradient } },
     ],
   });
 
   const opinionCount = data.opinion_count || 2;
   const shares = Array.from({ length: opinionCount }, (_, opinion) => ({
-    name: `立场 ${opinion} / Opinion ${opinion}`,
+    name: P(`立场 ${opinion}`, `Opinion ${opinion}`),
     type: "line",
     stack: "shares",
     smooth: true,
@@ -192,11 +220,14 @@ function renderCharts(data, upto) {
     animationDuration: 700,
     animationEasing: "cubicOut",
     animationDurationUpdate: 120,
-    tooltip: { trigger: "axis" },
-    legend: { top: 0, right: 0, itemWidth: 10, itemHeight: 8 },
+    textStyle: { color: "#7fa6bd", fontFamily: "ui-monospace" },
+    tooltip: { trigger: "axis", backgroundColor: "#02070b", borderColor: "#1e4a5f",
+               textStyle: { color: "#d5edf7" } },
+    legend: { top: 0, right: 0, itemWidth: 10, itemHeight: 8,
+              textStyle: { color: "#9ec3d6", fontSize: 10 } },
     grid: { left: 40, right: 12, top: 30, bottom: 26 },
-    xAxis: { type: "category", data: steps, boundaryGap: false },
-    yAxis: { type: "value", min: 0, max: 1 },
+    xAxis: { type: "category", data: steps, boundaryGap: false, ...AXIS, splitLine: { show: false } },
+    yAxis: { type: "value", min: 0, max: 1, ...AXIS, splitLine: SPLIT },
     series: shares,
   });
 
@@ -204,14 +235,15 @@ function renderCharts(data, upto) {
     animationDuration: 700,
     animationEasing: "cubicOut",
     animationDurationUpdate: 120,
-    tooltip: {},
+    textStyle: { color: "#7fa6bd", fontFamily: "ui-monospace" },
+    tooltip: { backgroundColor: "#02070b", borderColor: "#1e4a5f", textStyle: { color: "#d5edf7" } },
     grid: { left: 44, right: 14, top: 30, bottom: 26 },
-    xAxis: { type: "category", data: steps },
-    yAxis: { type: "value" },
+    xAxis: { type: "category", data: steps, ...AXIS, splitLine: { show: false } },
+    yAxis: { type: "value", ...AXIS, splitLine: SPLIT },
     series: [{
       type: "bar",
       data: sliceUpto(series.cascade, index),
-      itemStyle: { color: "#f59e0b", opacity: 0.8, borderRadius: [3, 3, 0, 0] },
+      itemStyle: { color: "#ffb020", opacity: 0.8 },
       markLine: cascadeMarkers.length ? { symbol: "none", data: cascadeMarkers } : undefined,
     }],
   });
@@ -221,33 +253,29 @@ function renderDecision(decision) {
   const panel = $("decision");
   if (!decision) { panel.hidden = true; return; }
   panel.hidden = false;
-  $("decisionText").textContent = `${decision.decision_zh} / ${decision.decision_en}`;
+  $("decisionText").textContent = P(decision.decision_zh, decision.decision_en);
   const timing = decision.timing || {};
   const labels = [
-    ["takeoff_step", "起势 / take-off"],
-    ["peak_step", "峰值 / peak"],
-    ["consensus_step", "多数 / majority"],
-    ["intervention_step", "干预 / intervention"],
+    ["takeoff_step", P("起势", "take-off")],
+    ["peak_step", P("峰值", "peak")],
+    ["consensus_step", P("多数", "majority")],
+    ["intervention_step", P("干预", "intervention")],
   ];
   $("timing").innerHTML = labels
     .filter(([key]) => timing[key] !== null && timing[key] !== undefined)
     .map(([key, label]) => `<span class="chip-timing">${label} <b>step ${timing[key]}</b></span>`)
     .join("");
-  $("window").innerHTML = `${decision.window_zh}<br><span class="muted">${decision.window_en}</span>`;
-  $("followups").innerHTML = decision.followups_zh
-    .map((zh, index) => `<li>${zh}<br><span class="muted">${decision.followups_en[index] || ""}</span></li>`)
-    .join("");
-  $("caveat").textContent = `${decision.caveat_zh} ${decision.caveat_en}`;
+  $("window").textContent = P(decision.window_zh, decision.window_en);
+  const followups = P(decision.followups_zh, decision.followups_en);
+  $("followups").innerHTML = followups.map((item) => `<li>${item}</li>`).join("");
+  $("caveat").textContent = P(decision.caveat_zh, decision.caveat_en);
 }
 
-function render(data) {
-  if (state.last) state.previous = state.last;
-  state.last = data;
-  state.data = data;
+function renderViews(data) {
   const summary = data.summary_text;
-  $("verdict").textContent = `${summary.verdict_zh} / ${summary.verdict_en}`;
+  $("verdict").textContent = P(summary.verdict_zh, summary.verdict_en);
   $("verdict").className = data.summary.absorbing ? "verdict good" : "verdict";
-  $("summary").innerHTML = `${summary.text_zh}<br><span class="muted">${summary.text_en}</span>`;
+  $("summary").textContent = P(summary.text_zh, summary.text_en);
   renderMetrics(data.metrics);
   renderDecision(data.decision);
   renderCharts(data);
@@ -258,6 +286,23 @@ function render(data) {
   $("download").disabled = false;
   $("copy").disabled = false;
   $("compare").disabled = !state.previous;
+  if (tracker) {
+    tracker.setData({
+      shares: data.series.shares[data.series.shares.length - 1],
+      steps: data.series.steps.length,
+      peak: Math.max(...data.series.cascade),
+      divergence: data.summary.diversity_final,
+    });
+    $("trackStatus").textContent = P("已锁定", "LOCKED");
+    $("trackNodes").textContent = "150";
+  }
+}
+
+function render(data) {
+  if (state.last) state.previous = state.last;
+  state.last = data;
+  state.data = data;
+  renderViews(data);
   renderDelta();
   updateURL();
 }
@@ -272,11 +317,14 @@ function renderDelta() {
   const overlap = !(after.ci95_hi < before.ci95_lo || after.ci95_lo > before.ci95_hi);
   const cls = overlap ? "flat" : diff > 0 ? "up" : "down";
   const verdict = overlap
-    ? "置信区间重叠，暂时不能说明有差异 / CIs overlap, no clear difference"
-    : diff > 0 ? "比上一次更分散 / more diverse than the previous run"
-               : "比上一次更集中 / more concentrated than the previous run";
+    ? P("置信区间重叠，暂时不能说明有差异", "CIs overlap, no clear difference")
+    : diff > 0 ? P("比上一次更分散", "more diverse than the previous run")
+               : P("比上一次更集中", "more concentrated than the previous run");
   $("delta").className = `delta ${cls}`;
-  $("delta").textContent = `与上一次相比，多样性 ${diff >= 0 ? "+" : ""}${diff.toFixed(4)}；${verdict}`;
+  $("delta").textContent = P(
+    `与上一次相比，多样性 ${diff >= 0 ? "+" : ""}${diff.toFixed(4)}；${verdict}`,
+    `Diversity ${diff >= 0 ? "+" : ""}${diff.toFixed(4)} vs the previous run; ${verdict}.`,
+  );
 }
 
 function updateURL() {
@@ -290,7 +338,7 @@ async function run() {
   $("loading").hidden = false;
   $("run").classList.add("running");
   $("run").disabled = true;
-  $("status").textContent = "运行中… / running…";
+  $("status").textContent = T("running");
   try {
     const response = await fetch("/api/v1/demo/simulate", {
       method: "POST",
@@ -428,6 +476,20 @@ $("scrub").oninput = () => {
 $("download").onclick = download;
 $("copy").onclick = copyLink;
 window.addEventListener("resize", () => Object.values(charts).forEach((chart) => chart.resize()));
+
+window.addEventListener("languagechange", () => {
+  refreshOptions();
+  showQuestion();
+  updateLabels();
+  if (state.data) renderViews(state.data);
+  if (state.last) renderDelta();
+  if (state.data) {
+    $("status").textContent =
+      `q=${state.data.spec.q} · steps=${state.data.spec.n_steps} · ` +
+      `${state.data.spec.repeats} replicas · seed=${state.data.spec.seed}`;
+  }
+});
+if ($("langToggle")) $("langToggle").onclick = () => I18N.toggle();
 
 loadTemplates()
   .then(() => {
