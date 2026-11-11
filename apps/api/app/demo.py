@@ -101,7 +101,11 @@ async def demo_templates() -> dict[str, Any]:
         for template in iter_templates(REPO_ROOT / "scenarios")
         if template.is_enabled()
     ]
-    return {"data": templates, "disclaimer_key": "simulation_not_prediction"}
+    return {
+        "data": templates,
+        "features": {"ollama": settings.ollama_enabled},
+        "disclaimer_key": "simulation_not_prediction",
+    }
 
 
 def _bands(aggregate: Any) -> dict[str, list[float]]:

@@ -72,6 +72,7 @@ def test_templates_endpoint_lists_enabled_templates() -> None:
     payload = response.json()
     keys = {item["key"] for item in payload["data"]}
     assert {"S2", "G1"} <= keys
+    assert payload["features"]["ollama"] is False
     s2 = next(item for item in payload["data"] if item["key"] == "S2")
     assert s2["question_zh"] and s2["question_en"]
     assert "q" in s2["defaults"]

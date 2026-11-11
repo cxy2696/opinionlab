@@ -3,6 +3,7 @@ const T = (key) => (window.I18N ? I18N.t(key) : key);
 const P = (zh, en) => (window.I18N ? I18N.pick(zh, en) : zh);
 const state = {
   templates: [],
+  features: {},
   last: null,
   previous: null,
   data: null,
@@ -94,6 +95,7 @@ async function loadTemplates() {
   const response = await fetch("/api/v1/demo/templates");
   const payload = await response.json();
   state.templates = payload.data;
+  state.features = payload.features || {};
   refreshOptions();
   const requested = new URLSearchParams(location.search).get("template") || "S2";
   if (state.templates.some((item) => item.key === requested)) {
@@ -370,7 +372,11 @@ function renderViews(data) {
   $("download").disabled = false;
   $("copy").disabled = false;
   $("compare").disabled = !state.previous;
-  if ($("aiRun")) $("aiRun").disabled = false;
+  if ($("aiRun")) {
+    const enabled = Boolean(state.features.ollama);
+    $("aiRun").disabled = !enabled;
+    $("aiStatus").textContent = enabled ? "" : T("aiDisabled");
+  }
   if (tracker) {
     tracker.setData({
       shares: data.series.shares[data.series.shares.length - 1],
@@ -511,7 +517,7 @@ async function download() {
 }
 
 async function runAi() {
-  if (!state.data) return;
+  if (!state.data || !state.features.ollama) return;
   $("error").textContent = "";
   $("aiStatus").textContent = T("aiRunning");
   $("aiText").textContent = "";
