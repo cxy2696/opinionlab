@@ -17,6 +17,24 @@ const charts = {
   shares: echarts.init($("chartShares"), null, chartOptions),
   cascade: echarts.init($("chartCascade"), null, chartOptions),
 };
+const particleFields = [];
+function addParticles(id, chart, mode) {
+  if (window.TrackParticles && $(id)) particleFields.push(TrackParticles.create($(id), chart, mode));
+}
+addParticles("particlesDiversity", charts.diversity, "line");
+addParticles("particlesShares", charts.shares, "shares");
+addParticles("particlesCascade", charts.cascade, "cascade");
+
+function tickClock() {
+  if (!$("cockpitClock")) return;
+  const now = new Date();
+  $("cockpitClock").textContent =
+    [now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds()]
+      .map((value) => String(value).padStart(2, "0")).join(":");
+}
+tickClock();
+setInterval(tickClock, 1000);
+
 let tracker = null;
 if (window.TrackScene && $("trackScene")) {
   tracker = TrackScene.create($("trackScene"), {
@@ -254,6 +272,12 @@ function renderCharts(data, upto) {
       markLine: cascadeMarkers.length ? { symbol: "none", data: cascadeMarkers } : undefined,
     }],
   });
+
+  if (particleFields.length === 3) {
+    particleFields[0].setData(series.diversity.slice(0, index + 1));
+    particleFields[1].setData(series.shares.slice(0, index + 1));
+    particleFields[2].setData(series.cascade.slice(0, index + 1));
+  }
 }
 
 function renderDecision(decision) {

@@ -20,7 +20,8 @@ service uses the real engine, supports multiple opinions, interventions and repo
 
 - 15 bilingual scenario templates with the question they help answer.
 - Inline explanations for every parameter, hover tips and one-click presets.
-- Three linked charts: diversity over time, opinion shares, cascade per step.
+- Three linked charts with particle overlays: diversity flow, drifting opinion particles and cascade bursts.
+- A cockpit shell with a system status bar, numbered decks, UTC clock, telemetry and responsive layouts for desktop, tablet and phone.
 - A decision brief: what the run informs, key timing nodes, a simulated window, follow-up checks.
 - Replay, comparison with the previous run, CSV export and shareable parameter links.
 - A 3D industrial tracker shows the opinion network with lock brackets and telemetry.

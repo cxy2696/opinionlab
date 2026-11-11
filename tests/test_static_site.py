@@ -15,7 +15,7 @@ SITE = ROOT / "site"
 
 def test_static_site_files_exist() -> None:
     for name in ("index.html", "style.css", "app.js", "sim.js", "scene.js", "i18n.js",
-                 "templates.json", "echarts.min.js"):
+                 "particles.js", "templates.json", "echarts.min.js"):
         assert (SITE / name).exists(), name
     html = (SITE / "index.html").read_text(encoding="utf-8")
     assert "OpinionLab" in html

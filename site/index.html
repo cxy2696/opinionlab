@@ -9,6 +9,7 @@
 <script defer src="./i18n.js"></script>
 <script defer src="./scene.js"></script>
 <script defer src="./sim.js"></script>
+<script defer src="./particles.js"></script>
 <script defer src="./app.js"></script>
 </head>
 <body>
@@ -40,8 +41,20 @@
   </div>
 </header>
 
+<div class="cockpit-bar">
+  <div class="cockpit-id"><span class="led"></span> SYS // OPINIONLAB-01</div>
+  <div class="cockpit-status">
+    <span>ENGINE <b class="ok">READY</b></span>
+    <span>REGION <b>LOCAL</b></span>
+    <span>MODE <b>SIM</b></span>
+    <span class="hide-sm">BUILD <b>V1.0</b></span>
+  </div>
+  <div class="cockpit-clock"><span>UTC</span><b id="cockpitClock">--:--:--</b></div>
+</div>
+
 <main>
   <aside class="card controls">
+    <div class="deck-label">01 // CONTROL DECK</div>
     <div class="banner">
       <strong data-i18n="bannerStrong">先看边界</strong>
       <span class="banner-main" data-i18n="bannerText">本结果为给定假设下的情景推演，非对真实舆情的预测。</span>
@@ -133,6 +146,7 @@
   </aside>
 
   <section class="results">
+    <div class="deck-label">02 // TELEMETRY DECK</div>
     <div id="loading" class="loading" hidden>
       <div class="loading-bar"></div><span>正在跑副本，收集 95% CI…</span>
     </div>
@@ -173,15 +187,24 @@
         <div class="section-head">
           <h3><span data-i18n="chartDiversity">多样性随时间</span> <small data-i18n="chartDiversitySub">线 = 本次运行 · 带 = 副本 10–90%</small></h3>
         </div>
-        <div id="chartDiversity" class="chart tall"></div>
+        <div class="chart-wrap">
+          <div id="chartDiversity" class="chart tall"></div>
+          <canvas id="particlesDiversity" class="chart-particles" aria-hidden="true"></canvas>
+        </div>
       </div>
       <div class="card chart-card">
         <div class="section-head"><h3 data-i18n="chartShares">观点占比</h3></div>
-        <div id="chartShares" class="chart"></div>
+        <div class="chart-wrap">
+          <div id="chartShares" class="chart"></div>
+          <canvas id="particlesShares" class="chart-particles" aria-hidden="true"></canvas>
+        </div>
       </div>
       <div class="card chart-card">
         <div class="section-head"><h3 data-i18n="chartCascade">每步改变立场的人数</h3></div>
-        <div id="chartCascade" class="chart"></div>
+        <div class="chart-wrap">
+          <div id="chartCascade" class="chart"></div>
+          <canvas id="particlesCascade" class="chart-particles" aria-hidden="true"></canvas>
+        </div>
       </div>
     </div>
 
