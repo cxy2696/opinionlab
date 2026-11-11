@@ -2,7 +2,7 @@
 
 PYTEST := uv run pytest
 
-.PHONY: setup test check bench migrate demo
+.PHONY: setup test check bench migrate demo site
 
 setup:
 	uv sync
@@ -21,6 +21,9 @@ migrate:
 
 demo:
 	uv run uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
+
+site:
+	python scripts/build_site.py
 
 bench:
 	uv run pytest benchmarks -q

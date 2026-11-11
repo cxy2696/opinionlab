@@ -107,6 +107,30 @@ uv run hnle report --run-id <run_id> --runs-dir runs
 
 全部模板中英双语、可直接运行；`uv run hnle templates` 可列出。
 
+### 仓库地图 / What lives where
+
+| 路径 | 一句话说明 |
+|---|---|
+| `packages/hnle/` | 可独立运行的引擎：模型、超图、两种内核、指标、Monte Carlo、报告；不依赖数据库 |
+| `apps/api/` | FastAPI 服务：登录/RBAC、配额、作业、连接器、合规、演示 API |
+| `apps/web/` | 本地演示前端源码：HTML/CSS/JS、3D 场景、粒子、星系；数据来自 API |
+| `site/` | GitHub Pages 站点：只保留站点专属文件，构建时从 `apps/web` 复制共享资源 |
+| `scenarios/` | 15 个中英双语场景模板，直接可跑 |
+| `examples/` | 两个最小可运行案例（辟谣时点、社区从众） |
+| `tests/` | 单元、集成、金标与前端/文档测试 |
+| `docs/` | 中英文成对的数学、架构、合规、运维、演示文档 |
+| `benchmarks/` | 容量基准与 Locust 压测脚本 |
+| `deploy/` | Compose、Helm（CN/Global）与离线交付 |
+| `scripts/` | 静态站构建、场景模板导出 |
+| `migrations/` | Alembic 数据库迁移 |
+
+### 数学与可复现
+
+模型定义、超边加权、`q` 的极限行为、时延语义、Monte Carlo 估计量与置信区间假设，都写在
+[`docs/MATH_MODEL_cn.md`](docs/MATH_MODEL_cn.md)。文档里的每条公式都对应到具体代码函数，
+并列出“哪些结论只能方向性使用”的边界。想先看结论，可以读
+[`docs/MODEL_CARD_cn.md`](docs/MODEL_CARD_cn.md)。
+
 ### 常用命令
 
 ```bash
@@ -135,79 +159,6 @@ make migrate # 数据库迁移
 - 单机：`docker-compose.yml`（db / redis / minio / api / worker）
 - 集群：`deploy/k8s/helm-cn` 与 `helm-global` 两套 values
 - 私有化：`deploy/private/OFFLINE_cn.md`，无公网依赖
-
-### License
-
-MIT
-
----
-
-## English
-
-**Turn “how would this group react?” into something you can test repeatedly.**
-OpinionLab turns a group-opinion question into a reproducible experiment with uncertainty ranges, not a single forecast.
-
-**在线试用 / Live demo:** https://cxy2696.github.io/opinionlab/
-
-![OpinionLab demo](docs/demo.png)
-
-![3D 观测阵列](docs/telemetry-3d.png)
-
-### What it is for
-
-People influence each other in groups. A message spreads, a community argues, a company announces a change, a product launches. OpinionLab lets you try a scenario before you act: change conformity, latency or timing, then see how the distribution of opinions evolves — with 95% confidence intervals.
-
-### What you can do
-
-- **Crisis communication**: compare debunk timing and damping strength.
-- **Community discussion**: tell consensus from conformity pressure.
-- **Organizational change**: test communication cadence and sentiment rebound.
-- **Product launch**: separate early buzz from durable word of mouth.
-- **Teaching and research**: demonstrate how conformity `q` changes consensus; reproduce the classical voter limit.
-
-Concrete questions, commands and reading guides live in [`docs/USE_CASES_en.md`](docs/USE_CASES_en.md).
-
-### Live demo
-
-Try it in the browser (no install): https://cxy2696.github.io/opinionlab/
-
-### Quick start
-
-```bash
-git clone https://github.com/cxy2696/opinionlab.git
-cd opinionlab
-make demo        # http://127.0.0.1:8000
-
-make setup
-uv run hnle simulate --spec scenarios/s2_rumor_debunk_timing.yaml --repeats 20
-uv run python examples/rumor_timing.py --repeats 8
-uv run python examples/community_consensus.py --repeats 6
-```
-
-### How it works
-
-- **Hypergraphs** model group influence, not only pairwise chats.
-- **Two knobs**: conformity `q` and heterogeneous latency.
-- **Reproducible**: same spec + seed gives the same result; every run records config/data hashes and versions.
-- **Guardrails**: 95% CIs by default, a mandatory disclaimer in reports, and no per-person opinion traces.
-
-### What it is not
-
-- Not a prediction about real individuals or events, and not a profiling tool.
-- It does not model platform recommender systems, media agenda or offline behaviour.
-- Coarse parameters mean directional insight only; assumptions and limitations stay in the report.
-
-### Templates (15)
-
-S1–S6 for public communication (policy, debunking, governance, KOL, health, finance), S7–S9 for general use (community, organizational change, product launch), G1–G7 for research and verification (academic reproduction, fact-checking, public health, platform risk, disaster warning, corporate change). G5 election templates are disabled by default and require use-case approval.
-
-### Docs
-
-Architecture, math model, model card, compliance, runbook, capacity report, demo and use cases live under [`docs/`](docs), with links in the Chinese section.
-
-### Deployment
-
-Compose for a single host, Helm values for CN/global clusters, and an air-gapped delivery guide under [`deploy/`](deploy).
 
 ### License
 

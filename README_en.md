@@ -105,6 +105,30 @@ uv run python examples/community_consensus.py --repeats 6
   disaster warning, corporate change. G5 election templates are disabled by default and require
   use-case approval.
 
+## Repository map
+
+| Path | What it is |
+|---|---|
+| `packages/hnle/` | Standalone engine: model, hypergraph, two kernels, metrics, Monte Carlo, reports; no database |
+| `apps/api/` | FastAPI service: auth/RBAC, quotas, jobs, connectors, compliance, demo API |
+| `apps/web/` | Source for the local demo UI: HTML/CSS/JS, 3D scenes, particles, galaxy |
+| `site/` | GitHub Pages site; only site-specific files live here, shared assets are copied at build time |
+| `scenarios/` | 15 bilingual scenario templates, directly runnable |
+| `examples/` | Two minimal examples: debunk timing and community conformity |
+| `tests/` | Unit, integration, golden, frontend and documentation tests |
+| `docs/` | Paired Chinese/English math, architecture, compliance, runbook and demo docs |
+| `benchmarks/` | Capacity benchmarks and Locust load scripts |
+| `deploy/` | Compose, Helm (CN/global) and air-gapped delivery |
+| `scripts/` | Static-site assembly and scenario export |
+| `migrations/` | Alembic database migrations |
+
+## Rigour and reproducibility
+
+The formal model, weighted edge map, `q` limits, latency semantics, Monte Carlo estimator and CI
+assumptions are documented in [`docs/MATH_MODEL_en.md`](docs/MATH_MODEL_en.md). Each formula maps to a
+specific function, and the doc states where conclusions are directional only. For a
+plain-language summary, read [`docs/MODEL_CARD_en.md`](docs/MODEL_CARD_en.md).
+
 ## Documentation
 
 | Document | Contents |
