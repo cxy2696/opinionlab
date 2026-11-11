@@ -1,5 +1,11 @@
 # 使用场景与案例 / Use cases
 
+> **一分钟版本**
+>
+> - 六个真实问题：辟谣时点、社区共识、组织变革、产品发布、政策治理、学术复现。
+> - 每个案例给出模板、命令和“该看什么”。
+> - 先看 95% CI 是否重叠，再决定能不能下结论。
+
 OpinionLab 不局限于“舆情”两个字。任何**一群人互相影响、观点会变**的场景，都可以用同一套模型做情景推演：把人群抽象成节点，把“一起讨论/互相看见”的场合抽象成超边，把态度变化抽象成一次采纳，把反应快慢抽象成时延。
 
 OpinionLab is not limited to public opinion. Any setting where **people influence each other and opinions change** can use the same model: people become nodes, group conversations become hyperedges, attitude shifts become adoption events, and reaction speed becomes latency.

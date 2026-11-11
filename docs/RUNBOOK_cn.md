@@ -1,5 +1,11 @@
 # 运维手册 / Runbook
 
+> **一分钟版本**
+>
+> - 先看 `/metrics`：API P95、队列深度、副本失败率、连接器熔断。
+> - 回滚用上一个镜像 tag；数据库只做可逆迁移。
+> - 发现数值缺陷时标记 tainted，保留证据并重跑。
+
 ## 观测与告警 / Observability & alerts
 Prometheus 指标由 API 暴露在 `/metrics`：
 
@@ -37,7 +43,6 @@ Alert rules (Prometheus):
 2. 提交无反应：`redis-cli XLEN` 与 worker 存活、队列深度。
 3. 作业一直 running：比对 soft/hard limit，> hard+5min 主动查 Celery 结果。
 4. 结果异常：取 manifest 比对 `engine_version + spec_sha256`，检查 golden 基线漂移。
-
 
 ## 金丝雀与回滚 / Canary & rollback
 1. 新版本先部署 1 个 API/worker 实例，路由 5% 流量，观察 30 分钟。

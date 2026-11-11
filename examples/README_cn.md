@@ -1,5 +1,11 @@
 # 示例 / Examples
 
+> **一分钟版本**
+>
+> - 两个脚本，不需要数据库或 API，直接 `uv run python ...`。
+> - 一个看辟谣时点，一个看社区从众强度。
+> - 输出只有群体统计量。
+
 两个最小案例，直接使用模板与引擎 API，不需要数据库或 API 服务。
 
 Two minimal examples using templates and the engine directly; no database or API server needed.

@@ -1,5 +1,11 @@
 # Model card
 
+> **In one minute**
+>
+> - It does: group-level what-if simulation, 95% CIs and reproducible reports.
+> - It does not: individual prediction, profiling, election forecasting or targeted persuasion.
+> - No generative model is used for conclusions; Ollama narration is off by default and labelled.
+
 ## Capabilities
 
 - Hypergraph group interaction, non-linear conformity `q`, and heterogeneous latency.

@@ -1,5 +1,11 @@
 # Math model
 
+> **In one minute**
+>
+> - `q` controls majority-following: `q=1` is the linear voter, `q→∞` locks onto the majority.
+> - The 95% CI is a normal approximation over replicas; treat `R<30` as directional only.
+> - This is scenario simulation, not causal identification; do not over-claim without calibration.
+
 This document states the update rule as checkable mathematics and maps every formula to code. The
 goal is not to look like a paper, but to make each number answer three questions: **what it defines,
 which assumptions it depends on, and when it should not be trusted.**

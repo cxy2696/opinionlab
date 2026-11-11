@@ -15,6 +15,8 @@ Not a fortune teller — a sandbox for trying “what if” before you publish, 
 
 ![3D telemetry array](docs/telemetry-3d.png)
 
+*① opinion terrain ② cascade bars ③ stance cloud*
+
 ## The problem
 
 A message goes out. Some people share it immediately, others react two days later. Small groups
@@ -132,6 +134,7 @@ summary, read [`docs/MODEL_CARD_en.md`](docs/MODEL_CARD_en.md).
 
 | Document | Contents |
 |---|---|
+| [Docs index](docs/README_en.md) | reading paths by role |
 | [Use cases](docs/USE_CASES_en.md) | six real questions, commands and interpretation |
 | [Demo](docs/DEMO_en.md) | hosted page, APIs, limits, Ollama |
 | [Architecture](docs/ARCHITECTURE_en.md) | layers, data flow, invariants |

@@ -15,6 +15,8 @@
 
 ![3D 观测阵列](docs/telemetry-3d.png)
 
+*① 观点地形 ② 级联柱阵 ③ 立场粒子云*
+
 ## 它解决什么问题
 
 一条消息发出去，有人立刻转发，有人过两天才反应；小群体会互相强化，大群体会把少数声音盖过去。
@@ -124,6 +126,7 @@ uv run hnle report --run-id <run_id> --runs-dir runs
 
 | 文档 | 内容 |
 |---|---|
+| [文档导航](docs/README_cn.md) | 按角色选阅读路径 |
 | [使用场景](docs/USE_CASES_cn.md) | 6 类真实问题、命令与解读 |
 | [产品演示](docs/DEMO_cn.md) | 演示页、公开 API、限制、Ollama |
 | [架构](docs/ARCHITECTURE_cn.md) | 分层、数据流、模块地图 |

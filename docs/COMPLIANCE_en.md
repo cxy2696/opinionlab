@@ -1,5 +1,11 @@
 # Compliance
 
+> **In one minute**
+>
+> - CN/EU data residency; cross-region tenant access returns 403.
+> - G5 election templates need an org_admin declaration and platform_admin approval.
+> - Structural data only; no per-node traces; every report carries the disclaimer.
+
 ## Regions
 
 - `REGION=cn` or `global` controls data residency and the compliance template.

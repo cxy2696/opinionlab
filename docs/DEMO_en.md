@@ -1,5 +1,11 @@
 # Demo application
 
+> **In one minute**
+>
+> - The hosted demo runs locally in the browser; the local service uses the full engine.
+> - 15 bilingual templates, explained parameters, CIs, decision brief and a 3D telemetry array.
+> - Ollama narration is off by default and is assistive only.
+
 OpinionLab includes a no-login browser sandbox for the full loop: choose a scenario, tune parameters,
 watch the group evolve and download a report.
 

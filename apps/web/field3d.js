@@ -36,7 +36,7 @@
       if (global.ResizeObserver) new ResizeObserver(this.resize).observe(canvas.parentElement);
       this.resize();
       this.canvas.addEventListener("pointermove", (event) => {
-        if (this.mode !== "bars") return;
+        if (this.mode !== "bars" && this.mode !== "wave") return;
         const rect = this.canvas.getBoundingClientRect();
         const x = event.clientX - rect.left;
         const y = event.clientY - rect.top;
@@ -128,8 +128,27 @@
       ctx.fillRect(0, this.cy - 20, this.width, this.height - this.cy + 20);
     }
 
+    drawTip(ctx) {
+      if (!this.hover) return;
+      const value = this.hover.percent
+        ? `${(this.hover.value * 100).toFixed(0)}%`
+        : this.hover.value.toFixed(2);
+      const text = `S${this.hover.step} · ${value}`;
+      ctx.font = "600 9px ui-monospace, monospace";
+      const width = ctx.measureText(text).width + 10;
+      const x = Math.min(this.width - width - 4, Math.max(4, this.hover.x - width / 2));
+      const y = Math.max(4, this.hover.y - 26);
+      ctx.fillStyle = "rgba(2,7,11,.94)";
+      ctx.fillRect(x, y, width, 17);
+      ctx.strokeStyle = "rgba(34,211,238,.55)";
+      ctx.strokeRect(x, y, width, 17);
+      ctx.fillStyle = "#d5edf7";
+      ctx.fillText(text, x + 5, y + 12);
+    }
+
     drawWave(ctx, t) {
       this.drawHorizon(ctx);
+      this.picks = [];
       const cols = 42;
       const rows = 18;
       for (let ix = 0; ix < cols; ix += 1) {
@@ -149,8 +168,13 @@
           ctx.beginPath();
           ctx.arc(point.x, point.y, size, 0, TAU);
           ctx.fill();
+          if (ix % 3 === 0 && iz % 2 === 0) {
+            this.picks.push({ x: point.x, y: point.y, step: Math.min(this.diversity.length - 1, step) + 1,
+                              value: base, percent: false });
+          }
         }
       }
+      this.drawTip(ctx);
     }
 
     drawBars(ctx, t) {
@@ -164,7 +188,8 @@
           return { ...bar, base, top };
         })
         .sort((a, b) => a.base.depth - b.base.depth);
-      this.picks = sorted.map((bar) => ({ x: bar.top.x, y: bar.top.y, step: bar.step, value: bar.value }));
+      this.picks = sorted.map((bar) => ({ x: bar.top.x, y: bar.top.y, step: bar.step + 1,
+        value: bar.value, percent: true }));
       sorted.forEach((bar) => {
         const width = 0.09 * this.scale * bar.top.perspective;
         const height = bar.base.y - bar.top.y;
@@ -178,19 +203,7 @@
         ctx.lineWidth = 0.6;
         ctx.strokeRect(bar.top.x - width, bar.top.y, width * 2, height);
       });
-      if (this.hover) {
-        const text = `S${this.hover.step + 1} · ${(this.hover.value * 100).toFixed(0)}%`;
-        ctx.font = "600 9px ui-monospace, monospace";
-        const width = ctx.measureText(text).width + 10;
-        const x = Math.min(this.width - width - 4, Math.max(4, this.hover.x - width / 2));
-        const y = Math.max(4, this.hover.y - 26);
-        ctx.fillStyle = "rgba(2,7,11,.94)";
-        ctx.fillRect(x, y, width, 17);
-        ctx.strokeStyle = "rgba(34,211,238,.55)";
-        ctx.strokeRect(x, y, width, 17);
-        ctx.fillStyle = "#d5edf7";
-        ctx.fillText(text, x + 5, y + 12);
-      }
+      this.drawTip(ctx);
     }
 
     drawCloud(ctx, t) {

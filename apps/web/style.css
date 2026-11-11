@@ -405,14 +405,32 @@ body { overflow-x: hidden; }
 
 /* 3D telemetry fields */
 .field-deck { padding: 14px 16px 16px; }
-.field-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 8px; }
+.field-guide { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.field-guide span { font: 600 9px/1.4 var(--mono); color: #8fb3c9; border: 1px solid var(--line);
+                    padding: 4px 7px; background: rgba(4, 12, 18, .55); }
+.field-grid { display: grid; grid-template-columns: 1.45fr 1fr; grid-template-rows: auto auto;
+              gap: 10px; margin-top: 10px; }
+.field-card:first-child { grid-row: 1 / span 2; }
+.field-card:first-child .field-wrap { height: 292px; }
+.field-card:not(:first-child) .field-wrap { height: 150px; }
+.field-axis { display: flex; justify-content: space-between; margin-top: 3px;
+              font: 500 8.5px/1.4 var(--mono); color: #587e94; }
 .field-card { border: 1px solid var(--line); background: rgba(3, 9, 14, .62); padding: 8px 9px; }
 .field-card h4 { margin: 0 0 2px; font: 700 9.5px/1.4 var(--mono); letter-spacing: .08em; color: #bfe8f5; text-transform: uppercase; }
 .field-card p { margin: 4px 0 0; font-size: 9.5px; line-height: 1.5; color: #6f97ac; }
 .field-wrap { position: relative; width: 100%; height: 150px; }
 .field-wrap canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
-@media (max-width: 900px) { .field-grid { grid-template-columns: 1fr 1fr; } .field-card:last-child { grid-column: 1 / -1; } }
-@media (max-width: 560px) { .field-grid { grid-template-columns: 1fr; } .field-card:last-child { grid-column: auto; } .field-wrap { height: 140px; } }
+@media (max-width: 900px) {
+  .field-grid { grid-template-columns: 1fr 1fr; }
+  .field-card:first-child { grid-column: 1 / -1; grid-row: auto; }
+  .field-card:first-child .field-wrap { height: 210px; }
+  .field-card:not(:first-child) .field-wrap { height: 150px; }
+}
+@media (max-width: 560px) {
+  .field-grid { grid-template-columns: 1fr; }
+  .field-card:first-child { grid-column: auto; }
+  .field-card:first-child .field-wrap, .field-card:not(:first-child) .field-wrap { height: 165px; }
+}
 
 /* Readable 3D field cards */
 .field-head { display: flex; align-items: center; justify-content: space-between; gap: 6px; }

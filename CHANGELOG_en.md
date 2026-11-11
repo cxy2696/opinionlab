@@ -1,5 +1,11 @@
 # Changelog
 
+> **In one minute**
+>
+> - v1.0 upgrades the prototype: node-centric updates, explicit decision rules, deterministic RNG, manifests and CIs.
+> - Results intentionally differ from the upstream prototype.
+> - Known deviations and capacity coefficients are environment-dependent; recalibrate before release.
+
 ## v1.0.0 — 2026-11-11 (upgraded from the upstream research prototype)
 
 ### Behaviour changes

@@ -1,5 +1,11 @@
 # 私有化离线交付包 / Air-gapped private delivery
 
+> **一分钟版本**
+>
+> - 离线包包含镜像、wheel、迁移、模板和校验清单。
+> - 步骤：load 镜像 → 装 wheel → 配 `.env` → compose up。
+> - 回滚保留上一版 tag；数据库只做可逆迁移。
+
 ## 组成 / Contents
 - `images/*.tar`：api、worker、postgres、redis、minio 镜像（`docker save` 导出）。
 - `packages/hnle-*.whl`：可离线 `pip install` 的引擎与 CLI。

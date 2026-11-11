@@ -1,5 +1,11 @@
 # 合规说明 / Compliance
 
+> **一分钟版本**
+>
+> - CN/EU 双区数据驻留；跨区租户访问返回 403。
+> - G5 选举类模板需要 org_admin 声明 + platform_admin 审批。
+> - 只收结构性数据；禁止单节点轨迹；报告必须带免责声明。
+
 ## 区域 / Regions
 - `REGION=cn` 或 `global` 决定数据驻留与合规模板；跨区租户数据访问返回 `403 REGION_MISMATCH`。
 - `REGION=cn|global` controls data residency; cross-region tenant access returns 403.

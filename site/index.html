@@ -190,10 +190,17 @@
         <h3 data-i18n="fieldTitle">3D 观测阵列</h3>
         <span class="tag">HOLOGRAPHIC TELEMETRY</span>
       </div>
+      <div class="field-guide">
+        <span data-i18n="fieldGuide1">① 高度 = 多样性</span>
+        <span data-i18n="fieldGuide2">② 柱高 = 转向比例</span>
+        <span data-i18n="fieldGuide3">③ 颜色 = 立场占比</span>
+        <span data-i18n="fieldGuide4">可悬浮读数 · 随回放同步</span>
+      </div>
       <div class="field-grid">
         <div class="field-card">
           <div class="field-head"><h4 data-i18n="fieldWave">观点地形</h4><span class="field-badge">TERRAIN</span></div>
           <div class="field-wrap"><canvas id="fieldWave" aria-hidden="true"></canvas></div>
+          <div class="field-axis"><span data-i18n="fieldAxisTime">时间 →</span><span data-i18n="fieldAxisDiversity">多样性 ↑</span></div>
           <div id="fieldWaveStat" class="field-stats">—</div>
           <p data-i18n="fieldWaveDesc">高度 = 多样性；波峰是分歧最大的时刻。</p>
           <div class="field-legend" data-i18n="fieldWaveLegend">点越高 = 分歧越大</div>
@@ -201,6 +208,7 @@
         <div class="field-card">
           <div class="field-head"><h4 data-i18n="fieldBars">级联柱阵</h4><span class="field-badge">CASCADE</span></div>
           <div class="field-wrap"><canvas id="fieldBars" aria-hidden="true"></canvas></div>
+          <div class="field-axis"><span data-i18n="fieldAxisStep">步数 →</span><span data-i18n="fieldAxisShare">转向比例 ↑</span></div>
           <div id="fieldBarsStat" class="field-stats">—</div>
           <p data-i18n="fieldBarsDesc">柱高 = 该步改变立场的人数比例。</p>
           <div class="field-legend" data-i18n="fieldBarsLegend">悬浮柱体查看步数与比例</div>
@@ -208,6 +216,7 @@
         <div class="field-card">
           <div class="field-head"><h4 data-i18n="fieldCloud">立场粒子云</h4><span class="field-badge">STANCE</span></div>
           <div class="field-wrap"><canvas id="fieldCloud" aria-hidden="true"></canvas></div>
+          <div class="field-axis"><span data-i18n="fieldAxisOrbit">旋转视角</span><span data-i18n="fieldAxisStance">颜色 = 立场</span></div>
           <div id="fieldCloudStat" class="field-stats">—</div>
           <p data-i18n="fieldCloudDesc">颜色比例 = 当前双方占比，旋转观察。</p>
           <div class="field-legend" data-i18n="fieldCloudLegend">青 = 立场 0 / 琥珀 = 立场 1</div>

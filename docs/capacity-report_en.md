@@ -1,5 +1,11 @@
 # Capacity report
 
+> **In one minute**
+>
+> - Reads are not the bottleneck; CPU simulation is.
+> - One replica costs about `c × nnz × steps`, with `c ≈ 1.5e-8` measured.
+> - Start with 2×8C16G workers; absorb bursts with quotas and priorities, not blind scaling.
+
 ## Summary
 
 - Read traffic is not the bottleneck: at 20 orgs / 200 seats, peak reads are about 5 QPS, leaving
