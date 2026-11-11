@@ -85,20 +85,41 @@ function requestBody() {
 }
 
 function metricCard(key, label, metric) {
-  const value = metric ? metric.mean : null;
-  let display = fmt(value);
-  if (key === "absorbing" && typeof value === "number") display = `${(value * 100).toFixed(0)}%`;
+  const value = metric && metric.mean !== null && metric.mean !== undefined ? metric.mean : null;
   const ci = metric && metric.ci95_lo !== null && metric.ci95_lo !== undefined
     ? `95% CI ${fmt(metric.ci95_lo)} – ${fmt(metric.ci95_hi)} · n=${metric.n}`
     : "无副本达到多数 / no replica reached a majority";
+  const percent = key === "absorbing" ? "1" : "0";
   return `<div class="metric"><div class="name">${label}</div>
-    <div class="val">${display}</div><div class="ci">${ci}</div></div>`;
+    <div class="val" data-target="${value === null ? "null" : value}" data-percent="${percent}">—</div>
+    <div class="ci">${ci}</div></div>`;
+}
+
+function animateMetrics() {
+  document.querySelectorAll("#metrics .val").forEach((el) => {
+    const raw = el.dataset.target;
+    const target = Number(raw);
+    const percent = el.dataset.percent === "1";
+    if (raw === "null" || !Number.isFinite(target)) { el.textContent = "—"; return; }
+    const started = performance.now();
+    const tick = (now) => {
+      const progress = Math.min(1, (now - started) / 650);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const value = target * eased;
+      el.textContent = percent
+        ? `${(value * 100).toFixed(0)}%`
+        : Math.abs(target) >= 10 ? value.toFixed(1) : value.toFixed(3);
+      if (progress < 1) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  });
 }
 
 function renderMetrics(metrics) {
   $("metrics").innerHTML = METRICS
     .map(([key, label]) => metricCard(key, label, metrics[key]))
     .join("");
+  animateMetrics();
 }
 
 function sliceUpto(values, index) {
@@ -123,8 +144,14 @@ function renderCharts(data, upto) {
   const bands = series.bands;
   const width = bands.p90.map((high, i) => high - bands.p10[i]);
 
+  const runGradient = new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+    { offset: 0, color: "rgba(37,99,235,.22)" },
+    { offset: 1, color: "rgba(37,99,235,0)" },
+  ]);
   charts.diversity.setOption({
-    animationDurationUpdate: 60,
+    animationDuration: 700,
+    animationEasing: "cubicOut",
+    animationDurationUpdate: 120,
     tooltip: { trigger: "axis" },
     color: ["#e2e8f0", "rgba(43,108,176,.16)", "#718096", "#2b6cb0"],
     legend: { top: 0, right: 0, itemWidth: 10, itemHeight: 8, type: "scroll",
@@ -144,8 +171,8 @@ function renderCharts(data, upto) {
       { name: "中位数 / median", type: "line", data: sliceUpto(bands.p50, index),
         smooth: true, showSymbol: false, lineStyle: { type: "dashed", width: 1.5 } },
       { name: "本次 / run", type: "line", data: sliceUpto(series.diversity, index),
-        smooth: true, showSymbol: false, lineStyle: { width: 2.5 },
-        areaStyle: { opacity: 0.05 } },
+        smooth: true, showSymbol: false, lineStyle: { width: 2.6, color: "#2563eb" },
+        areaStyle: { color: runGradient } },
     ],
   });
 
@@ -162,7 +189,9 @@ function renderCharts(data, upto) {
     data: sliceUpto(series.shares.map((row) => row[opinion] || 0), index),
   }));
   charts.shares.setOption({
-    animationDurationUpdate: 60,
+    animationDuration: 700,
+    animationEasing: "cubicOut",
+    animationDurationUpdate: 120,
     tooltip: { trigger: "axis" },
     legend: { top: 0, right: 0, itemWidth: 10, itemHeight: 8 },
     grid: { left: 40, right: 12, top: 30, bottom: 26 },
@@ -172,7 +201,9 @@ function renderCharts(data, upto) {
   });
 
   charts.cascade.setOption({
-    animationDurationUpdate: 60,
+    animationDuration: 700,
+    animationEasing: "cubicOut",
+    animationDurationUpdate: 120,
     tooltip: {},
     grid: { left: 44, right: 14, top: 30, bottom: 26 },
     xAxis: { type: "category", data: steps },
@@ -180,7 +211,7 @@ function renderCharts(data, upto) {
     series: [{
       type: "bar",
       data: sliceUpto(series.cascade, index),
-      itemStyle: { color: "#dd6b20", opacity: 0.75 },
+      itemStyle: { color: "#f59e0b", opacity: 0.8, borderRadius: [3, 3, 0, 0] },
       markLine: cascadeMarkers.length ? { symbol: "none", data: cascadeMarkers } : undefined,
     }],
   });
@@ -200,7 +231,7 @@ function renderDecision(decision) {
   ];
   $("timing").innerHTML = labels
     .filter(([key]) => timing[key] !== null && timing[key] !== undefined)
-    .map(([key, label]) => `<span class="chip">${label} <b>step ${timing[key]}</b></span>`)
+    .map(([key, label]) => `<span class="chip-timing">${label} <b>step ${timing[key]}</b></span>`)
     .join("");
   $("window").innerHTML = `${decision.window_zh}<br><span class="muted">${decision.window_en}</span>`;
   $("followups").innerHTML = decision.followups_zh
@@ -256,8 +287,10 @@ function updateURL() {
 
 async function run() {
   $("error").textContent = "";
-  $("status").textContent = "运行中… / running…";
+  $("loading").hidden = false;
+  $("run").classList.add("running");
   $("run").disabled = true;
+  $("status").textContent = "运行中… / running…";
   try {
     const response = await fetch("/api/v1/demo/simulate", {
       method: "POST",
@@ -275,6 +308,8 @@ async function run() {
     $("status").textContent = "";
   } finally {
     $("run").disabled = false;
+    $("run").classList.remove("running");
+    $("loading").hidden = true;
   }
 }
 
@@ -323,7 +358,53 @@ async function copyLink() {
   }
 }
 
-$("q").oninput = updateLabels;
+const PRESETS = {
+  quick: { steps: 60, repeats: 8 },
+  robust: { repeats: 20 },
+  highq: { q: 2.2 },
+  slow: { mu: 8 },
+};
+
+function updateRange() {
+  const input = $("q");
+  const ratio = (Number(input.value) - Number(input.min)) / (Number(input.max) - Number(input.min));
+  input.style.setProperty("--p", `${(ratio * 100).toFixed(1)}%`);
+}
+
+document.querySelectorAll("[data-preset]").forEach((button) => {
+  button.onclick = () => {
+    const preset = PRESETS[button.dataset.preset];
+    if (!preset) return;
+    if (preset.steps) $("steps").value = preset.steps;
+    if (preset.repeats) $("repeats").value = Math.min(preset.repeats, 20);
+    if (preset.q) { $("q").value = preset.q; updateLabels(); updateRange(); }
+    if (preset.mu) $("mu").value = preset.mu;
+    run();
+  };
+});
+
+$("reset").onclick = () => {
+  const template = currentTemplate();
+  if (template) {
+    $("q").value = template.defaults.q;
+    $("mu").value = template.defaults.latency_mu;
+    $("steps").value = Math.min(template.defaults.n_steps, 200);
+    $("repeats").value = Math.min(Math.max(template.defaults.repeats, 8), 20);
+    $("seed").value = 42;
+    updateLabels();
+    updateRange();
+    run();
+  }
+};
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Enter" && event.target.tagName !== "BUTTON") {
+    event.preventDefault();
+    run();
+  }
+});
+
+$("q").oninput = () => { updateLabels(); updateRange(); };
 $("template").onchange = () => {
   const template = currentTemplate();
   if (template) {
@@ -336,6 +417,7 @@ $("template").onchange = () => {
   $("compare").disabled = true;
   showQuestion();
   updateLabels();
+  updateRange();
 };
 $("run").onclick = run;
 $("play").onclick = play;
@@ -349,6 +431,7 @@ window.addEventListener("resize", () => Object.values(charts).forEach((chart) =>
 
 loadTemplates()
   .then(() => {
+    updateRange();
     if (new URLSearchParams(location.search).get("run") === "1") run();
   })
   .catch((error) => { $("error").textContent = error.message; });

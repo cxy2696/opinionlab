@@ -20,6 +20,8 @@ def test_static_site_files_exist() -> None:
     assert "OpinionLab" in html
     assert "非对真实舆情的预测" in html
     assert "./sim.js" in html
+    assert "这些参数到底在做什么" in html
+    assert 'data-preset="quick"' in html
 
 
 def test_templates_export_matches_the_library() -> None:

@@ -45,6 +45,8 @@ def test_demo_page_is_self_contained() -> None:
     assert "/api/v1/demo/static/style.css" in html
     assert "非对真实舆情的预测" in html
     assert "not a prediction" in html
+    assert "这些参数到底在做什么" in html
+    assert 'data-preset="robust"' in html
 
 
 def test_echarts_bundle_is_served_locally() -> None:

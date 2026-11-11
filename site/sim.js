@@ -147,13 +147,20 @@
       cascade.push(changedCount / n);
       if (timeToConsensus < 0 && Math.max(...shares) >= 0.8) timeToConsensus = step;
     }
+    let stableConsensus = -1;
+    const finalMax = Math.max(...shareSeries[shareSeries.length - 1]);
+    if (finalMax >= 0.8) {
+      let index = shareSeries.length - 1;
+      while (index > 0 && Math.max(...shareSeries[index - 1]) >= 0.8) index -= 1;
+      stableConsensus = index;
+    }
     return {
       steps: diversity.length,
       diversity,
       shares: shareSeries,
       cascade,
-      timeToConsensus,
-      absorbing: timeToConsensus >= 0,
+      timeToConsensus: stableConsensus,
+      absorbing: stableConsensus >= 0,
       finalDiversity: diversity[diversity.length - 1],
       finalShares: shareSeries[shareSeries.length - 1],
     };
@@ -208,7 +215,25 @@
     };
   }
 
-  function decisionBrief(params, result) {
+  const DECISIONS = {
+    S1: ["政策分阶段发布的节奏与窗口", "cadence and windows for staged policy releases"],
+    S2: ["辟谣/更正信息的投放时点与力度", "timing and strength of debunking or corrections"],
+    S3: ["平台治理动作的介入时机", "when to intervene with platform governance"],
+    S4: ["品牌 KOL 与普通用户的配比节奏", "the mix and cadence of KOL vs organic reach"],
+    S5: ["应急科普的投放时点", "when to push emergency science communication"],
+    S6: ["金融预期沟通的节奏", "cadence of financial-expectation communication"],
+    S7: ["社区议事是否需要轻推、何时轻推", "whether and when to facilitate a community discussion"],
+    S8: ["组织变革沟通的节奏与窗口", "cadence and windows for organizational-change communication"],
+    S9: ["新品发布的投放节奏", "launch cadence for a new product"],
+    G1: ["模型行为是否符合经典极限（研究判断）", "whether model behaviour matches the classical limit"],
+    G2: ["事实核查的介入时点", "when fact-checking should step in"],
+    G3: ["公共卫生信息的集中投放时点", "when to concentrate public-health messaging"],
+    G4: ["平台系统性风险的观察窗口", "observation windows for platform systemic risk"],
+    G6: ["灾害预警的发布时点", "when to issue a disaster warning"],
+    G7: ["企业变更沟通的节奏", "cadence of corporate-change communication"],
+  };
+
+  function decisionBrief(params, result, templateKey) {
     const cascade = result.first.cascade;
     const meanCascade = cascade.reduce((a, b) => a + b, 0) / Math.max(1, cascade.length);
     const threshold = Math.max(0.02, meanCascade * 2);
@@ -242,9 +267,10 @@
       "Raise replicas to 30+ before relying on the result; small samples give wide intervals.",
       "Calibrate q, latency and initial stances on real data; this window is simulated, not an event forecast.",
     ];
+    const pair = DECISIONS[templateKey] || ["沟通/干预的时点与力度", "when and how strongly to communicate or intervene"];
     return {
-      decisionZh: result.metrics.absorbing.rate >= 0.5 ? "评估干预时点与沟通节奏" : "评估沟通窗口与观察重点",
-      decisionEn: result.metrics.absorbing.rate >= 0.5 ? "assessing intervention timing and cadence" : "assessing the communication window",
+      decisionZh: pair[0],
+      decisionEn: pair[1],
       timing: {
         takeoff: takeoffIndex >= 0 ? takeoffIndex + 1 : null,
         peak: peakStep,
