@@ -51,6 +51,7 @@ The demo only needs the engine and static assets; it does not require Postgres/R
 | GET | `/api/v1/demo/templates` | 可用模板与默认参数 |
 | POST | `/api/v1/demo/simulate` | 运行一次小规模蒙特卡洛，返回指标 + 序列 |
 | POST | `/api/v1/demo/report` | 生成单文件 HTML 报告 |
+| POST | `/api/v1/demo/narrate` | 可选 Ollama 辅助解读（默认关闭） |
 | GET | `/api/v1/demo/echarts.js` | 本地 ECharts bundle（离线可用） |
 | GET | `/api/v1/demo/app` | 演示页 |
 

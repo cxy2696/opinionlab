@@ -56,6 +56,7 @@ The brief appears in the demo and in the downloaded HTML report.
 | GET | `/api/v1/demo/templates` | enabled templates and defaults |
 | POST | `/api/v1/demo/simulate` | one small Monte Carlo run, metrics and series |
 | POST | `/api/v1/demo/report` | single-file HTML report |
+| POST | `/api/v1/demo/narrate` | optional Ollama narration (off by default) |
 | GET | `/api/v1/demo/echarts.js` | local ECharts bundle |
 | GET | `/api/v1/demo/app` | the demo page |
 
