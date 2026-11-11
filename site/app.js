@@ -122,10 +122,11 @@ function renderCharts(data) {
   charts.diversity.setOption({
     color: ["#e2e8f0", "rgba(43,108,176,.16)", "#718096", "#2b6cb0"],
     tooltip: { trigger: "axis" },
-    legend: { top: 0, right: 0, itemWidth: 10, itemHeight: 8, type: "scroll" },
+    legend: { top: 0, right: 0, itemWidth: 10, itemHeight: 8, type: "scroll",
+              data: ["本次 / run", "中位数 / median", "10–90%"] },
     grid: { left: 44, right: 14, top: 30, bottom: 26 },
     xAxis: { type: "category", data: steps, boundaryGap: false },
-    yAxis: { type: "value", min: 0, max: 1 },
+    yAxis: { type: "value", min: 0, max: 0.5 },
     series: [
       { name: "下界", type: "line", stack: "band", data: data.bands.p10, lineStyle: { opacity: 0 }, areaStyle: { opacity: 0 }, symbol: "none", silent: true },
       { name: "10–90%", type: "line", stack: "band", data: width, lineStyle: { opacity: 0 }, areaStyle: { color: "rgba(43,108,176,.16)" }, symbol: "none", silent: true },
@@ -138,7 +139,7 @@ function renderCharts(data) {
     legend: { top: 0, right: 0, itemWidth: 10, itemHeight: 8 },
     grid: { left: 40, right: 12, top: 30, bottom: 26 },
     xAxis: { type: "category", data: steps, boundaryGap: false },
-    yAxis: { type: "value", min: 0, max: 1 },
+    yAxis: { type: "value", min: 0, max: 0.5 },
     series: [0, 1].map((opinion) => ({
       name: `立场 ${opinion} / Opinion ${opinion}`,
       type: "line",
