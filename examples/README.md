@@ -24,7 +24,7 @@ conformity pressure.
 
 - `docs/USE_CASES.md`: crisis communication, community, organizational change, product launch,
   research reproduction.
-- `scenarios/`: 15 runnable templates.
+- `scenarios/`: 16 templates (15 enabled; G5 is gated).
 - `make demo`: interactive browser sandbox.
 
 ## Real-data case

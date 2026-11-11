@@ -3,4 +3,4 @@
 Pure-computation library: no service dependencies, installable and runnable offline.
 """
 
-__version__ = "1.3.0"
+__version__ = "1.3.1"

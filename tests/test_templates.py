@@ -1,4 +1,4 @@
-"""the scenario template library has 12 bilingual, runnable templates."""
+"""The scenario library has 16 templates: 15 enabled and one gated."""
 
 from __future__ import annotations
 

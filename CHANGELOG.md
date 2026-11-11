@@ -1,5 +1,22 @@
 # Changelog
 
+## v1.3.1 — 2026-11-12
+
+### Changed
+
+- Removed the tracked `sensitivity.json`, a generated CLI artifact that is
+  already covered by `.gitignore`.
+- Corrected the scenario count: the library has 16 templates, 15 enabled and
+  the G5 election template gated. The README, demo note, examples index and
+  template-test docstring now agree.
+- Added a source-versus-generated note to the README: `runs/` is local,
+  `site/` is assembled from the site shell plus shared `apps/web/` assets, and
+  `data/` is a fixed CC0 sample.
+
+### Unchanged
+
+- Engine dynamics are unchanged from 1.3.0.
+
 ## v1.3.0 — 2026-11-12
 
 ### Added

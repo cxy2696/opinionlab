@@ -18,7 +18,7 @@ service uses the real engine, supports multiple opinions, interventions and repo
 
 ## Features
 
-- 15 scenario templates with the question they help answer; the UI can show English or Chinese labels.
+- 16 scenario templates (15 enabled; G5 is gated) with the question they help answer; the UI can show English or Chinese labels.
 - Inline explanations for every parameter, hover tips and one-click presets.
 - A 3D telemetry array: dotted opinion terrain, elevated cascade bars and a rotating stance cloud,
   each with live peak/current stats, a legend and hover readouts on the bars.

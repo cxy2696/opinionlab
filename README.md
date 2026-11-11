@@ -60,7 +60,8 @@ Student-*t* interval, plus the assumptions and limitations that apply to the
 run. Consensus times are censored when no majority forms inside the window, and
 the reports state the censoring rate.
 
-The scenario library has 15 templates: public communication, community
+The scenario library has 16 templates: 15 enabled, plus a gated election
+template. The enabled set covers public communication, community
 discussion, organizational change, product launch, and research/reproduction.
 The browser UI can display English or Chinese labels; the repository
 documentation itself is English-only.
@@ -92,13 +93,15 @@ result, not an engine failure. The full output, commands and caveats are in
 | `apps/web/` | Source for the local demo UI: HTML, CSS, JavaScript, 3D scenes |
 | `site/` | GitHub Pages site; shared assets are copied at build time |
 | `data/` | CC0 sample used by the real-data case |
-| `scenarios/` | 15 runnable scenario templates and the valence mapping |
+| `scenarios/` | 16 scenario templates (15 enabled; G5 gated) and valence mappings |
 | `examples/` | Two minimal examples: debunk timing and community conformity |
 | `tests/` | Unit, integration, golden, frontend and documentation tests |
 | `docs/` | Mathematics, conformance, architecture, compliance, runbook and demo notes |
 | `benchmarks/` | Capacity benchmarks and Locust load scripts |
 | `deploy/` | Compose, Helm and air-gapped delivery |
 | `migrations/` | Alembic database migrations |
+
+`runs/` is local output and is not committed. `site/` is assembled from the site shell plus shared assets copied from `apps/web/` by `make site`; the tracked files in `site/` are the site-specific shell, client code and scenario export. `data/` is a fixed CC0 sample, and `scenarios/` contains the templates and the valence mappings.
 
 ## Mathematics and conformance
 
