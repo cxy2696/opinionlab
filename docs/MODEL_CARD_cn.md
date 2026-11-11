@@ -28,6 +28,6 @@
 - CN/EU dual-region deployment; cross-region tenant access returns 403.
 
 ## 生成式内容 / Generative content
-平台不调用生成式模型产出结论；如未来引入生成式段落，必须显式标识并人工复核。
+引擎不调用生成式模型计算指标或产出结论。可选 Ollama 仅用于“辅助解读”，默认关闭、必须显式启用，输出会标注“AI 辅助解释，不是结论”，且需人工复核；它不改变任何指标、决策或报告数值。
 The platform does not call generative models for conclusions; any future generated
 section must be labelled and human-reviewed.

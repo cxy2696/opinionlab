@@ -8,6 +8,8 @@ const charts = {
   shares: echarts.init($("chartShares")),
   cascade: echarts.init($("chartCascade")),
 };
+if (window.TrackGalaxy && $("galaxyScene")) TrackGalaxy.create($("galaxyScene"));
+
 const particleFields = [];
 function addParticles(id, chart, mode) {
   if (window.TrackParticles && $(id)) particleFields.push(TrackParticles.create($(id), chart, mode));
@@ -465,6 +467,7 @@ window.addEventListener("languagechange", () => {
   refreshOptions();
   showQuestion();
   updateLabels();
+  if ($("aiRun") && $("aiRun").disabled) $("aiStatus").textContent = T("aiOffline");
   if (state.last) {
     renderSummary(state.last);
     renderMetrics(state.last);
@@ -475,5 +478,10 @@ window.addEventListener("languagechange", () => {
   }
 });
 if ($("langToggle")) $("langToggle").onclick = () => I18N.toggle();
+
+if ($("aiRun")) {
+  $("aiRun").disabled = true;
+  $("aiStatus").textContent = T("aiOffline");
+}
 
 boot().catch((error) => { $("error").textContent = error.message; });

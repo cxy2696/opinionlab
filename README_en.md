@@ -33,6 +33,9 @@ number.
 - **Teaching and research:** show how conformity `q` changes consensus; reproduce the classical voter
   limit.
 
+Optional **local Ollama narration** restates a run in plain language and suggests the next experiment.
+It is disabled by default, clearly labelled assistive, and never computes metrics or decisions.
+
 Concrete questions, commands and reading guides are in [`docs/USE_CASES_en.md`](docs/USE_CASES_en.md).
 
 ## Quick start

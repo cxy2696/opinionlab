@@ -383,3 +383,22 @@ body { overflow-x: hidden; }
   .playback { flex-wrap: wrap; }
   .playback input[type=range] { flex-basis: 100%; }
 }
+
+/* Galaxy hero */
+.hero { min-height: clamp(500px, 62vh, 720px); }
+.galaxy-canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; }
+.hero::before {
+  content: ""; position: absolute; inset: 0; z-index: 2; pointer-events: none;
+  background: linear-gradient(90deg, rgba(4,8,13,.86) 0%, rgba(4,8,13,.42) 48%, rgba(4,8,13,.18) 100%);
+}
+.hero::after { z-index: 4; }
+.hero-copy, .track-panel { z-index: 3; }
+.lang-toggle { z-index: 6; }
+
+/* AI assist */
+.ai-card { border-color: var(--line-2); background: linear-gradient(180deg, rgba(8, 30, 42, .55), rgba(6, 14, 21, .95)); }
+.ai-note { margin: 6px 0 10px; font-size: 11px; line-height: 1.65; color: #8fb3c9; }
+.ai-text { margin-top: 10px; white-space: pre-wrap; font-size: 12.5px; line-height: 1.75; color: #d5edf7;
+           border-left: 2px solid var(--amber); padding-left: 10px; }
+.ai-text:empty { display: none; }
+#aiRun { margin-top: 2px; }

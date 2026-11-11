@@ -107,6 +107,21 @@ The URL captures the template and parameters; sharing it reproduces the same set
 - 想调整上限，改 `.env` 中的 `DEMO_MAX_*` 并重启 API。
 - 静态资源拆成 `index.html` / `style.css` / `app.js`，方便单独维护；ECharts 由后端本地提供，不依赖 CDN。
 
+## Ollama 辅助推演 / Ollama-assisted narration
+
+本地完整版可选接入 Ollama，把当前结果翻译成人话，并生成 2 条“下一步推演”建议。
+
+- 默认关闭：`OLLAMA_ENABLED=true` 并运行 `ollama serve && ollama pull llama3.2`
+- 只读取引擎输出的数字，不计算指标、不预测个人、不替代决策
+- 输出明确标注“AI 辅助解释，不是结论”
+- 在线版不调用本地 Ollama，按钮会提示使用本地完整版
+
+```bash
+ollama serve
+ollama pull llama3.2
+OLLAMA_ENABLED=true make demo
+```
+
 ## 边界 / Limits
 
 为避免公开接口被滥用，演示模式主动限制：节点 ≤ 400、步数 ≤ 200、副本 ≤ 20，并且只允许启用状态的模板。完整产品没有这些限制，但需要登录与配额。

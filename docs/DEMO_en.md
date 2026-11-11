@@ -65,6 +65,22 @@ curl -s http://127.0.0.1:8000/api/v1/demo/simulate \
   -d '{"template_key":"S2","q":1.8,"latency_mu":3,"repeats":8,"seed":42,"steps":120}'
 ```
 
+## Ollama-assisted narration
+
+The local full service can optionally call a local Ollama model to restate a run and suggest two
+next experiments.
+
+- Off by default: set `OLLAMA_ENABLED=true` and run `ollama serve && ollama pull llama3.2`
+- It reads engine numbers only; it computes no metrics, predicts no individuals and does not decide
+- Output is labelled “AI-assisted explanation, not a conclusion”
+- The hosted demo cannot call local Ollama; the button explains this
+
+```bash
+ollama serve
+ollama pull llama3.2
+OLLAMA_ENABLED=true make demo
+```
+
 ## Limits and operations
 
 | Item | Default | Notes |

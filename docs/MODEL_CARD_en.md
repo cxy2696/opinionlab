@@ -29,5 +29,6 @@
 
 ## Generative content
 
-The platform does not call generative models to produce conclusions. Any future generated section
-must be explicitly labelled and human-reviewed.
+The engine does not call generative models for metrics or conclusions. Optional Ollama narration is
+disabled by default, must be explicitly enabled, is labelled “AI-assisted explanation, not a
+conclusion”, and requires human review; it changes no metric, decision or report number.

@@ -17,6 +17,8 @@ const charts = {
   shares: echarts.init($("chartShares"), null, chartOptions),
   cascade: echarts.init($("chartCascade"), null, chartOptions),
 };
+if (window.TrackGalaxy && $("galaxyScene")) TrackGalaxy.create($("galaxyScene"));
+
 const particleFields = [];
 function addParticles(id, chart, mode) {
   if (window.TrackParticles && $(id)) particleFields.push(TrackParticles.create($(id), chart, mode));
@@ -355,6 +357,7 @@ function renderViews(data) {
   $("download").disabled = false;
   $("copy").disabled = false;
   $("compare").disabled = !state.previous;
+  if ($("aiRun")) $("aiRun").disabled = false;
   if (tracker) {
     tracker.setData({
       shares: data.series.shares[data.series.shares.length - 1],
@@ -466,6 +469,34 @@ async function download() {
   $("status").textContent = "";
 }
 
+async function runAi() {
+  if (!state.data) return;
+  $("error").textContent = "";
+  $("aiStatus").textContent = T("aiRunning");
+  $("aiText").textContent = "";
+  $("aiRun").disabled = true;
+  try {
+    const response = await fetch("/api/v1/demo/narrate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...requestBody(), lang: I18N.lang }),
+    });
+    const payload = await response.json();
+    if (!response.ok) {
+      const code = payload.error?.code;
+      if (code === "OLLAMA_DISABLED") throw new Error(T("aiDisabled"));
+      throw new Error(payload.error?.message || T("aiFailed"));
+    }
+    $("aiText").textContent =
+      `${payload.data.text}\n\n${I18N.lang === "en" ? payload.data.disclaimer_en : payload.data.disclaimer_zh}`;
+    $("aiStatus").textContent = `${payload.data.model} · assistive narration`;
+  } catch (error) {
+    $("aiStatus").textContent = error.message;
+  } finally {
+    $("aiRun").disabled = false;
+  }
+}
+
 async function copyLink() {
   try {
     await navigator.clipboard.writeText(location.href);
@@ -544,6 +575,7 @@ $("scrub").oninput = () => {
 };
 $("download").onclick = download;
 $("copy").onclick = copyLink;
+if ($("aiRun")) $("aiRun").onclick = runAi;
 window.addEventListener("resize", () => Object.values(charts).forEach((chart) => chart.resize()));
 
 window.addEventListener("languagechange", () => {
@@ -552,6 +584,7 @@ window.addEventListener("languagechange", () => {
   updateLabels();
   if (state.data) renderViews(state.data);
   if (state.last) renderDelta();
+  if ($("aiText")) $("aiText").textContent = "";
   if (state.data) {
     $("status").textContent =
       `q=${state.data.spec.q} · steps=${state.data.spec.n_steps} · ` +

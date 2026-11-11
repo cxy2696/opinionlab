@@ -16,6 +16,7 @@ from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, Field
 
 from app.errors import ApiError
+from app.ollama import OllamaError, build_prompt, generate_narration
 from app.settings import settings
 from hnle.decision import build_decision_brief
 from hnle.io.export import series_frame
@@ -41,6 +42,7 @@ class DemoRequest(BaseModel):
     repeats: int = Field(default=8, ge=1, le=DEMO_MAX_REPEATS)
     seed: int = Field(default=42, ge=0, le=1_000_000)
     steps: int | None = Field(default=None, ge=10, le=DEMO_MAX_STEPS)
+    lang: str = Field(default="zh", pattern="^(zh|en)$")
 
 
 def _template(key: str) -> Template:
@@ -222,6 +224,76 @@ async def demo_simulate(request: DemoRequest) -> dict[str, Any]:
             "opinion_count": spec.n_opinions,
             "disclaimer": DISCLAIMERS["simulation_not_prediction"],
             "disclaimer_key": "simulation_not_prediction",
+        }
+    }
+
+
+@router.post("/narrate")
+async def demo_narrate(request: DemoRequest) -> dict[str, Any]:
+    """Optional local-Ollama explanation of a run; never used for metrics or decisions."""
+    if not settings.ollama_enabled:
+        raise ApiError(
+            503,
+            "OLLAMA_DISABLED",
+            "Ollama narration is disabled; set OLLAMA_ENABLED=true and run ollama serve.",
+        )
+    try:
+        template = _template(request.template_key)
+    except ValueError as exc:
+        raise ApiError(404, "TEMPLATE_NOT_FOUND", str(exc)) from exc
+    spec, graph, aggregate, result = _run(template, request)
+    summary = summarize(result, spec, graph.hyperedges).to_dict()
+    narrative = _summary(result, summary, spec)
+    decision = build_decision_brief(
+        template.key,
+        template.name_zh,
+        template.name_en,
+        spec,
+        result,
+        repeats=spec.repeats,
+        absorbing=float(summary["absorbing"]) >= 0.5,
+    ).to_dict()
+    zh = request.lang == "zh"
+    context = {
+        "template": template.name_zh if zh else template.name_en,
+        "question": template.question_zh if zh else template.question_en,
+        "assumptions": template.assumptions_zh if zh else template.assumptions_en,
+        "limitations": template.limitations_zh if zh else template.limitations_en,
+        "parameters": {
+            "q": spec.q,
+            "latency_mu": spec.latency.mu,
+            "steps": spec.n_steps,
+            "replicas": spec.repeats,
+            "seed": spec.seed,
+        },
+        "metrics": {
+            name: {"mean": item.mean, "ci95": [item.ci95_lo, item.ci95_hi], "n": item.n}
+            for name, item in aggregate.metrics.items()
+        },
+        "summary": narrative["text_zh"] if zh else narrative["text_en"],
+        "timing": decision["timing"],
+        "window": decision["window_zh"] if zh else decision["window_en"],
+        "followups": decision["followups_zh"] if zh else decision["followups_en"],
+    }
+    prompt = build_prompt(context, request.lang)
+    try:
+        text = await generate_narration(
+            prompt,
+            base_url=settings.ollama_base_url,
+            model=settings.ollama_model,
+            timeout=settings.ollama_timeout_seconds,
+        )
+    except OllamaError as exc:
+        raise ApiError(503, "OLLAMA_UNAVAILABLE", str(exc)) from exc
+    return {
+        "data": {
+            "text": text,
+            "model": settings.ollama_model,
+            "mode": "assistive-narration",
+            "disclaimer_zh": "AI 辅助解释，不是结论；指标与决策以引擎输出为准。",
+            "disclaimer_en": (
+                "AI-assisted explanation, not a conclusion; engine outputs remain authoritative."
+            ),
         }
     }
 

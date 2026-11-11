@@ -49,6 +49,8 @@ def test_demo_page_is_self_contained() -> None:
     assert "/api/v1/demo/static/i18n.js" in html
     assert "/api/v1/demo/static/particles.js" in html
     assert "cockpitClock" in html
+    assert 'id="aiRun"' in html
+    assert "/api/v1/demo/static/galaxy.js" in html
     assert "这些参数到底在做什么" in html
     assert 'data-preset="robust"' in html
 

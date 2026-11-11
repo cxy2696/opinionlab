@@ -23,6 +23,14 @@
 - Logs mask emails, keep only the first 8 HMAC characters, and truncate descriptions at 200 chars;
   request bodies and stack traces are not logged in production.
 
+## Optional generative assist
+
+- Ollama narration is off by default (`OLLAMA_ENABLED=true` to enable) and is never used for metrics,
+  conclusions or individual prediction.
+- Output must be labelled “AI-assisted explanation, not a conclusion” and keep engine numbers and
+  disclaimers authoritative.
+- No third-party data transfer; the default endpoint is local `127.0.0.1:11434`.
+
 ## Red lines
 
 - No endpoint may return single-node opinion trajectories (`NODE_TRACE_FORBIDDEN`).

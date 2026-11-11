@@ -22,6 +22,11 @@
 - Audit logs are append-only with ≥180-day retention.
 - Logs mask emails, keep only 8 HMAC chars, truncate descriptions at 200 chars.
 
+## 可选生成式辅助 / Optional generative assist
+- Ollama 辅助解读默认关闭，需 `OLLAMA_ENABLED=true`；不用于指标、结论或个体预测。
+- 输出必须标注“AI 辅助解释，不是结论”，并保留引擎数字与免责声明。
+- 不向第三方发送数据；默认仅连接本机 `127.0.0.1:11434`。
+
 ## 红线 / Red lines
 - 任何接口不得返回单节点立场轨迹（`NODE_TRACE_FORBIDDEN`）。
 - 报告必须带固定免责声明，缺失即 `DISCLAIMER_MISSING`。

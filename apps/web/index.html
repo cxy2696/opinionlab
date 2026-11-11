@@ -8,11 +8,13 @@
 <script src="/api/v1/demo/echarts.js"></script>
 <script defer src="/api/v1/demo/static/i18n.js"></script>
 <script defer src="/api/v1/demo/static/scene.js"></script>
+<script defer src="/api/v1/demo/static/galaxy.js"></script>
 <script defer src="/api/v1/demo/static/particles.js"></script>
 <script defer src="/api/v1/demo/static/app.js"></script>
 </head>
 <body>
 <header class="hero">
+  <canvas id="galaxyScene" class="galaxy-canvas" aria-hidden="true"></canvas>
   <div class="hero-copy">
     <span class="eyebrow">INDUSTRIAL OPINION TRACKER // HNL-VM</span>
     <h1>OpinionLab <span data-i18n="heroTitle">情景推演沙盘</span></h1>
@@ -178,6 +180,17 @@
         <ul id="followups"></ul>
       </div>
       <p id="caveat" class="note"></p>
+    </section>
+
+    <section class="card ai-card">
+      <div class="section-head">
+        <h3 data-i18n="aiTitle">Ollama 辅助推演</h3>
+        <span class="tag">LLM ASSIST · NOT A CONCLUSION</span>
+      </div>
+      <p class="ai-note" data-i18n="aiNote">用本地 Ollama 把结果翻译成人话，并给出下一步推演建议。它不计算指标、不预测个人，也不是结论。</p>
+      <button id="aiRun" class="ghost" disabled data-i18n="aiRun">生成辅助解读</button>
+      <div id="aiStatus" class="status"></div>
+      <div id="aiText" class="ai-text"></div>
     </section>
 
     <div class="chart-grid">
