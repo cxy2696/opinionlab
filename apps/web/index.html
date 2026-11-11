@@ -190,19 +190,25 @@
       </div>
       <div class="field-grid">
         <div class="field-card">
-          <h4 data-i18n="fieldWave">观点地形</h4>
+          <div class="field-head"><h4 data-i18n="fieldWave">观点地形</h4><span class="field-badge">TERRAIN</span></div>
           <div class="field-wrap"><canvas id="fieldWave" aria-hidden="true"></canvas></div>
+          <div id="fieldWaveStat" class="field-stats">—</div>
           <p data-i18n="fieldWaveDesc">高度 = 多样性；波峰是分歧最大的时刻。</p>
+          <div class="field-legend" data-i18n="fieldWaveLegend">点越高 = 分歧越大</div>
         </div>
         <div class="field-card">
-          <h4 data-i18n="fieldBars">级联柱阵</h4>
+          <div class="field-head"><h4 data-i18n="fieldBars">级联柱阵</h4><span class="field-badge">CASCADE</span></div>
           <div class="field-wrap"><canvas id="fieldBars" aria-hidden="true"></canvas></div>
+          <div id="fieldBarsStat" class="field-stats">—</div>
           <p data-i18n="fieldBarsDesc">柱高 = 该步改变立场的人数比例。</p>
+          <div class="field-legend" data-i18n="fieldBarsLegend">悬浮柱体查看步数与比例</div>
         </div>
         <div class="field-card">
-          <h4 data-i18n="fieldCloud">立场粒子云</h4>
+          <div class="field-head"><h4 data-i18n="fieldCloud">立场粒子云</h4><span class="field-badge">STANCE</span></div>
           <div class="field-wrap"><canvas id="fieldCloud" aria-hidden="true"></canvas></div>
+          <div id="fieldCloudStat" class="field-stats">—</div>
           <p data-i18n="fieldCloudDesc">颜色比例 = 当前双方占比，旋转观察。</p>
+          <div class="field-legend" data-i18n="fieldCloudLegend">青 = 立场 0 / 琥珀 = 立场 1</div>
         </div>
       </div>
     </section>

@@ -413,3 +413,14 @@ body { overflow-x: hidden; }
 .field-wrap canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
 @media (max-width: 900px) { .field-grid { grid-template-columns: 1fr 1fr; } .field-card:last-child { grid-column: 1 / -1; } }
 @media (max-width: 560px) { .field-grid { grid-template-columns: 1fr; } .field-card:last-child { grid-column: auto; } .field-wrap { height: 140px; } }
+
+/* Readable 3D field cards */
+.field-head { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+.field-badge { font: 700 7.5px/1 var(--mono); letter-spacing: .12em; color: var(--cyan-dim);
+               border: 1px solid var(--line); padding: 3px 5px; }
+.field-stats { margin-top: 5px; font: 700 10px/1.5 var(--mono); color: var(--cyan); letter-spacing: .02em; }
+.field-legend { margin-top: 4px; font: 500 9px/1.4 var(--mono); color: #6f97ac; }
+.field-card { transition: border-color .15s, transform .15s, box-shadow .15s; }
+.field-card:hover { border-color: var(--cyan-dim); transform: translateY(-2px);
+                    box-shadow: 0 10px 24px rgba(0,0,0,.35); }
+.field-wrap { height: 165px; }

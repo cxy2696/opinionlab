@@ -35,7 +35,8 @@ number.
 - **Teaching and research:** show how conformity `q` changes consensus; reproduce the classical voter
   limit.
 
-A **3D telemetry array** adds a dotted opinion terrain, a cascade bar field and a rotating stance cloud.
+A **3D telemetry array** adds a dotted opinion terrain, a cascade bar field and a rotating stance cloud,
+each with live peak/current values, legends and hover readouts.
 Optional **local Ollama narration** restates a run in plain language and suggests the next experiment.
 It is disabled by default, clearly labelled assistive, and never computes metrics or decisions.
 

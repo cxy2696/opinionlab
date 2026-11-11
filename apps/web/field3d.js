@@ -28,11 +28,27 @@
       this.cascade = [0.04, 0.08, 0.12, 0.2, 0.32, 0.18, 0.1, 0.06];
       this.warm = 0.5;
       this.targets = [];
+      this.picks = [];
+      this.hover = null;
       this.resize = this.resize.bind(this);
       this.frame = this.frame.bind(this);
       global.addEventListener("resize", this.resize);
       if (global.ResizeObserver) new ResizeObserver(this.resize).observe(canvas.parentElement);
       this.resize();
+      this.canvas.addEventListener("pointermove", (event) => {
+        if (this.mode !== "bars") return;
+        const rect = this.canvas.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+        let best = null;
+        let distance = 22;
+        this.picks.forEach((pick) => {
+          const d = Math.hypot(pick.x - x, pick.y - y);
+          if (d < distance) { distance = d; best = pick; }
+        });
+        this.hover = best;
+      });
+      this.canvas.addEventListener("pointerleave", () => { this.hover = null; });
       if (!reduce) requestAnimationFrame(this.frame);
       else this.draw(0);
     }
@@ -74,6 +90,8 @@
             x: (ix / (grid - 1) - 0.5) * 1.8,
             z: (iz / (grid - 1) - 0.5) * 1.8,
             height: 0.02,
+            step: index,
+            value: base,
             target: Math.max(0.03, base * (0.55 + wave * 0.9)),
             color: (ix + iz) % 5 === 0 ? "255,176,32" : (ix + iz) % 3 === 0 ? "167,139,250" : "34,211,238",
           });
@@ -146,6 +164,7 @@
           return { ...bar, base, top };
         })
         .sort((a, b) => a.base.depth - b.base.depth);
+      this.picks = sorted.map((bar) => ({ x: bar.top.x, y: bar.top.y, step: bar.step, value: bar.value }));
       sorted.forEach((bar) => {
         const width = 0.09 * this.scale * bar.top.perspective;
         const height = bar.base.y - bar.top.y;
@@ -159,6 +178,19 @@
         ctx.lineWidth = 0.6;
         ctx.strokeRect(bar.top.x - width, bar.top.y, width * 2, height);
       });
+      if (this.hover) {
+        const text = `S${this.hover.step + 1} · ${(this.hover.value * 100).toFixed(0)}%`;
+        ctx.font = "600 9px ui-monospace, monospace";
+        const width = ctx.measureText(text).width + 10;
+        const x = Math.min(this.width - width - 4, Math.max(4, this.hover.x - width / 2));
+        const y = Math.max(4, this.hover.y - 26);
+        ctx.fillStyle = "rgba(2,7,11,.94)";
+        ctx.fillRect(x, y, width, 17);
+        ctx.strokeStyle = "rgba(34,211,238,.55)";
+        ctx.strokeRect(x, y, width, 17);
+        ctx.fillStyle = "#d5edf7";
+        ctx.fillText(text, x + 5, y + 12);
+      }
     }
 
     drawCloud(ctx, t) {

@@ -310,6 +310,7 @@ function renderCharts(data, upto) {
     const payload = { diversity: first.diversity.slice(0, index + 1),
       cascade: first.cascade.slice(0, index + 1), shares: first.shares.slice(0, index + 1) };
     fields.forEach((field) => field.setData(payload));
+    renderFieldStats(payload);
   }
 }
 
@@ -331,6 +332,34 @@ function renderSummary(data) {
     ? `Under these assumptions diversity fell from ${start.toFixed(2)} to ${end.toFixed(2)}, reaching a majority around step ${ttc}. The cascade peaked at step ${data.metrics.peakStep}.`
     : `Diversity moved from ${start.toFixed(2)} to ${end.toFixed(2)} without a majority in ${first.diversity.length - 1} steps. The cascade peaked at step ${data.metrics.peakStep}.`;
   $("summary").textContent = P(zh, en);
+}
+
+function renderFieldStats(series) {
+  const diversity = series.diversity || [];
+  const cascade = series.cascade || [];
+  const shares = series.shares && series.shares.length ? series.shares[series.shares.length - 1] : [0.5, 0.5];
+  if ($("fieldWaveStat") && diversity.length) {
+    const max = Math.max(...diversity);
+    const step = diversity.indexOf(max) + 1;
+    $("fieldWaveStat").textContent = P(
+      `峰值 ${max.toFixed(2)} @ S${step} · 当前 ${diversity[diversity.length - 1].toFixed(2)}`,
+      `peak ${max.toFixed(2)} @ S${step} · now ${diversity[diversity.length - 1].toFixed(2)}`,
+    );
+  }
+  if ($("fieldBarsStat") && cascade.length) {
+    const max = Math.max(...cascade);
+    const step = cascade.indexOf(max) + 1;
+    $("fieldBarsStat").textContent = P(
+      `峰值 ${(max * 100).toFixed(0)}% @ S${step}`,
+      `peak ${(max * 100).toFixed(0)}% @ S${step}`,
+    );
+  }
+  if ($("fieldCloudStat") && shares.length) {
+    $("fieldCloudStat").textContent = P(
+      `立场 0 ${(shares[0] * 100).toFixed(0)}% · 立场 1 ${(shares[1] * 100).toFixed(0)}%`,
+      `stance 0 ${(shares[0] * 100).toFixed(0)}% · stance 1 ${(shares[1] * 100).toFixed(0)}%`,
+    );
+  }
 }
 
 function renderDelta() {
