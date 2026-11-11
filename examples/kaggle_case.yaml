@@ -1,0 +1,15 @@
+# Dynamics for the real-data hashtag case. The graph is supplied with --graph.
+spec:
+  n_steps: 100
+  seed: 7
+  repeats: 30
+  q: 1.5
+  n_opinions: 2
+  init_mode: data_driven
+  weights:
+    source: engagement
+    normalize: max
+  latency:
+    dist: const
+    mu: 5
+  consensus_threshold: 0.8

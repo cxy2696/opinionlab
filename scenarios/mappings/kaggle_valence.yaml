@@ -1,0 +1,174 @@
+# Valence mapping for data/kaggle_sentiment.csv.
+# Derived from the documented lexicon in the HNL research repository.
+# Ambiguous labels are intentionally absent; ingest with unmapped_policy=drop.
+labels:
+  "acceptance": 1
+  "accomplishment": 1
+  "admiration": 1
+  "adoration": 1
+  "adrenaline": 1
+  "adventure": 1
+  "affection": 1
+  "amazement": 1
+  "amusement": 1
+  "anger": 0
+  "anticipation": 1
+  "anxiety": 0
+  "appreciation": 1
+  "apprehensive": 0
+  "artisticburst": 1
+  "awe": 1
+  "bad": 0
+  "betrayal": 0
+  "bitter": 0
+  "bitterness": 0
+  "blessed": 1
+  "boredom": 0
+  "breakthrough": 1
+  "calmness": 1
+  "captivation": 1
+  "celebration": 1
+  "celestial wonder": 1
+  "challenge": 0
+  "charm": 1
+  "colorful": 1
+  "compassion": 1
+  "compassionate": 1
+  "confidence": 1
+  "confident": 1
+  "connection": 1
+  "contentment": 1
+  "coziness": 1
+  "creative inspiration": 1
+  "creativity": 1
+  "culinary adventure": 1
+  "culinaryodyssey": 1
+  "darkness": 0
+  "dazzle": 1
+  "desolation": 0
+  "despair": 0
+  "desperation": 0
+  "determination": 1
+  "devastated": 0
+  "disappointed": 0
+  "disappointment": 0
+  "disgust": 0
+  "dismissive": 0
+  "dreamchaser": 1
+  "ecstasy": 1
+  "elation": 1
+  "elegance": 1
+  "embarrassed": 0
+  "emotionalstorm": 0
+  "empathetic": 1
+  "empowerment": 1
+  "enchantment": 1
+  "energy": 1
+  "engagement": 1
+  "enjoyment": 1
+  "enthusiasm": 1
+  "envious": 0
+  "envisioning history": 1
+  "envy": 0
+  "euphoria": 1
+  "excitement": 1
+  "exhaustion": 0
+  "exploration": 1
+  "fear": 0
+  "fearful": 0
+  "festivejoy": 1
+  "free-spirited": 1
+  "freedom": 1
+  "friendship": 1
+  "frustrated": 0
+  "frustration": 0
+  "fulfillment": 1
+  "grandeur": 1
+  "grateful": 1
+  "gratitude": 1
+  "grief": 0
+  "happiness": 1
+  "happy": 1
+  "harmony": 1
+  "hate": 0
+  "heartache": 0
+  "heartbreak": 0
+  "heartwarming": 1
+  "helplessness": 0
+  "hope": 1
+  "hopeful": 1
+  "iconic": 1
+  "imagination": 1
+  "innerjourney": 1
+  "inspiration": 1
+  "inspired": 1
+  "intimidation": 0
+  "isolation": 0
+  "jealous": 0
+  "jealousy": 0
+  "joy": 1
+  "joy in baking": 1
+  "joyfulreunion": 1
+  "kind": 1
+  "kindness": 1
+  "loneliness": 0
+  "loss": 0
+  "lostlove": 0
+  "love": 1
+  "marvel": 1
+  "melancholy": 0
+  "melodic": 1
+  "mesmerizing": 1
+  "mindfulness": 1
+  "miscalculation": 0
+  "motivation": 1
+  "nature's beauty": 1
+  "negative": 0
+  "obstacle": 0
+  "ocean's freedom": 1
+  "optimism": 1
+  "overjoyed": 1
+  "playful": 1
+  "playfuljoy": 1
+  "positive": 1
+  "positivity": 1
+  "pressure": 0
+  "pride": 1
+  "proud": 1
+  "radiance": 1
+  "regret": 0
+  "rejuvenation": 1
+  "relief": 1
+  "renewed effort": 1
+  "resentment": 0
+  "resilience": 1
+  "reverence": 1
+  "romance": 1
+  "ruins": 0
+  "runway creativity": 1
+  "sad": 0
+  "sadness": 0
+  "satisfaction": 1
+  "serenity": 1
+  "shame": 0
+  "solace": 1
+  "sorrow": 0
+  "spark": 1
+  "success": 1
+  "suffering": 0
+  "suspense": 0
+  "sympathy": 1
+  "tenderness": 1
+  "thrill": 1
+  "thrilling journey": 1
+  "touched": 1
+  "tranquility": 1
+  "triumph": 1
+  "vibrancy": 1
+  "whimsy": 1
+  "winter magic": 1
+  "wonder": 1
+  "wonderment": 1
+  "yearning": 0
+  "zest": 1
+default_opinion: null

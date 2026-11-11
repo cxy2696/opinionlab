@@ -1,6 +1,6 @@
 # Examples
 
-Two minimal examples using templates and the engine directly; no database or API server needed.
+Two minimal examples using templates and the engine directly, plus a real-data case. No database or API server is needed.
 
 ## 1. Debunk timing
 
@@ -26,3 +26,11 @@ conformity pressure.
   research reproduction.
 - `scenarios/`: 15 runnable templates.
 - `make demo`: interactive browser sandbox.
+
+## Real-data case
+
+`kaggle_hashtag_case.py` ingests `data/kaggle_sentiment.csv`, prints the graph
+structure and runs the engine with 30 replicates. Run it from the repository
+root with `make case` or `uv run python examples/kaggle_hashtag_case.py`. The
+output and its limitations are described in `docs/CASE_STUDY.md`.
+`kaggle_case.yaml` is the matching dynamics file for `hnle simulate --graph`.

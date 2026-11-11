@@ -11,7 +11,8 @@ then [Demo](DEMO.md), then [Model card](MODEL_CARD.md).
 
 If you want to understand the numbers, read [Math model](MATH_MODEL.md) and
 [Conformance](CONFORMANCE.md). The first is the specification; the second maps
-each equation to a function and a test.
+each equation to a function and a test. For a concrete input, read the
+[case study](CASE_STUDY.md).
 
 If you are deploying or operating the service, read
 [Architecture](ARCHITECTURE.md), then [Runbook](RUNBOOK.md), then
@@ -25,6 +26,7 @@ If you are deploying or operating the service, read
 | [Demo](DEMO.md) | hosted and local demo, API, limits, Ollama narration |
 | [Architecture](ARCHITECTURE.md) | layers, data flow, module map |
 | [Math model](MATH_MODEL.md) | formulas, `q` limits, estimators and failure boundaries |
+| [Case study](CASE_STUDY.md) | a published hashtag sample, from CSV to component result |
 | [Conformance](CONFORMANCE.md) | equation-to-code map and the shared numerical fixture |
 | [Model card](MODEL_CARD.md) | capabilities, limits, prohibited uses |
 | [Compliance](COMPLIANCE.md) | regions, review, deletion, retention |

@@ -257,6 +257,9 @@ def ingest_dataframe(
         initial_opinions=tuple(opinions_array) if opinions_array else None,
         weights=tuple(float(value) for value in weights),
     )
+    # ``Hypergraph`` merges identical edges; report the number the engine will
+    # actually use, not the pre-merge count.
+    stats["edge_count"] = len(graph.hyperedges)
     return IngestResult(graph=graph, weights=weights, stats=stats, warnings=warnings)
 
 

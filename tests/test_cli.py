@@ -56,6 +56,7 @@ def test_simulate_help_lists_options_and_defaults() -> None:
         "--max-memory-gb",
         "--init-mode",
         "--decision-rule",
+        "--graph",
         "--out-dir",
     ):
         assert option in plain

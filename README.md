@@ -65,6 +65,24 @@ discussion, organizational change, product launch, and research/reproduction.
 The browser UI can display English or Chinese labels; the repository
 documentation itself is English-only.
 
+## A real-data case
+
+The repository includes a small CC0 sample from the Kaggle *Social Media
+Sentiments Analysis Dataset* and a worked case that ingests it, builds a
+hashtag hypergraph and runs the engine:
+
+```bash
+make case
+```
+
+The sample has 732 posts, 586 users and 149 hashtag hyperedges. It forms 239
+connected components; the largest holds 14 % of the users. With `q=1.5`, a
+fixed five-sweep latency and 30 replicates, the final diversity is 0.293
+(95 % CI 0.285–0.301) and the final majority is 0.744. Every component freezes,
+but no run reaches an 80 % population majority. That is the fragmentation
+result, not an engine failure. The full output, commands and caveats are in
+[`docs/CASE_STUDY.md`](docs/CASE_STUDY.md).
+
 ## Repository map
 
 | Path | What it is |
@@ -73,7 +91,8 @@ documentation itself is English-only.
 | `apps/api/` | FastAPI service: auth, quotas, jobs, connectors, compliance, demo API |
 | `apps/web/` | Source for the local demo UI: HTML, CSS, JavaScript, 3D scenes |
 | `site/` | GitHub Pages site; shared assets are copied at build time |
-| `scenarios/` | 15 runnable scenario templates |
+| `data/` | CC0 sample used by the real-data case |
+| `scenarios/` | 15 runnable scenario templates and the valence mapping |
 | `examples/` | Two minimal examples: debunk timing and community conformity |
 | `tests/` | Unit, integration, golden, frontend and documentation tests |
 | `docs/` | Mathematics, conformance, architecture, compliance, runbook and demo notes |
@@ -117,6 +136,7 @@ tests are skipped locally when the services are not available; they run in CI.
 | [Architecture](docs/ARCHITECTURE.md) | layers, data flow, module map |
 | [Math model](docs/MATH_MODEL.md) | formulas, `q` limits, estimators and failure boundaries |
 | [Conformance](docs/CONFORMANCE.md) | formula-to-code map and the shared fixture |
+| [Case study](docs/CASE_STUDY.md) | a published hashtag sample, end to end |
 | [Model card](docs/MODEL_CARD.md) | capabilities, limits, prohibited uses |
 | [Compliance](docs/COMPLIANCE.md) | regions, review, deletion, red lines |
 | [Runbook](docs/RUNBOOK.md) | metrics, logs, rollback, tainted runs |

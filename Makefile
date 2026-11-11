@@ -2,7 +2,7 @@
 
 PYTEST := uv run pytest
 
-.PHONY: setup test check bench migrate demo site
+.PHONY: setup test check bench migrate demo site case
 
 setup:
 	uv sync
@@ -27,3 +27,6 @@ site:
 
 bench:
 	uv run pytest benchmarks -q
+
+case:
+	uv run python examples/kaggle_hashtag_case.py

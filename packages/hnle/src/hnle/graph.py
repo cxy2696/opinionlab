@@ -101,6 +101,31 @@ def adjacency_lists(graph: Hypergraph) -> list[list[int]]:
     return incident
 
 
+def connected_components(graph: Hypergraph) -> list[list[int]]:
+    """Connected components of the 2-section graph, largest first."""
+    parent = list(range(graph.n_nodes))
+
+    def find(node: int) -> int:
+        while parent[node] != node:
+            parent[node] = parent[parent[node]]
+            node = parent[node]
+        return node
+
+    def union(left: int, right: int) -> None:
+        root_left, root_right = find(left), find(right)
+        if root_left != root_right:
+            parent[root_right] = root_left
+
+    for edge in graph.hyperedges:
+        anchor = edge[0]
+        for node in edge[1:]:
+            union(anchor, node)
+    groups: dict[int, list[int]] = {}
+    for node in range(graph.n_nodes):
+        groups.setdefault(find(node), []).append(node)
+    return sorted(groups.values(), key=len, reverse=True)
+
+
 def opinions_array(opinions: list[int]) -> npt.NDArray[np.int64]:
     """Validate a plain list of opinions and convert it to an ``int64`` array."""
     return np.asarray(opinions, dtype=np.int64)

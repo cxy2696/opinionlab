@@ -1,5 +1,32 @@
 # Changelog
 
+## v1.3.0 — 2026-11-12
+
+### Added
+
+- A real-data case built on the CC0 Kaggle *Social Media Sentiments Analysis
+  Dataset*: `data/kaggle_sentiment.csv`, a 169-label valence mapping, and
+  `examples/kaggle_hashtag_case.py`. `make case` ingests 732 posts, builds 149
+  hashtag hyperedges, and runs 30 replicas.
+- `docs/CASE_STUDY.md` reports the result: 239 components, largest 14.2 %,
+  final diversity 0.293 [0.285, 0.301], final majority 0.744, every component
+  internally absorbed, no 80 % population majority. The case is framed as a
+  structural scenario, not a forecast.
+- `simulate --graph` accepts an ingested `.npz` graph, so the output of
+  `hnle ingest` can be run without writing a new scenario graph.
+- `connected_components()` in `hnle.graph`, used by the case and available to
+  callers.
+- `tests/test_case_study.py` checks the sample ingest and the `--graph` path.
+
+### Changed
+
+- `hnle ingest` exposes `--user-column`, `--hashtags-column`,
+  `--sentiment-column`, `--engagement-column`, `--min-size`, `--max-size` and
+  `--allow-content`, so a CSV with non-default headers can be used directly.
+- Ingest stats report the post-merge hyperedge count, matching the graph the
+  engine actually uses.
+- Version metadata to 1.3.0. Engine dynamics are unchanged from 1.2.0.
+
 ## v1.2.0 — 2026-11-12
 
 ### Documentation

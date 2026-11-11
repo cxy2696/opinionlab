@@ -1,6 +1,6 @@
 [project]
 name = "opinionlab"
-version = "1.2.0"
+version = "1.3.0"
 description = "OpinionLab — reproducible, high-performance opinion-dynamics simulation sandbox (hnle engine + service layer)."
 requires-python = ">=3.12,<3.13"
 dependencies = ["hnle", "opinionlab-api"]

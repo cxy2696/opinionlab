@@ -37,8 +37,8 @@ def test_changelog_records_behaviour_changes() -> None:
 
 def test_readme_points_at_docs() -> None:
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
-    for base in ("ARCHITECTURE", "MATH_MODEL", "CONFORMANCE", "MODEL_CARD", "COMPLIANCE",
-                 "RUNBOOK", "capacity-report", "DEMO", "USE_CASES"):
+    for base in ("ARCHITECTURE", "MATH_MODEL", "CONFORMANCE", "CASE_STUDY", "MODEL_CARD",
+                 "COMPLIANCE", "RUNBOOK", "capacity-report", "DEMO", "USE_CASES"):
         assert f"docs/{base}.md" in readme
         assert (ROOT / "docs" / f"{base}.md").exists()
     assert "CHANGELOG.md" in readme

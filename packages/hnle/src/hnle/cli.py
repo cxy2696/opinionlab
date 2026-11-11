@@ -92,6 +92,7 @@ def _load_spec(
     jobs: int | None = None,
     init_mode: str | None = None,
     decision_rule: str | None = None,
+    graph_path: Path | None = None,
 ) -> tuple[ModelSpec, Hypergraph, dict[str, Any]]:
     if not spec_path.exists():
         typer.echo(f"spec not found: {spec_path}", err=True)
@@ -117,6 +118,16 @@ def _load_spec(
                 err=True,
             )
             raise typer.Exit(code=3)
+    if graph_path is not None:
+        from hnle.io.manifest import load_graph
+
+        try:
+            graph, _weights = load_graph(graph_path)
+        except (OSError, ValueError, KeyError) as exc:
+            typer.echo(f"could not read graph {graph_path}: {exc}", err=True)
+            raise typer.Exit(code=2) from exc
+        return spec, graph, {"graph_path": str(graph_path)}
+
     graph_data = raw.get("graph") if isinstance(raw, dict) else None
     if graph_data:
         n_nodes = int(graph_data.get("n_nodes", 200))
@@ -187,11 +198,19 @@ def simulate(
     ),
     init_mode: Optional[str] = typer.Option(None, help="data_driven|balanced_random|fixed_ratio"),
     decision_rule: Optional[str] = typer.Option(None, help="stochastic|argmax|threshold"),
+    graph_path: Optional[Path] = typer.Option(
+        None, "--graph", help="Ingested graph .npz (from `hnle ingest`) / 接入图文件"
+    ),
     out_dir: Path = typer.Option(Path("runs"), help="Artifact root / 产物目录"),
 ) -> None:
     """Run one scenario (Monte-Carlo when repeats > 1) and export artifacts."""
     parsed, graph, _graph_data = _load_spec(
-        spec, set_values, repeats=repeats, init_mode=init_mode, decision_rule=decision_rule
+        spec,
+        set_values,
+        repeats=repeats,
+        init_mode=init_mode,
+        decision_rule=decision_rule,
+        graph_path=graph_path,
     )
     started = time.perf_counter()
     aggregate = run_monte_carlo(
@@ -237,13 +256,30 @@ def ingest(
     out_dir: Path = typer.Option(Path("datasets"), help="Output directory / 输出目录"),
     mapping: Optional[Path] = typer.Option(None, help="Sentiment mapping YAML"),
     unmapped_policy: str = typer.Option("drop", help="drop|to_negative|to_positive|exclude_user"),
+    user_column: str = typer.Option("user", help="User id column"),
+    hashtags_column: str = typer.Option("hashtags", help="Hashtag column"),
+    sentiment_column: Optional[str] = typer.Option("sentiment", help="Sentiment column"),
+    engagement_column: Optional[str] = typer.Option("engagement", help="Engagement column"),
+    min_size: int = typer.Option(2, help="Minimum hyperedge size"),
+    max_size: int = typer.Option(200, help="Maximum hyperedge size"),
+    allow_content: bool = typer.Option(False, help="Allow a text/content column"),
 ) -> None:
     """Pseudonymise a CSV, build a hypergraph and write a snapshot."""
     salt = org_salt or None
     if salt is None:
         typer.echo("--org-salt (or PSEUDONYM_HMAC_KEY) is required", err=True)
         raise typer.Exit(code=2)
-    config = IngestConfig(mapping_path=mapping, unmapped_policy=unmapped_policy)
+    config = IngestConfig(
+        user_column=user_column,
+        hashtags_column=hashtags_column,
+        sentiment_column=sentiment_column,
+        engagement_column=engagement_column,
+        mapping_path=mapping,
+        unmapped_policy=unmapped_policy,
+        min_size=min_size,
+        max_size=max_size,
+        allow_content=allow_content,
+    )
     try:
         result = ingest_csv(csv, salt=salt.encode("utf-8"), config=config)
     except IngestError as exc:
