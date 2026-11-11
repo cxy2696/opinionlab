@@ -26,6 +26,6 @@ Vary `q` and watch diversity, consensus step and absorption to distinguish genui
 
 ## 更多场景 / More scenarios
 
-- `docs/USE_CASES.md`：危机沟通、社区议事、组织变革、产品发布、学术复现等具体案例
+- `docs/USE_CASES_cn.md`：危机沟通、社区议事、组织变革、产品发布、学术复现等具体案例
 - `scenarios/`：15 个可运行模板
 - `make demo`：在浏览器中交互体验

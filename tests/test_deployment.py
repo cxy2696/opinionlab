@@ -49,7 +49,7 @@ def test_dockerfiles_pin_digest_and_run_as_non_root() -> None:
 
 
 def test_private_offline_and_dual_region_values() -> None:
-    offline = (ROOT / "deploy" / "private" / "OFFLINE.md").read_text(encoding="utf-8")
+    offline = (ROOT / "deploy" / "private" / "OFFLINE_cn.md").read_text(encoding="utf-8")
     assert "docker load" in offline
     assert "全离线" in offline or "air-gapped" in offline.lower()
 
@@ -73,7 +73,7 @@ def test_ci_has_migration_and_weekly_audit() -> None:
 
 
 def test_runbook_documents_canary_rollback_and_tainted() -> None:
-    text = (ROOT / "docs" / "RUNBOOK.md").read_text(encoding="utf-8")
+    text = (ROOT / "docs" / "RUNBOOK_cn.md").read_text(encoding="utf-8")
     assert "金丝雀" in text and "Canary" in text
     assert "回滚" in text and "rollback" in text.lower()
     assert "tainted" in text.lower()

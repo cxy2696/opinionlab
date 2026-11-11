@@ -21,7 +21,7 @@ make demo
 # 打开 http://127.0.0.1:8000  →  自动跳转到 /api/v1/demo/app
 ```
 
-演示页只依赖本仓库的引擎与静态资源，不需要 Postgres/Redis；完整服务（登录、场景库、作业队列）见 `docs/ARCHITECTURE.md`。
+演示页只依赖本仓库的引擎与静态资源，不需要 Postgres/Redis；完整服务（登录、场景库、作业队列）见 `docs/ARCHITECTURE_cn.md`。
 
 The demo only needs the engine and static assets; it does not require Postgres/Redis. The full service (auth, scenario library, job queue) is described in the architecture doc.
 

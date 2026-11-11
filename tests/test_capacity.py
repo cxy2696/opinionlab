@@ -42,7 +42,7 @@ def test_worker_throughput() -> None:
 
 
 def test_capacity_report_has_measured_coefficient() -> None:
-    report = (ROOT / "docs" / "capacity-report.md").read_text(encoding="utf-8")
+    report = (ROOT / "docs" / "capacity-report_cn.md").read_text(encoding="utf-8")
     assert "c ≈ 1.5e-8" in report
     assert "single_replica = c × nnz(H) × n_steps" in report
     assert "ScenarioA" in report and "ScenarioB" in report and "ScenarioC" in report

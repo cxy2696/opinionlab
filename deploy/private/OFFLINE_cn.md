@@ -17,7 +17,7 @@
 - `sha256sum -c SHA256SUMS`
 - `docker compose ps` 全部 healthy
 - `curl http://localhost:8000/health` 返回 `{"status":"ok"}`
-- 离线跑一次：`hnle simulate --spec scenarios/s2_rumor_debon_timing.yaml --repeats 5 --out-dir runs`
+- 离线跑一次：`hnle simulate --spec scenarios/s2_rumor_debunk_timing.yaml --repeats 5 --out-dir runs`
 
 ## 回滚 / Rollback
 - 保留上一版本镜像 tag；`docker compose down` 后用旧 tag 重新 `up -d`。

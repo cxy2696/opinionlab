@@ -110,12 +110,19 @@ function config() {
   });
 }
 
-function metricCard(label, value, ci, percent) {
+const METRIC_WHY = {
+  diversity: ["越低越集中；0 表示只剩一种立场。", "Lower is more concentrated; 0 means one stance left."],
+  peak: ["级联最剧烈的一步，多少人同时改变立场。", "The most intense step: how many changed at once."],
+  consensus: ["达到 80% 多数所需的步数；只统计达到多数的副本。", "Steps to an 80% majority; majority-reaching replicas only."],
+  absorbing: ["有多少副本最终稳定在多数。", "Share of replicas that end in a stable majority."],
+};
+
+function metricCard(label, value, ci, percent, why) {
   const target = value === null || value === undefined ? "null" : value;
   const interval = ci ? `95% CI ${fmt(ci[0])} – ${fmt(ci[1])}` : "";
   return `<div class="metric"><div class="name">${label}</div>
     <div class="val" data-target="${target}" data-percent="${percent ? "1" : "0"}">—</div>
-    <div class="ci">${interval}</div></div>`;
+    <div class="ci">${interval}</div><div class="why">${why || ""}</div></div>`;
 }
 
 function animateMetrics() {
@@ -140,12 +147,42 @@ function animateMetrics() {
 function renderMetrics(data) {
   const m = data.metrics;
   $("metrics").innerHTML = [
-    metricCard(P("多样性", "Diversity"), m.diversity.mean, [m.diversity.lo, m.diversity.hi]),
-    metricCard(P("级联峰值", "Peak cascade"), m.peakValue, null),
-    metricCard(P("达到多数的步", "Majority step"), m.consensus ? m.consensus.mean : null, null),
-    metricCard(P("吸收比例", "Absorbing rate"), m.absorbing.rate, null, true),
+    metricCard(P("多样性", "Diversity"), m.diversity.mean, [m.diversity.lo, m.diversity.hi], false, P(...METRIC_WHY.diversity)),
+    metricCard(P("级联峰值", "Peak cascade"), m.peakValue, null, false, P(...METRIC_WHY.peak)),
+    metricCard(P("达到多数的步", "Majority step"), m.consensus ? m.consensus.mean : null, null, false, P(...METRIC_WHY.consensus)),
+    metricCard(P("吸收比例", "Absorbing rate"), m.absorbing.rate, null, true, P(...METRIC_WHY.absorbing)),
   ].join("");
   animateMetrics();
+}
+
+function renderPlain(data) {
+  const m = data.metrics;
+  const diversity = m.diversity.mean;
+  const absorbing = m.absorbing.rate;
+  const consensus = m.consensus ? m.consensus.mean : null;
+  const cascade = data.first.cascade;
+  const peak = cascade.length ? Math.max(...cascade) : 0;
+  const peakStep = cascade.length ? cascade.indexOf(peak) + 1 : 0;
+  const bullets = [];
+  bullets.push(P(
+    `最终多样性 ${fmt(diversity)}：${diversity < 0.05 ? "基本只剩一种声音" : diversity < 0.2 ? "仍有少数派，但明显收拢" : "多种立场仍然并存"}。`,
+    `Final diversity ${fmt(diversity)}: ${diversity < 0.05 ? "one stance dominates" : diversity < 0.2 ? "minority remains but shrinking" : "multiple stances still coexist"}.`,
+  ));
+  if (cascade.length) {
+    bullets.push(P(
+      `级联峰值在第 ${peakStep} 步，约 ${(peak * 100).toFixed(0)}% 的人同时改变立场。`,
+      `The cascade peaked at step ${peakStep}; about ${(peak * 100).toFixed(0)}% changed at once.`,
+    ));
+  }
+  if (consensus !== null) {
+    bullets.push(P(`约第 ${consensus.toFixed(1)} 步达到 80% 多数。`, `An 80% majority is reached around step ${consensus.toFixed(1)}.`));
+  }
+  bullets.push(P(
+    `${(absorbing * 100).toFixed(0)}% 的副本最终稳定在多数。`,
+    `${(absorbing * 100).toFixed(0)}% of replicas end in a stable majority.`,
+  ));
+  $("plainReading").innerHTML =
+    `<strong>${P("用一句话说：", "In plain words:")}</strong><ul>${bullets.map((item) => `<li>${item}</li>`).join("")}</ul>`;
 }
 
 function renderDecision(decision) {
@@ -285,6 +322,7 @@ function run() {
     state.config = settings;
     renderSummary(result);
     renderMetrics(result);
+    renderPlain(result);
     renderDecision(OpinionSim.decisionBrief(settings, result, $("template").value));
     renderCharts(result);
     renderDelta();
@@ -406,6 +444,7 @@ window.addEventListener("languagechange", () => {
   if (state.last) {
     renderSummary(state.last);
     renderMetrics(state.last);
+    renderPlain(state.last);
     renderDecision(OpinionSim.decisionBrief(state.config, state.last, $("template").value));
     renderCharts(state.last);
     renderDelta();

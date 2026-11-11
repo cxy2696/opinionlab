@@ -183,8 +183,8 @@ async def test_dataset_deletion_cascades_artifacts_and_snapshots(client: AsyncCl
 
 def test_docs_cover_model_card_and_compliance() -> None:
     root = Path(__file__).parents[1]
-    model_card = (root / "docs" / "MODEL_CARD.md").read_text(encoding="utf-8")
-    compliance = (root / "docs" / "COMPLIANCE.md").read_text(encoding="utf-8")
+    model_card = (root / "docs" / "MODEL_CARD_cn.md").read_text(encoding="utf-8")
+    compliance = (root / "docs" / "COMPLIANCE_cn.md").read_text(encoding="utf-8")
     assert "禁止用途" in model_card and "Prohibited uses" in model_card
     assert "留存" in compliance and "retention" in compliance
     assert "NODE_TRACE_FORBIDDEN" in compliance

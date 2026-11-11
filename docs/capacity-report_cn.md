@@ -54,7 +54,7 @@ locust -f benchmarks/locustfile.py ScenarioCAbuse --host http://localhost:8000 \
 - `opinionlab_api_duration_seconds` P95（A）
 - `opinionlab_queue_depth`（B：不单调增长）
 - `opinionlab_replica_failures_total` / 429 比例（C）
-- `docs/RUNBOOK.md` 中的告警阈值即压测通过线。
+- `docs/RUNBOOK_cn.md` 中的告警阈值即压测通过线。
 
 ## 假设与局限 / Assumptions & limitations
 - 本报告 c 为单机 CSR 引擎实测，未含网络/DB 写回开销。

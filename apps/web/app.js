@@ -109,6 +109,13 @@ function requestBody() {
   };
 }
 
+const METRIC_WHY = {
+  diversity_final: ["越低越集中；0 表示只剩一种立场。", "Lower is more concentrated; 0 means one stance left."],
+  cascade_p99: ["最剧烈的 1% 步数里，改变立场的人占比。", "Share changing in the most intense 1% of steps."],
+  time_to_consensus: ["达到 80% 多数所需的步数；只统计达到多数的副本。", "Steps to an 80% majority; majority-reaching replicas only."],
+  absorbing: ["有多少副本最终稳定在多数。", "Share of replicas that end in a stable majority."],
+};
+
 function metricCard(key, label, metric) {
   const value = metric && metric.mean !== null && metric.mean !== undefined ? metric.mean : null;
   const ci = metric && metric.ci95_lo !== null && metric.ci95_lo !== undefined
@@ -117,7 +124,7 @@ function metricCard(key, label, metric) {
   const percent = key === "absorbing" ? "1" : "0";
   return `<div class="metric"><div class="name">${label}</div>
     <div class="val" data-target="${value === null ? "null" : value}" data-percent="${percent}">—</div>
-    <div class="ci">${ci}</div></div>`;
+    <div class="ci">${ci}</div><div class="why">${P(...METRIC_WHY[key])}</div></div>`;
 }
 
 function animateMetrics() {
@@ -271,12 +278,50 @@ function renderDecision(decision) {
   $("caveat").textContent = P(decision.caveat_zh, decision.caveat_en);
 }
 
+function renderPlain(data) {
+  const m = data.metrics;
+  const diversity = m.diversity_final ? m.diversity_final.mean : null;
+  const absorbing = m.absorbing ? m.absorbing.mean : null;
+  const consensus = m.time_to_consensus ? m.time_to_consensus.mean : null;
+  const cascade = data.series.cascade || [];
+  const peak = cascade.length ? Math.max(...cascade) : 0;
+  const peakStep = cascade.length ? cascade.indexOf(peak) + 1 : 0;
+  const bullets = [];
+  if (diversity !== null) {
+    bullets.push(P(
+      `最终多样性 ${fmt(diversity)}：${diversity < 0.05 ? "基本只剩一种声音" : diversity < 0.2 ? "仍有少数派，但明显收拢" : "多种立场仍然并存"}。`,
+      `Final diversity ${fmt(diversity)}: ${diversity < 0.05 ? "one stance dominates" : diversity < 0.2 ? "minority remains but shrinking" : "multiple stances still coexist"}.`,
+    ));
+  }
+  if (cascade.length) {
+    bullets.push(P(
+      `级联峰值在第 ${peakStep} 步，约 ${(peak * 100).toFixed(0)}% 的人同时改变立场。`,
+      `The cascade peaked at step ${peakStep}; about ${(peak * 100).toFixed(0)}% changed at once.`,
+    ));
+  }
+  if (consensus !== null) {
+    bullets.push(P(
+      `约第 ${consensus.toFixed(1)} 步达到 80% 多数。`,
+      `An 80% majority is reached around step ${consensus.toFixed(1)}.`,
+    ));
+  }
+  if (absorbing !== null) {
+    bullets.push(P(
+      `${(absorbing * 100).toFixed(0)}% 的副本最终稳定在多数。`,
+      `${(absorbing * 100).toFixed(0)}% of replicas end in a stable majority.`,
+    ));
+  }
+  $("plainReading").innerHTML =
+    `<strong>${P("用一句话说：", "In plain words:")}</strong><ul>${bullets.map((item) => `<li>${item}</li>`).join("")}</ul>`;
+}
+
 function renderViews(data) {
   const summary = data.summary_text;
   $("verdict").textContent = P(summary.verdict_zh, summary.verdict_en);
   $("verdict").className = data.summary.absorbing ? "verdict good" : "verdict";
   $("summary").textContent = P(summary.text_zh, summary.text_en);
   renderMetrics(data.metrics);
+  renderPlain(data);
   renderDecision(data.decision);
   renderCharts(data);
   $("scrub").disabled = false;
