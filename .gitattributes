@@ -1,6 +1,7 @@
 # Vendored third-party bundle: keep it out of GitHub language statistics.
 packages/hnle/src/hnle/assets/echarts.min.js.gz binary linguist-vendored linguist-generated
 *.min.js linguist-vendored linguist-generated
+site/echarts.min.js linguist-vendored linguist-generated
 *.min.css linguist-vendored linguist-generated
 
 # Normalise text files.

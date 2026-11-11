@@ -1,0 +1,436 @@
+[
+  {
+    "key": "G1",
+    "name_zh": "学术复现",
+    "name_en": "Academic reproduction",
+    "question_zh": "在经典 Voter 极限（q=1、L=1、二元超边）下，共识概率是否随规模按预期衰减？",
+    "question_en": "In the classical voter limit (q=1, L=1, pair edges), does consensus probability decay with size as expected?",
+    "interpretation_zh": "共识概率随 n 单调下降，可作为实现正确性的数学锚点。",
+    "interpretation_en": "Consensus probability decreasing with n serves as the mathematical correctness anchor.",
+    "defaults": {
+      "q": 1.0,
+      "latency_mu": 1.0,
+      "latency_sigma": 2.0,
+      "steps": 150,
+      "repeats": 8,
+      "seed": 42,
+      "n_nodes": 200,
+      "n_edges": 400,
+      "min_size": 2,
+      "max_size": 2
+    },
+    "intervention": null
+  },
+  {
+    "key": "G2",
+    "name_zh": "事实核查",
+    "name_en": "Fact checking",
+    "question_zh": "事实核查在不同传播阶段介入，能否阻断错误信息的二次扩散？",
+    "question_en": "Can fact-checking at different diffusion stages block secondary spread of misinformation?",
+    "interpretation_zh": "核查越早，级联尾部越短；若 CI 重叠，说明时点不是决定因素。",
+    "interpretation_en": "Earlier checks shorten the cascade tail; overlapping CIs mean timing is not the driver.",
+    "defaults": {
+      "q": 1.6,
+      "latency_mu": 3.0,
+      "latency_sigma": 1.0,
+      "steps": 100,
+      "repeats": 8,
+      "seed": 42,
+      "n_nodes": 300,
+      "n_edges": 800,
+      "min_size": 2,
+      "max_size": 200
+    },
+    "intervention": {
+      "at_step": 12,
+      "type": "debunk",
+      "magnitude": 0.35,
+      "duration": 5,
+      "target": {
+        "opinion": "1"
+      }
+    }
+  },
+  {
+    "key": "G3",
+    "name_zh": "公共卫生",
+    "name_en": "Public health",
+    "question_zh": "权威信源集中发声，能否在疫情话题中形成稳定的正向共识？",
+    "question_en": "Can concentrated authoritative messaging form a stable positive consensus in an outbreak topic?",
+    "interpretation_zh": "种子观点比例越高，收敛越快；但过度集中可能压低多样性。",
+    "interpretation_en": "A higher seeded share converges faster, but over-concentration can suppress diversity.",
+    "defaults": {
+      "q": 1.8,
+      "latency_mu": 4.0,
+      "latency_sigma": 1.5,
+      "steps": 100,
+      "repeats": 8,
+      "seed": 42,
+      "n_nodes": 350,
+      "n_edges": 900,
+      "min_size": 2,
+      "max_size": 200
+    },
+    "intervention": {
+      "at_step": 8,
+      "type": "seed_opinion",
+      "magnitude": 0.2,
+      "duration": 1,
+      "target": {
+        "opinion": "1"
+      }
+    }
+  },
+  {
+    "key": "G4",
+    "name_zh": "平台系统性风险",
+    "name_en": "Platform systemic risk",
+    "question_zh": "超边持续增长时，平台话题是否会进入高波动、难收敛的状态？",
+    "question_en": "When hyperedges keep growing, can platform topics enter a high-volatility, non-converging regime?",
+    "interpretation_zh": "拓扑增长叠加高从众 q，会显著抬高 cascade p99 并推迟收敛。",
+    "interpretation_en": "Topology growth plus high conformity q raises cascade p99 and delays convergence.",
+    "defaults": {
+      "q": 2.2,
+      "latency_mu": 3.0,
+      "latency_sigma": 2.0,
+      "steps": 120,
+      "repeats": 8,
+      "seed": 42,
+      "n_nodes": 400,
+      "n_edges": 1000,
+      "min_size": 2,
+      "max_size": 200
+    },
+    "intervention": null
+  },
+  {
+    "key": "G6",
+    "name_zh": "灾害预警",
+    "name_en": "Disaster warning",
+    "question_zh": "灾害预警发布后，信息扩散是否能在短时间内覆盖多数节点并稳定？",
+    "question_en": "After a disaster warning, can information reach most nodes quickly and stay stable?",
+    "interpretation_zh": "预警后若正向占比快速上升且不回落，说明覆盖有效；否则需补充渠道。",
+    "interpretation_en": "A quick, non-reverting rise in the positive share means coverage worked; otherwise add channels.",
+    "defaults": {
+      "q": 1.7,
+      "latency_mu": 3.0,
+      "latency_sigma": 1.0,
+      "steps": 90,
+      "repeats": 8,
+      "seed": 42,
+      "n_nodes": 250,
+      "n_edges": 700,
+      "min_size": 2,
+      "max_size": 200
+    },
+    "intervention": {
+      "at_step": 5,
+      "type": "boost",
+      "magnitude": 0.3,
+      "duration": 10,
+      "target": {
+        "opinion": "1"
+      }
+    }
+  },
+  {
+    "key": "G7",
+    "name_zh": "企业变更沟通",
+    "name_en": "Corporate change communication",
+    "question_zh": "组织变革沟通的节奏，会如何影响员工观点的分化与回流？",
+    "question_en": "How does the cadence of change communication affect employee opinion polarisation and relapse?",
+    "interpretation_zh": "分段沟通降低短期冲击，但若间隔过长，负向观点会重新聚集。",
+    "interpretation_en": "Staged communication softens the initial shock, but long gaps let negative opinions regroup.",
+    "defaults": {
+      "q": 1.5,
+      "latency_mu": 5.0,
+      "latency_sigma": 2.0,
+      "steps": 100,
+      "repeats": 8,
+      "seed": 42,
+      "n_nodes": 300,
+      "n_edges": 800,
+      "min_size": 2,
+      "max_size": 200
+    },
+    "intervention": {
+      "at_step": 20,
+      "type": "dampen",
+      "magnitude": 0.25,
+      "duration": 10,
+      "target": {
+        "opinion": "1"
+      }
+    }
+  },
+  {
+    "key": "S1",
+    "name_zh": "政策发布节奏",
+    "name_en": "Policy release cadence",
+    "question_zh": "政策分阶段发布时，公众讨论会在第几步达到峰值、峰值后是否回落？",
+    "question_en": "When a policy is released in stages, at which step does discussion peak and does it subside?",
+    "interpretation_zh": "若峰值后多样性快速下降，说明讨论收敛为单一叙事；干预后若级联仍高，需延长沟通窗口。",
+    "interpretation_en": "A fast diversity drop after the peak means the discussion converges to one narrative; high cascades after the intervention call for a longer communication window.",
+    "defaults": {
+      "q": 1.8,
+      "latency_mu": 4.0,
+      "latency_sigma": 1.5,
+      "steps": 120,
+      "repeats": 8,
+      "seed": 42,
+      "n_nodes": 300,
+      "n_edges": 800,
+      "min_size": 2,
+      "max_size": 200
+    },
+    "intervention": {
+      "at_step": 30,
+      "type": "boost",
+      "magnitude": 0.2,
+      "duration": 10,
+      "target": {
+        "opinion": "1"
+      }
+    }
+  },
+  {
+    "key": "S2",
+    "name_zh": "辟谣时机",
+    "name_en": "Rumor debunk timing",
+    "question_zh": "辟谣信息在谣言峰值前后不同时点投放，最终负向观点占比差多少？",
+    "question_en": "How much does the final negative share differ when debunking before vs after the rumor peak?",
+    "interpretation_zh": "越早投放辟谣，负向占比越低；若 CI 重叠则不能宣称时点有效。",
+    "interpretation_en": "Earlier debunking lowers the negative share; overlapping CIs mean the timing effect is not established.",
+    "defaults": {
+      "q": 1.6,
+      "latency_mu": 3.0,
+      "latency_sigma": 1.0,
+      "steps": 100,
+      "repeats": 8,
+      "seed": 42,
+      "n_nodes": 300,
+      "n_edges": 900,
+      "min_size": 2,
+      "max_size": 200
+    },
+    "intervention": {
+      "at_step": 20,
+      "type": "debunk",
+      "magnitude": 0.3,
+      "duration": 5,
+      "target": {
+        "opinion": "1"
+      }
+    }
+  },
+  {
+    "key": "S3",
+    "name_zh": "平台治理",
+    "name_en": "Platform governance",
+    "question_zh": "平台限流/降温措施能否压低极端叙事的级联规模？",
+    "question_en": "Can platform throttling reduce the cascade size of extreme narratives?",
+    "interpretation_zh": "治理后级联 p99 下降且收敛加快，说明措施有效；否则可能只是转移了讨论场域。",
+    "interpretation_en": "A lower cascade p99 and faster convergence after moderation suggests effectiveness; otherwise discussion may simply move elsewhere.",
+    "defaults": {
+      "q": 2.0,
+      "latency_mu": 2.0,
+      "latency_sigma": 2.0,
+      "steps": 120,
+      "repeats": 8,
+      "seed": 42,
+      "n_nodes": 400,
+      "n_edges": 1000,
+      "min_size": 2,
+      "max_size": 200
+    },
+    "intervention": {
+      "at_step": 25,
+      "type": "dampen",
+      "magnitude": 0.3,
+      "duration": 15,
+      "target": {
+        "opinion": "1"
+      }
+    }
+  },
+  {
+    "key": "S4",
+    "name_zh": "品牌 KOL 组合",
+    "name_en": "Brand KOL mix",
+    "question_zh": "头部 KOL 与长尾创作者的不同配比，会改变品牌话题的观点分布吗？",
+    "question_en": "Does the mix of top KOLs versus long-tail creators change the opinion distribution?",
+    "interpretation_zh": "KOL 权重越高，早期级联越大但后期多样性越低，存在覆盖与多元的权衡。",
+    "interpretation_en": "Higher KOL weight yields larger early cascades but lower late diversity — a reach versus pluralism trade-off.",
+    "defaults": {
+      "q": 1.4,
+      "latency_mu": 5.0,
+      "latency_sigma": 2.0,
+      "steps": 100,
+      "repeats": 8,
+      "seed": 42,
+      "n_nodes": 350,
+      "n_edges": 900,
+      "min_size": 2,
+      "max_size": 200
+    },
+    "intervention": {
+      "at_step": 10,
+      "type": "boost",
+      "magnitude": 0.25,
+      "duration": 10,
+      "target": {
+        "opinion": "1"
+      }
+    }
+  },
+  {
+    "key": "S5",
+    "name_zh": "应急科普",
+    "name_en": "Emergency science literacy",
+    "question_zh": "突发公共卫生事件中，科普投放能否降低恐慌性观点占比？",
+    "question_en": "Can science communication reduce panic-driven opinions during a public-health emergency?",
+    "interpretation_zh": "科普越早，正向占比越高；若时延很大，需同时安排权威信源重复触达。",
+    "interpretation_en": "Earlier science communication raises the positive share; with long latency, repeat authoritative reach is needed.",
+    "defaults": {
+      "q": 1.5,
+      "latency_mu": 4.0,
+      "latency_sigma": 1.5,
+      "steps": 90,
+      "repeats": 8,
+      "seed": 42,
+      "n_nodes": 250,
+      "n_edges": 700,
+      "min_size": 2,
+      "max_size": 200
+    },
+    "intervention": {
+      "at_step": 10,
+      "type": "debunk",
+      "magnitude": 0.4,
+      "duration": 5,
+      "target": {
+        "opinion": "1"
+      }
+    }
+  },
+  {
+    "key": "S6",
+    "name_zh": "金融预期沟通",
+    "name_en": "Financial expectation communication",
+    "question_zh": "监管沟通节奏如何影响市场情绪的收敛速度与尾部风险？",
+    "question_en": "How does the cadence of regulator communication affect sentiment convergence and tail risk?",
+    "interpretation_zh": "渐进式沟通降低 cascade p99，但可能延长收敛时间；需权衡稳定性与效率。",
+    "interpretation_en": "Gradual communication lowers cascade p99 but can lengthen convergence; stability trades off against speed.",
+    "defaults": {
+      "q": 1.7,
+      "latency_mu": 6.0,
+      "latency_sigma": 2.0,
+      "steps": 110,
+      "repeats": 8,
+      "seed": 42,
+      "n_nodes": 300,
+      "n_edges": 800,
+      "min_size": 2,
+      "max_size": 200
+    },
+    "intervention": {
+      "at_step": 15,
+      "type": "boost",
+      "magnitude": 0.2,
+      "duration": 20,
+      "target": {
+        "opinion": "1"
+      }
+    }
+  },
+  {
+    "key": "S7",
+    "name_zh": "社区议事共识",
+    "name_en": "Community consensus",
+    "question_zh": "一次社区议事中，适度引导能否让分歧收敛，而不是压成沉默的多数？",
+    "question_en": "Can light-touch facilitation help a community discussion converge without silencing the minority?",
+    "interpretation_zh": "收敛步变短且多样性没有塌到 0，说明讨论在形成共识而非被压制。",
+    "interpretation_en": "A shorter consensus step without diversity collapsing to zero suggests consensus rather than suppression.",
+    "defaults": {
+      "q": 1.3,
+      "latency_mu": 4.0,
+      "latency_sigma": 1.5,
+      "steps": 90,
+      "repeats": 8,
+      "seed": 42,
+      "n_nodes": 180,
+      "n_edges": 450,
+      "min_size": 2,
+      "max_size": 200
+    },
+    "intervention": {
+      "at_step": 10,
+      "type": "seed_opinion",
+      "magnitude": 0.15,
+      "duration": 1,
+      "target": {
+        "opinion": "1"
+      }
+    }
+  },
+  {
+    "key": "S8",
+    "name_zh": "组织变革沟通",
+    "name_en": "Organizational change",
+    "question_zh": "变革消息分阶段释放时，员工情绪会在哪一步反弹，沟通节奏能否降低对立？",
+    "question_en": "When change news is released in stages, where does sentiment rebound and can cadence reduce polarisation?",
+    "interpretation_zh": "若降温和干预后级联 P99 下降、多样性保持中等，说明沟通留住了讨论空间。",
+    "interpretation_en": "Lower cascade P99 with moderate diversity after damping suggests the conversation remains open.",
+    "defaults": {
+      "q": 1.7,
+      "latency_mu": 5.0,
+      "latency_sigma": 2.0,
+      "steps": 100,
+      "repeats": 8,
+      "seed": 42,
+      "n_nodes": 220,
+      "n_edges": 550,
+      "min_size": 2,
+      "max_size": 200
+    },
+    "intervention": {
+      "at_step": 20,
+      "type": "dampen",
+      "magnitude": 0.25,
+      "duration": 15,
+      "target": {
+        "opinion": "1"
+      }
+    }
+  },
+  {
+    "key": "S9",
+    "name_zh": "新品发布口碑",
+    "name_en": "Product launch",
+    "question_zh": "新品发布时，创作者与真实用户的不同配比，会怎样影响口碑扩散与长期多样性？",
+    "question_en": "At launch, how does the mix of creators and real users affect word-of-mouth spread and long-run diversity?",
+    "interpretation_zh": "早期级联大不代表长期口碑好；需要同时看后期多样性与负向占比。",
+    "interpretation_en": "A large early cascade is not the same as durable word of mouth; watch late diversity and negative share.",
+    "defaults": {
+      "q": 1.8,
+      "latency_mu": 2.0,
+      "latency_sigma": 2.0,
+      "steps": 90,
+      "repeats": 8,
+      "seed": 42,
+      "n_nodes": 260,
+      "n_edges": 700,
+      "min_size": 2,
+      "max_size": 200
+    },
+    "intervention": {
+      "at_step": 8,
+      "type": "boost",
+      "magnitude": 0.3,
+      "duration": 8,
+      "target": {
+        "opinion": "1"
+      }
+    }
+  }
+]

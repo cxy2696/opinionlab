@@ -6,7 +6,15 @@ OpinionLab 自带一个无需登录的浏览器演示页，用来快速体验“
 
 OpinionLab ships a public, no-login browser demo covering the full flow: choose a scenario, tune parameters, watch opinion dynamics, download a report.
 
-## 启动 / Run
+## 在线版 / Live version
+
+无需安装，直接打开：**https://cxy2696.github.io/opinionlab/**
+
+页面在浏览器本地计算（二立场、均匀权重的轻量模拟），不上传数据；完整引擎、多立场、干预与报告请使用下方本地服务。
+
+The hosted page computes locally in the browser (binary, uniform-weight lightweight simulation) and uploads nothing. Use the full service below for the complete engine, multi-opinion, interventions and reports.
+
+## 本地启动 / Local run
 
 ```bash
 make demo

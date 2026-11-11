@@ -9,6 +9,8 @@
 **把“一群人会怎么想”变成可以反复试验、能看到误差范围的沙盘。**
 A sandbox for exploring how opinions spread through groups — reproducible, with uncertainty ranges instead of single numbers.
 
+**在线试用 / Live demo:** https://cxy2696.github.io/opinionlab/
+
 ![OpinionLab demo](docs/demo.png)
 
 ---
@@ -33,7 +35,9 @@ OpinionLab 让你在发之前，先在沙盘里试：如果从众更强一点、
 
 ### 5 分钟上手
 
-**浏览器里试**（无需登录）：
+**在线试用**（无需安装）：打开 https://cxy2696.github.io/opinionlab/
+
+**本地运行**（完整服务）：
 
 ```bash
 git clone https://github.com/cxy2696/opinionlab.git
@@ -136,6 +140,8 @@ MIT
 **Turn “how would this group react?” into something you can test repeatedly.**
 OpinionLab turns a group-opinion question into a reproducible experiment with uncertainty ranges, not a single forecast.
 
+**在线试用 / Live demo:** https://cxy2696.github.io/opinionlab/
+
 ![OpinionLab demo](docs/demo.png)
 
 ### What it is for
@@ -151,6 +157,10 @@ People influence each other in groups. A message spreads, a community argues, a 
 - **Teaching and research**: demonstrate how conformity `q` changes consensus; reproduce the classical voter limit.
 
 Concrete questions, commands and reading guides live in [`docs/USE_CASES.md`](docs/USE_CASES.md).
+
+### Live demo
+
+Try it in the browser (no install): https://cxy2696.github.io/opinionlab/
 
 ### Quick start
 

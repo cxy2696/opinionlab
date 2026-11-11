@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OpinionLab · 在线情景推演 / Live sandbox</title>
+<link rel="stylesheet" href="./style.css">
+<script src="./echarts.min.js"></script>
+<script defer src="./sim.js"></script>
+<script defer src="./app.js"></script>
+</head>
+<body>
+<header>
+  <div>
+    <h1>OpinionLab · 舆情演化仿真沙盘</h1>
+    <p>先问“如果这样，会怎样”，再看数字和图形。一个在浏览器里直接跑的轻量演示。
+      <br>Ask “what if”, then read the numbers and the shapes — a lightweight in-browser demo.</p>
+  </div>
+  <a class="repo" href="https://github.com/cxy2696/opinionlab" target="_blank" rel="noreferrer">GitHub 仓库 / Repository</a>
+</header>
+
+<main>
+  <aside class="card">
+    <div class="banner">本结果为基于给定假设的情景推演，非对真实舆情的预测。<br>
+      Scenario simulation under stated assumptions, not a prediction of real opinion.</div>
+
+    <label for="template">场景模板 / Scenario template</label>
+    <select id="template"></select>
+    <div id="question" class="question"></div>
+
+    <label for="q">从众强度 q / Conformity <span id="qVal" class="value"></span></label>
+    <input id="q" type="range" min="0.5" max="3" step="0.1" value="1.5">
+
+    <div class="row">
+      <div>
+        <label for="mu">平均时延 / Mean latency</label>
+        <input id="mu" type="number" min="1" max="60" step="1" value="3">
+      </div>
+      <div>
+        <label for="steps">步数 / Steps</label>
+        <input id="steps" type="number" min="20" max="200" step="10" value="100">
+      </div>
+    </div>
+    <div class="row">
+      <div>
+        <label for="repeats">副本 / Replicas</label>
+        <input id="repeats" type="number" min="2" max="20" step="1" value="8">
+      </div>
+      <div>
+        <label for="seed">随机种子 / Seed</label>
+        <input id="seed" type="number" min="0" step="1" value="42">
+      </div>
+    </div>
+
+    <button id="run" class="primary">运行推演 / Run simulation</button>
+    <div id="status" class="status">在浏览器内计算，不上传数据。Computed locally.</div>
+    <div id="error" class="error"></div>
+  </aside>
+
+  <section class="card results">
+    <div id="verdict" class="verdict">等待运行 / Waiting</div>
+    <p id="summary" class="summary">选择场景并运行，看看这群人可能怎么走。<br>
+      Pick a scenario and run it to see how the group might evolve.</p>
+    <div id="reading" class="reading"></div>
+
+    <section id="decision" class="decision" hidden>
+      <h3>决策提示 / Decision brief</h3>
+      <p><strong>这项推演帮助判断 / What it informs:</strong> <span id="decisionText"></span></p>
+      <div id="timing" class="chips"></div>
+      <p id="window" class="window"></p>
+      <div class="next">
+        <strong>建议后续 / Next steps</strong>
+        <ul id="followups"></ul>
+      </div>
+      <p id="caveat" class="note"></p>
+    </section>
+
+    <div class="chart-grid">
+      <div class="chart-card wide">
+        <h3>多样性随时间 / Diversity over time <small>线 = 本次运行，带 = 副本 10–90%</small></h3>
+        <div id="chartDiversity" class="chart"></div>
+      </div>
+      <div class="chart-card">
+        <h3>观点占比 / Opinion shares</h3>
+        <div id="chartShares" class="chart"></div>
+      </div>
+      <div class="chart-card">
+        <h3>每步改变立场的人数 / Cascade per step</h3>
+        <div id="chartCascade" class="chart"></div>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <button id="compare" class="ghost" disabled>对比上一次 / Compare</button>
+      <button id="csv" class="ghost" disabled>下载 CSV / Download</button>
+      <button id="copy" class="ghost" disabled>复制参数链接 / Copy link</button>
+    </div>
+    <div id="delta" class="delta"></div>
+    <div id="metrics" class="metrics"></div>
+  </section>
+</main>
+
+<footer>
+  只展示群体统计量，不展示任何单节点观点轨迹。Only group-level statistics.
+  · 浏览器演示为二立场、均匀权重的轻量版本；多立场、干预与报告请使用
+  <a href="https://github.com/cxy2696/opinionlab">完整引擎 / full engine</a>。
+</footer>
+</body>
+</html>
