@@ -40,3 +40,14 @@ def test_readme_points_at_docs() -> None:
         assert (ROOT / "docs" / f"{base}_cn.md").exists()
         assert (ROOT / "docs" / f"{base}_en.md").exists()
     assert "CHANGELOG_cn.md" in readme and "CHANGELOG_en.md" in readme
+
+
+def test_every_markdown_has_chinese_and_english_editions() -> None:
+    for path in ROOT.rglob("*.md"):
+        if any(part in {".git", ".venv", ".pytest_cache", ".mypy_cache"} for part in path.parts):
+            continue
+        if path.name == "README.md":
+            continue
+        assert path.name.endswith(("_cn.md", "_en.md")), f"unpaired doc: {path}"
+        counterpart = path.with_name(path.name[:-6] + ("_en.md" if path.name.endswith("_cn.md") else "_cn.md"))
+        assert counterpart.exists(), f"missing {counterpart}"
