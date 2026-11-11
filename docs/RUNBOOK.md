@@ -1,11 +1,5 @@
 # Runbook
 
-> **In one minute**
->
-> - Start at `/metrics`: API P95, queue depth, replica failures and connector circuits.
-> - Roll back to the previous image tag; only revert reversible migrations.
-> - Mark affected runs tainted, keep evidence and rerun after the fix.
-
 ## Observability and alerts
 
 Prometheus metrics are exposed at `/metrics`:

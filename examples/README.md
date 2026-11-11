@@ -1,11 +1,5 @@
 # Examples
 
-> **In one minute**
->
-> - Two scripts, no database or API; run them with `uv run python ...`.
-> - One looks at debunk timing, the other at conformity in a community.
-> - Only group-level statistics are printed.
-
 Two minimal examples using templates and the engine directly; no database or API server needed.
 
 ## 1. Debunk timing
@@ -28,7 +22,7 @@ conformity pressure.
 
 ## More scenarios
 
-- `docs/USE_CASES_en.md`: crisis communication, community, organizational change, product launch,
+- `docs/USE_CASES.md`: crisis communication, community, organizational change, product launch,
   research reproduction.
 - `scenarios/`: 15 runnable templates.
 - `make demo`: interactive browser sandbox.

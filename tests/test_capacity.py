@@ -42,11 +42,11 @@ def test_worker_throughput() -> None:
 
 
 def test_capacity_report_has_measured_coefficient() -> None:
-    report = (ROOT / "docs" / "capacity-report_cn.md").read_text(encoding="utf-8")
+    report = (ROOT / "docs" / "capacity-report.md").read_text(encoding="utf-8")
     assert "c ≈ 1.5e-8" in report
     assert "single_replica = c × nnz(H) × n_steps" in report
-    assert "ScenarioA" in report and "ScenarioB" in report and "ScenarioC" in report
-    assert "P95 < 500ms" in report
+    assert "A read-heavy" in report and "B batch burst" in report and "C abuse" in report
+    assert "P95 < 500 ms" in report
     assert "1.26e-8" in report and "1.43e-8" in report
 
 

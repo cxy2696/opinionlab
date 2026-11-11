@@ -1,11 +1,5 @@
 # Capacity report
 
-> **In one minute**
->
-> - Reads are not the bottleneck; CPU simulation is.
-> - One replica costs about `c × nnz × steps`, with `c ≈ 1.5e-8` measured.
-> - Start with 2×8C16G workers; absorb bursts with quotas and priorities, not blind scaling.
-
 ## Summary
 
 - Read traffic is not the bottleneck: at 20 orgs / 200 seats, peak reads are about 5 QPS, leaving
@@ -66,7 +60,7 @@ locust -f benchmarks/locustfile.py ScenarioCAbuse --host http://localhost:8000 \
 - `opinionlab_api_duration_seconds` P95 (A)
 - `opinionlab_queue_depth` (B; must not grow monotonically)
 - `opinionlab_replica_failures_total` / 429 ratio (C)
-- Alert thresholds in `docs/RUNBOOK_en.md` are the pass lines.
+- Alert thresholds in `docs/RUNBOOK.md` are the pass lines.
 
 ## Assumptions and limitations
 

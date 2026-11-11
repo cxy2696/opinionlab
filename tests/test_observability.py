@@ -125,7 +125,7 @@ def test_temporary_debug_restores_level() -> None:
 
 
 def test_runbook_documents_alerts() -> None:
-    text = (Path(__file__).parents[1] / "docs" / "RUNBOOK_cn.md").read_text(encoding="utf-8")
+    text = (Path(__file__).parents[1] / "docs" / "RUNBOOK.md").read_text(encoding="utf-8")
     assert "ApiP95High" in text
     assert "QueueDepthHigh" in text
     assert "ConnectorOpen" in text

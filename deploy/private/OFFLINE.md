@@ -1,11 +1,5 @@
 # Air-gapped private delivery
 
-> **In one minute**
->
-> - The bundle contains images, wheels, migrations, templates and checksums.
-> - Steps: load images → install wheel → configure `.env` → compose up.
-> - Rollback keeps the previous tag; migrations only revert when reversible.
-
 ## Contents
 
 - API and worker images (`opinionlab-api`, `opinionlab-worker`)

@@ -1,10 +1,29 @@
 # Changelog
 
-> **In one minute**
->
-> - v1.0 upgrades the prototype: node-centric updates, explicit decision rules, deterministic RNG, manifests and CIs.
-> - Results intentionally differ from the upstream prototype.
-> - Known deviations and capacity coefficients are environment-dependent; recalibrate before release.
+## v1.2.0 — 2026-11-12
+
+### Documentation
+
+- Repository documentation is English-only. The `_cn` editions of the README,
+  changelog and docs were removed; `_en` files were renamed to their plain
+  names. The browser demo keeps its optional Chinese UI translation; that is a
+  user-facing feature, not a second documentation set.
+- Rewrote the README and the docs index in a plainer voice: what the engine
+  does, what it does not claim, and how it relates to the research repository.
+- Added `docs/CONFORMANCE.md`, mapping each formula to a function and a test.
+
+### Conformance
+
+- Added `conformance/binary_case.json`, the same three-case fixture stored in
+  the HNL research repository.
+- Added `tests/test_conformance.py`, which checks this repository's
+  `edge_distributions` and `aggregate_node_probabilities` against the fixture.
+  A drift in the shared binary kernel now fails in both repositories.
+
+### Unchanged
+
+- No engine behaviour changes from 1.1.0. The version bump is for the
+  documentation restructuring and the conformance contract.
 
 ## v1.1.0 — 2026-11-12
 
@@ -41,7 +60,7 @@
 
 - Added tests for threshold status-quo, max renormalisation, integer event/CSR equivalence at
   `L = 2` and `L = 5`, weighted event counts, and binary-only controls.
-- `docs/MATH_MODEL_en.md` / `_cn.md` rewritten: `q > 0`, non-negative weights, normalised `max`,
+- `docs/MATH_MODEL.md` rewritten: `q > 0`, non-negative weights, normalised `max`,
   explicit threshold semantics, integer event clocks, Student-*t* intervals, and the censoring
   meaning of `time_to_consensus = -1`.
 - Regenerated `tests/golden/v1_baseline.json` for the distinct-edge generator; `pre_fix_baseline.json`

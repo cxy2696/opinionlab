@@ -1,12 +1,5 @@
 # Math model
 
-> **In one minute**
->
-> - `q > 0` controls majority-following: `q = 1` is the linear voter, `q → ∞` locks onto the majority, `q → 0+` ignores how large the majority is.
-> - `time_to_consensus = -1` means **censored** (no majority inside the window), not a divergence.
-> - The 95% interval is a Student-*t* interval over replicas; `R < 30` is directional only.
-> - This is scenario simulation, not causal identification.
-
 This document is the normative definition of the OpinionLab model. Code and
 tests follow it; the README only summarises it. Each formula is mapped to a
 function so that a change in one engine cannot silently diverge from another.

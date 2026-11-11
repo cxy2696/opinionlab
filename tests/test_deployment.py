@@ -49,9 +49,9 @@ def test_dockerfiles_pin_digest_and_run_as_non_root() -> None:
 
 
 def test_private_offline_and_dual_region_values() -> None:
-    offline = (ROOT / "deploy" / "private" / "OFFLINE_cn.md").read_text(encoding="utf-8")
-    assert "docker load" in offline
-    assert "全离线" in offline or "air-gapped" in offline.lower()
+    offline = (ROOT / "deploy" / "private" / "OFFLINE.md").read_text(encoding="utf-8")
+    assert "Load images" in offline
+    assert "air-gapped" in offline.lower()
 
     cn = yaml.safe_load((ROOT / "deploy" / "k8s" / "helm-cn" / "values.yaml").read_text())
     eu = yaml.safe_load((ROOT / "deploy" / "k8s" / "helm-global" / "values.yaml").read_text())
@@ -73,8 +73,8 @@ def test_ci_has_migration_and_weekly_audit() -> None:
 
 
 def test_runbook_documents_canary_rollback_and_tainted() -> None:
-    text = (ROOT / "docs" / "RUNBOOK_cn.md").read_text(encoding="utf-8")
-    assert "金丝雀" in text and "Canary" in text
-    assert "回滚" in text and "rollback" in text.lower()
+    text = (ROOT / "docs" / "RUNBOOK.md").read_text(encoding="utf-8")
+    assert "Canary" in text
+    assert "rollback" in text.lower()
     assert "tainted" in text.lower()
     assert "spec_sha256" in text

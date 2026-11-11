@@ -1,11 +1,5 @@
 # Architecture
 
-> **In one minute**
->
-> - The engine (`packages/hnle`) has no database dependency; the API adds tenancy, jobs and compliance.
-> - Reports and APIs expose group-level metrics only; per-node traces are rejected at the boundary.
-> - Start with `make demo`, then read `apps/api` and `deploy/`.
-
 OpinionLab is a simulation engine, a service layer and a reporting/deployment kit. The engine has no
 database or network dependency, so the same code powers the CLI, the API workers and the public demo.
 
@@ -41,7 +35,7 @@ database or network dependency, so the same code powers the CLI, the API workers
 | `hnle/metrics.py` | diversity, entropy, cascade, consensus, oscillation |
 | `hnle/mc.py` | replicas, Welford aggregation, CIs |
 | `hnle/io/` | manifests, artifacts, offline HTML reports |
-| `hnle/templates.py` | bilingual scenario library |
+| `hnle/templates.py` | scenario library with English/Chinese display labels |
 | `apps/api/app/` | auth, jobs, quotas, connectors, compliance, demo |
 
 ## Invariants
@@ -58,4 +52,4 @@ database or network dependency, so the same code powers the CLI, the API workers
 
 - Single host: `docker-compose.yml` (Postgres, Redis, MinIO, API, worker).
 - Cluster: `deploy/k8s/helm-cn` and `helm-global` values.
-- Air-gapped: `deploy/private/OFFLINE_en.md`.
+- Air-gapped: `deploy/private/OFFLINE.md`.

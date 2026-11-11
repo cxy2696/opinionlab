@@ -3,7 +3,7 @@
     single replica ≈ c × nnz(H) × n_steps
     job wall clock ≈ single replica × repeats / jobs
 
-``c`` is calibrated from the benchmark (see docs/capacity-report_en.md).
+``c`` is calibrated from the benchmark (see docs/capacity-report.md).
 """
 
 from __future__ import annotations

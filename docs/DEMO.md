@@ -1,11 +1,5 @@
 # Demo application
 
-> **In one minute**
->
-> - The hosted demo runs locally in the browser; the local service uses the full engine.
-> - 15 bilingual templates, explained parameters, CIs, decision brief and a 3D telemetry array.
-> - Ollama narration is off by default and is assistive only.
-
 OpinionLab includes a no-login browser sandbox for the full loop: choose a scenario, tune parameters,
 watch the group evolve and download a report.
 
@@ -24,7 +18,7 @@ service uses the real engine, supports multiple opinions, interventions and repo
 
 ## Features
 
-- 15 bilingual scenario templates with the question they help answer.
+- 15 scenario templates with the question they help answer; the UI can show English or Chinese labels.
 - Inline explanations for every parameter, hover tips and one-click presets.
 - A 3D telemetry array: dotted opinion terrain, elevated cascade bars and a rotating stance cloud,
   each with live peak/current stats, a legend and hover readouts on the bars.

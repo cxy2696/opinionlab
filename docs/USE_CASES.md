@@ -1,11 +1,5 @@
 # Use cases
 
-> **In one minute**
->
-> - Six real questions: debunk timing, community consensus, org change, launch, governance, research.
-> - Each case gives the template, command and what to look for.
-> - Check whether the 95% CIs overlap before drawing a conclusion.
-
 OpinionLab is not limited to public opinion. Any setting where **people influence each other and
 opinions change** can use the same model: people become nodes, group conversations become hyperedges,
 attitude shifts become adoption events, and reaction speed becomes latency.

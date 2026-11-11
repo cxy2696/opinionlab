@@ -1,0 +1,35 @@
+{
+  "description": "Shared numerical conformance cases for the binary HNL kernel. Both this repository and OpinionLab assert these values against their own implementation. Values are exact products of the equations in docs/MODEL.md, not snapshots of a run.",
+  "cases": [
+    {
+      "name": "binary_q1p5_mean",
+      "n_nodes": 5,
+      "q": 1.5,
+      "edges": [[0, 1, 2], [2, 3, 4], [0, 4]],
+      "weights": [1.0, 2.0, 0.5, 1.5, 1.0],
+      "opinions": [1, 0, 1, 0, 0],
+      "expected_edge_p1": [0.3937626859906231, 0.08209951522176573, 0.5],
+      "expected_node_p1": [0.44688134299531157, 0.3937626859906231, 0.2379311006061944, 0.08209951522176573, 0.29104975761088286]
+    },
+    {
+      "name": "binary_q1_mean",
+      "n_nodes": 3,
+      "q": 1.0,
+      "edges": [[0, 1, 2]],
+      "weights": [1.0, 2.0, 3.0],
+      "opinions": [0, 1, 1],
+      "expected_edge_p1": [0.8333333333333334],
+      "expected_node_p1": [0.8333333333333334, 0.8333333333333334, 0.8333333333333334]
+    },
+    {
+      "name": "binary_q2_mean",
+      "n_nodes": 4,
+      "q": 2.0,
+      "edges": [[0, 1], [1, 2, 3], [2, 3]],
+      "weights": [1.0, 1.0, 1.0, 1.0],
+      "opinions": [0, 1, 1, 0],
+      "expected_edge_p1": [0.5, 0.8, 0.5],
+      "expected_node_p1": [0.5, 0.65, 0.65, 0.65]
+    }
+  ]
+}
