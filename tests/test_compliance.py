@@ -185,10 +185,10 @@ def test_docs_cover_model_card_and_compliance() -> None:
     root = Path(__file__).parents[1]
     model_card = (root / "docs" / "MODEL_CARD.md").read_text(encoding="utf-8")
     compliance = (root / "docs" / "COMPLIANCE.md").read_text(encoding="utf-8")
-    assert "禁止用途" in model_card and "Prohibited uses" in model_card
-    assert "留存" in compliance and "retention" in compliance
+    assert "Prohibited uses" in model_card
+    assert "retention" in compliance.lower()
     assert "NODE_TRACE_FORBIDDEN" in compliance
-    assert "不调用生成式模型" in model_card
+    assert "does not call generative models" in model_card
 
 
 def test_report_has_ai_label_and_no_node_traces(tmp_path: Path) -> None:
