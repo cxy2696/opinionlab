@@ -4,64 +4,24 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>OpinionLab · 情景推演 / Scenario sandbox</title>
+<link rel="stylesheet" href="/api/v1/demo/static/style.css">
 <script src="/api/v1/demo/echarts.js"></script>
-<style>
-  :root { color-scheme: light; --ink:#102a43; --muted:#627d98; --line:#d9e2ec;
-          --accent:#2b6cb0; --accent-soft:#ebf4ff; --warn:#b7791f; }
-  * { box-sizing: border-box; }
-  body { margin:0; font-family:-apple-system,"Segoe UI","PingFang SC",sans-serif;
-         color:var(--ink); background:#f7fafc; }
-  header { background:#fff; border-bottom:1px solid var(--line); padding:18px 28px; }
-  header h1 { margin:0; font-size:22px; }
-  header p { margin:6px 0 0; color:var(--muted); font-size:13px; }
-  main { max-width:1180px; margin:0 auto; padding:24px; display:grid;
-         grid-template-columns: 360px 1fr; gap:24px; }
-  @media (max-width: 900px) { main { grid-template-columns: 1fr; } }
-  .card { background:#fff; border:1px solid var(--line); border-radius:12px; padding:18px; }
-  .banner { background:#fff8e6; border-left:4px solid var(--warn); padding:12px 16px;
-            border-radius:8px; font-size:13px; margin-bottom:18px; }
-  label { display:block; font-size:12px; color:var(--muted); margin:12px 0 6px; }
-  select, input[type=number] { width:100%; padding:8px 10px; border:1px solid var(--line);
-                               border-radius:8px; font-size:14px; background:#fff; }
-  input[type=range] { width:100%; }
-  .row { display:flex; gap:10px; }
-  .row > div { flex:1; }
-  button { border:0; border-radius:9px; padding:10px 14px; font-size:14px; cursor:pointer; }
-  button.primary { background:var(--accent); color:#fff; width:100%; margin-top:18px; }
-  button.ghost { background:var(--accent-soft); color:var(--accent); }
-  .value { font-variant-numeric: tabular-nums; color:var(--ink); font-size:13px; }
-  .question { background:var(--accent-soft); border-radius:10px; padding:12px 14px;
-              font-size:14px; line-height:1.5; }
-  .question small { color:var(--muted); display:block; margin-top:6px; }
-  #chart { width:100%; height:320px; }
-  .metrics { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px; margin-top:14px; }
-  .metric { border:1px solid var(--line); border-radius:10px; padding:12px; }
-  .metric .name { font-size:12px; color:var(--muted); }
-  .metric .val { font-size:22px; font-weight:600; margin:4px 0 2px; }
-  .metric .ci { font-size:11px; color:var(--muted); }
-  .delta { font-size:12px; margin-top:8px; }
-  .delta.up { color:#2f855a; } .delta.down { color:#c53030; } .delta.flat { color:var(--muted); }
-  .toolbar { display:flex; gap:10px; align-items:center; margin-top:14px; }
-  .status { font-size:12px; color:var(--muted); }
-  .error { color:#c53030; font-size:13px; margin-top:10px; white-space:pre-wrap; }
-  footer { max-width:1180px; margin:0 auto; padding:0 24px 30px; color:var(--muted); font-size:12px; }
-  code { background:#eef2f6; padding:1px 5px; border-radius:4px; }
-</style>
+<script defer src="/api/v1/demo/static/app.js"></script>
 </head>
 <body>
 <header>
   <h1>OpinionLab · 舆情演化仿真沙盘</h1>
-  <p>选择场景、调整参数，观察群体观点如何演化。Select a scenario and explore opinion dynamics.</p>
+  <p>先问“如果这样，会怎样”，再看数字和图形。Ask “what if”, then read the numbers and the shapes.</p>
 </header>
 
 <main>
-  <section class="card">
-    <div id="disclaimer" class="banner">本结果为基于给定假设的情景推演，非对真实舆情的预测。<br>
+  <aside class="card">
+    <div class="banner">本结果为基于给定假设的情景推演，非对真实舆情的预测。<br>
       Scenario simulation under stated assumptions, not a prediction of real opinion.</div>
 
     <label for="template">场景模板 / Scenario template</label>
     <select id="template"></select>
-    <div id="question" class="question" style="margin-top:12px"></div>
+    <div id="question" class="question"></div>
 
     <label for="q">从众强度 q / Conformity <span id="qVal" class="value"></span></label>
     <input id="q" type="range" min="0.5" max="3" step="0.1" value="1.5">
@@ -90,183 +50,44 @@
     <button id="run" class="primary">运行推演 / Run simulation</button>
     <div id="status" class="status"></div>
     <div id="error" class="error"></div>
-  </section>
+  </aside>
 
-  <section class="card">
-    <div class="toolbar">
-      <strong>结果 / Results</strong>
-      <button id="compare" class="ghost" disabled>对比上一次 / Compare with previous</button>
-      <button id="download" class="ghost" disabled>下载报告 / Download report</button>
+  <section class="card results">
+    <div id="verdict" class="verdict">等待运行 / Waiting</div>
+    <p id="summary" class="summary">选择场景并运行，看看这群人可能怎么走。<br>
+      Pick a scenario and run it to see how the group might evolve.</p>
+    <div id="reading" class="reading"></div>
+
+    <div class="chart-grid">
+      <div class="chart-card wide">
+        <h3>多样性随时间 / Diversity over time <small>线 = 本次运行，带 = 多次副本的 10–90% 区间</small></h3>
+        <div id="chartDiversity" class="chart"></div>
+      </div>
+      <div class="chart-card">
+        <h3>观点占比 / Opinion shares</h3>
+        <div id="chartShares" class="chart"></div>
+      </div>
+      <div class="chart-card">
+        <h3>每步改变立场的人数 / Cascade per step</h3>
+        <div id="chartCascade" class="chart"></div>
+      </div>
     </div>
-    <div id="chart"></div>
-    <div id="metrics" class="metrics"></div>
+
+    <div class="toolbar">
+      <button id="play" class="ghost" disabled>播放演化 / Play</button>
+      <input id="scrub" type="range" min="0" max="100" value="0" disabled>
+      <button id="compare" class="ghost" disabled>对比上一次 / Compare</button>
+      <button id="download" class="ghost" disabled>下载报告 / Report</button>
+      <button id="copy" class="ghost" disabled>复制参数链接 / Copy link</button>
+    </div>
     <div id="delta" class="delta"></div>
+    <div id="metrics" class="metrics"></div>
   </section>
 </main>
 
 <footer>
-  输出仅为群体统计量，不展示任何单节点观点轨迹。Only group-level statistics are shown.
-  · 报告为单文件离线 HTML · <a href="/docs">API docs</a>
+  只展示群体统计量，不展示任何单节点观点轨迹。Only group-level statistics are shown.
+  · 单文件离线报告 · <a href="/docs">API docs</a>
 </footer>
-
-<script>
-const $ = (id) => document.getElementById(id);
-const chart = echarts.init($("chart"));
-let templates = [];
-let last = null;      // {metrics, series, label}
-let previous = null;
-
-const METRICS = [
-  ["diversity_final", "多样性 / Diversity"],
-  ["cascade_p99", "级联 P99 / Cascade P99"],
-  ["time_to_consensus", "收敛步 / Consensus step"],
-  ["absorbing", "吸收态 / Absorbing"],
-];
-
-function fmt(value) {
-  if (value === null || value === undefined) return "—";
-  if (typeof value !== "number") return String(value);
-  return Math.abs(value) >= 10 ? value.toFixed(1) : value.toFixed(3);
-}
-
-function renderQuestion(t) {
-  if (!t) return;
-  $("question").innerHTML = `${t.question_zh}<small>${t.question_en}</small>`;
-}
-
-async function loadTemplates() {
-  const res = await fetch("/api/v1/demo/templates");
-  const payload = await res.json();
-  templates = payload.data;
-  const select = $("template");
-  select.innerHTML = templates.map(
-    (t) => `<option value="${t.key}">${t.key} · ${t.name_zh} / ${t.name_en}</option>`
-  ).join("");
-  select.value = "S2";
-  const current = templates.find((t) => t.key === select.value) || templates[0];
-  if (current) {
-    $("q").value = current.defaults.q;
-    $("mu").value = current.defaults.latency_mu;
-    $("steps").value = Math.min(current.defaults.n_steps, 200);
-    $("repeats").value = Math.min(Math.max(current.defaults.repeats, 8), 20);
-    renderQuestion(current);
-  }
-  updateLabels();
-  select.onchange = () => {
-    const t = templates.find((item) => item.key === select.value);
-    renderQuestion(t);
-    if (t) {
-      $("q").value = t.defaults.q;
-      $("mu").value = t.defaults.latency_mu;
-      updateLabels();
-    }
-  };
-}
-
-function updateLabels() {
-  $("qVal").textContent = Number($("q").value).toFixed(1);
-}
-$("q").oninput = updateLabels;
-
-function card(name, label, metric) {
-  const ci = metric && metric.ci95_lo !== undefined
-    ? `95% CI ${fmt(metric.ci95_lo)} – ${fmt(metric.ci95_hi)} · n=${metric.n}`
-    : "";
-  const value = metric ? metric.mean : null;
-  return `<div class="metric"><div class="name">${label}</div>
-    <div class="val">${fmt(value)}</div><div class="ci">${ci}</div></div>`;
-}
-
-function draw(series) {
-  chart.setOption({
-    tooltip: { trigger: "axis" },
-    grid: { left: 48, right: 18, top: 24, bottom: 32 },
-    xAxis: { type: "category", data: series.steps, name: "step" },
-    yAxis: { type: "value", min: 0, max: 0.5, name: "diversity" },
-    series: [{ type: "line", smooth: true, showSymbol: false,
-               areaStyle: { opacity: 0.08 }, data: series.diversity }]
-  });
-}
-
-function requestBody() {
-  return {
-    template_key: $("template").value,
-    q: Number($("q").value),
-    latency_mu: Number($("mu").value),
-    repeats: Number($("repeats").value),
-    seed: Number($("seed").value),
-    steps: Number($("steps").value),
-  };
-}
-
-async function run() {
-  $("error").textContent = "";
-  $("status").textContent = "运行中… / running…";
-  $("run").disabled = true;
-  try {
-    const res = await fetch("/api/v1/demo/simulate", {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(requestBody()),
-    });
-    const payload = await res.json();
-    if (!res.ok || payload.error) throw new Error(payload.error?.message || "request failed");
-    const data = payload.data;
-    if (last) previous = last;
-    last = { metrics: data.metrics, series: data.series, label: `${data.spec.q.toFixed(1)}` };
-    draw(data.series);
-    $("metrics").innerHTML = METRICS.map(([key, label]) => card(key, label, data.metrics[key])).join("");
-    $("download").disabled = false;
-    $("compare").disabled = !previous;
-    $("status").textContent =
-      `q=${data.spec.q} · steps=${data.spec.n_steps} · ${data.spec.repeats} replicas · seed=${data.spec.seed}`;
-    renderDelta();
-  } catch (err) {
-    $("error").textContent = err.message;
-    $("status").textContent = "";
-  } finally {
-    $("run").disabled = false;
-  }
-}
-
-function renderDelta() {
-  if (!previous || !last) { $("delta").textContent = ""; return; }
-  const key = "diversity_final";
-  const a = previous.metrics[key];
-  const b = last.metrics[key];
-  if (!a || !b) return;
-  const diff = b.mean - a.mean;
-  const overlap = !(b.ci95_hi < a.ci95_lo || b.ci95_lo > a.ci95_hi);
-  const cls = overlap ? "flat" : diff > 0 ? "up" : "down";
-  const verdict = overlap ? "置信区间重叠，差异不显著 / CIs overlap, not significant"
-                          : diff > 0 ? "高于上一次 / higher than previous" : "低于上一次 / lower than previous";
-  $("delta").className = `delta ${cls}`;
-  $("delta").textContent =
-    `对比 q=${previous.label} → q=${last.label}：多样性 ${diff >= 0 ? "+" : ""}${diff.toFixed(4)}，${verdict}`;
-}
-
-async function download() {
-  $("status").textContent = "生成报告中… / building report…";
-  const res = await fetch("/api/v1/demo/report", {
-    method: "POST", headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(requestBody()),
-  });
-  if (!res.ok) { $("error").textContent = "report failed"; return; }
-  const blob = await res.blob();
-  const url = URL.createObjectURL(blob);
-  window.open(url, "_blank");
-  $("status").textContent = "";
-}
-
-$("run").onclick = run;
-$("compare").onclick = renderDelta;
-$("download").onclick = download;
-window.addEventListener("resize", () => chart.resize());
-
-loadTemplates()
-  .then(() => {
-    if (new URLSearchParams(location.search).get("run") === "1") run();
-  })
-  .catch((err) => { $("error").textContent = err.message; });
-</script>
 </body>
 </html>

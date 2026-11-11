@@ -22,6 +22,9 @@ class Settings(BaseSettings):
     rate_limit_user_rps: int = 30
     rate_limit_org_rps: int = 200
     connector_allowed_hosts: str = ""
+    demo_max_nodes: int = 400
+    demo_max_steps: int = 200
+    demo_max_repeats: int = 20
     use_case_review_enabled: bool = True
 
 

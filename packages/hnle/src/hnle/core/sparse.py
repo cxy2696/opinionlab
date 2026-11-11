@@ -30,7 +30,7 @@ from hnle.core.update import (
     node_weights,
 )
 from hnle.graph import Hypergraph
-from hnle.metrics import diversity
+from hnle.metrics import diversity, opinion_shares
 from hnle.spec import Aggregation, ModelSpec, TopologyMode
 
 __all__ = ["RunResult", "build_incidence", "run_sparse"]
@@ -128,6 +128,7 @@ def run_sparse(spec: ModelSpec, graph: Hypergraph, seed: int) -> RunResult:
     diversity_series = [diversity(opinions)]
     cascade_series: list[float] = []
     mean_opinion_series = [float(opinions.mean() / (k - 1))]
+    share_series = [opinion_shares(opinions, k).tolist()]
     time_to_consensus = 0 if _reached(opinions, spec) else -1
 
     active = degree > 0
@@ -164,6 +165,7 @@ def run_sparse(spec: ModelSpec, graph: Hypergraph, seed: int) -> RunResult:
         cascade_series.append(float(np.count_nonzero(changed)) / n_nodes)
         diversity_series.append(diversity(opinions))
         mean_opinion_series.append(float(opinions.mean() / (k - 1)))
+        share_series.append(opinion_shares(opinions, k).tolist())
         if time_to_consensus < 0 and _reached(opinions, spec):
             time_to_consensus = step
 
@@ -176,6 +178,7 @@ def run_sparse(spec: ModelSpec, graph: Hypergraph, seed: int) -> RunResult:
         warn_counts=warn_counts,
         mean_opinion_series=mean_opinion_series,
         max_latency=float(latencies.max()) if latencies.size else 0.0,
+        share_series=share_series,
     )
 
 

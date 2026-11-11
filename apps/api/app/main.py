@@ -11,10 +11,12 @@ from typing import Any
 from fastapi import APIRouter, Depends, FastAPI, Header, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse, RedirectResponse, Response
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.demo import WEB_DIR
 from app.demo import router as demo_router
 from app.deps import (
     Principal,
@@ -931,6 +933,7 @@ async def admin_settings(
 app.include_router(auth)
 app.include_router(api)
 app.include_router(demo_router)
+app.mount("/api/v1/demo/static", StaticFiles(directory=WEB_DIR), name="demo-static")
 
 
 @app.get("/")

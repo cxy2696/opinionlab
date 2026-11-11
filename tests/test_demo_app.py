@@ -40,8 +40,9 @@ def test_demo_page_is_self_contained() -> None:
     assert response.status_code == 200
     html = response.text
     assert "OpinionLab" in html
-    assert "/api/v1/demo/simulate" in html
     assert "/api/v1/demo/echarts.js" in html
+    assert "/api/v1/demo/static/app.js" in html
+    assert "/api/v1/demo/static/style.css" in html
     assert "非对真实舆情的预测" in html
     assert "not a prediction" in html
 
@@ -76,6 +77,10 @@ def test_demo_simulation_is_reproducible() -> None:
     for name in ("diversity_final", "cascade_p99", "time_to_consensus"):
         assert {"mean", "ci95_lo", "ci95_hi", "n"} <= set(metrics[name])
     assert len(left["series"]["steps"]) == 41  # n_steps + initial point
+    assert len(left["series"]["shares"]) == 41
+    assert len(left["series"]["shares"][0]) == 2
+    assert len(left["series"]["bands"]["p50"]) == 41
+    assert {"verdict_zh", "verdict_en", "text_zh", "text_en"} <= set(left["summary_text"])
     assert left["disclaimer_key"] == "simulation_not_prediction"
 
 
@@ -94,3 +99,11 @@ def test_demo_report_contains_disclaimer_and_ci() -> None:
     assert "not a prediction" in html
     assert "95% CI" in html
     assert "echarts" in html.lower()
+
+
+def test_demo_static_assets() -> None:
+    script = _request("GET", "/api/v1/demo/static/app.js")
+    style = _request("GET", "/api/v1/demo/static/style.css")
+    assert script.status_code == style.status_code == 200
+    assert "renderCharts" in script.text
+    assert "--accent" in style.text

@@ -22,7 +22,7 @@ import numpy as np
 import numpy.typing as npt
 
 from hnle.graph import Hypergraph
-from hnle.metrics import diversity
+from hnle.metrics import diversity, opinion_shares
 from hnle.spec import (
     Aggregation,
     DecisionRule,
@@ -49,6 +49,7 @@ class RunResult:
     warn_counts: dict[str, int] = field(default_factory=dict)
     mean_opinion_series: list[float] = field(default_factory=list)
     max_latency: float = 0.0
+    share_series: list[list[float]] = field(default_factory=list)
 
 
 def derive_streams(
@@ -232,6 +233,7 @@ def run_simulation(spec: ModelSpec, graph: Hypergraph, seed: SeedLike) -> RunRes
     diversity_series = [diversity(opinions)]
     cascade_series: list[float] = []
     mean_opinion_series = [float(opinions.mean() / (spec.n_opinions - 1))]
+    share_series = [opinion_shares(opinions, spec.n_opinions).tolist()]
     reached = _reached_consensus(opinions, spec)
     time_to_consensus = 0 if reached else -1
 
@@ -258,6 +260,7 @@ def run_simulation(spec: ModelSpec, graph: Hypergraph, seed: SeedLike) -> RunRes
         cascade_series.append(float(np.count_nonzero(changed)) / n_nodes)
         diversity_series.append(diversity(opinions))
         mean_opinion_series.append(float(opinions.mean() / (spec.n_opinions - 1)))
+        share_series.append(opinion_shares(opinions, spec.n_opinions).tolist())
         if time_to_consensus < 0 and _reached_consensus(opinions, spec):
             time_to_consensus = step
 
@@ -270,4 +273,5 @@ def run_simulation(spec: ModelSpec, graph: Hypergraph, seed: SeedLike) -> RunRes
         warn_counts=warn_counts,
         mean_opinion_series=mean_opinion_series,
         max_latency=float(latencies.max()) if latencies.size else 0.0,
+        share_series=share_series,
     )
