@@ -6,9 +6,10 @@ import uuid
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
+import jwt
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
-from jose import JWTError, jwt  # type: ignore[import-untyped]
+from jwt import InvalidTokenError
 
 from app.settings import settings
 
@@ -64,7 +65,7 @@ def create_refresh_token(
 def decode_token(token: str, expected_type: str) -> dict[str, Any]:
     try:
         payload = jwt.decode(token, settings.jwt_secret, algorithms=["HS256"])
-    except JWTError as exc:
+    except InvalidTokenError as exc:
         raise ValueError("invalid token") from exc
     if payload.get("type") != expected_type:
         raise ValueError("wrong token type")

@@ -1,9 +1,13 @@
 # Conformance: equations, code, tests
 
+**Applies to:** OpinionLab v1.3.1 · [Docs index](README.md) ·
+[Changelog](../CHANGELOG.md)
+
 This note is the bridge between the model described in
 [`MATH_MODEL.md`](MATH_MODEL.md) and the code that runs it. It lists where each
 formula lives, which test checks it, and which numerical values are shared with
-the HNL research repository.
+the HNL research repository. The fixture is also used by the
+[HNL repository](https://github.com/cxy2696/Hypergraph-Nonlinear-Latency-Voter-Model).
 
 ## Formula-to-code map
 
@@ -56,11 +60,22 @@ tests, not by the shared fixture.
 ## Reproducing the check
 
 ```bash
-python -m pytest tests/test_conformance.py tests/test_kernel_math.py
-python -m pytest
+uv run pytest tests/test_conformance.py tests/test_kernel_math.py
+uv run pytest
 ```
+
+The focused files are
+[`tests/test_conformance.py`](../tests/test_conformance.py) and
+[`tests/test_kernel_math.py`](../tests/test_kernel_math.py). The full suite
+also covers the engine equivalence, weights, decision rules and service layer.
 
 If a deliberate model change invalidates the fixture, change the equations and
 the fixture together, and explain why in the commit message. Do not regenerate
 the fixture from the code; that would only test that the code agrees with
 itself.
+
+## Related documents
+
+- [Math model](MATH_MODEL.md): the normative equations behind this map.
+- [Case study](CASE_STUDY.md): the same formulas on a fragmented real-data graph.
+- [Architecture](ARCHITECTURE.md): where the kernels sit in the service stack.

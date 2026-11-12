@@ -50,7 +50,9 @@ services:
       context: .
       dockerfile: deploy/docker/api.Dockerfile
     restart: unless-stopped
-    env_file: .env
+    env_file:
+      - path: .env
+        required: false
     environment:
       DATABASE_URL: postgresql+asyncpg://app:${POSTGRES_PASSWORD:-CHANGE_ME}@db:5432/opinionlab
       REDIS_URL: redis://redis:6379/0
@@ -76,7 +78,9 @@ services:
       context: .
       dockerfile: deploy/docker/worker.Dockerfile
     restart: unless-stopped
-    env_file: .env
+    env_file:
+      - path: .env
+        required: false
     environment:
       DATABASE_URL: postgresql+asyncpg://app:${POSTGRES_PASSWORD:-CHANGE_ME}@db:5432/opinionlab
       REDIS_URL: redis://redis:6379/0
@@ -86,6 +90,8 @@ services:
       db:
         condition: service_healthy
       redis:
+        condition: service_healthy
+      minio:
         condition: service_healthy
     deploy:
       resources:

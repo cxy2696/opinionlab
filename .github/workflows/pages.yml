@@ -5,6 +5,11 @@ on:
     branches: [main]
     paths:
       - "site/**"
+      - "apps/web/**"
+      - "scenarios/**"
+      - "packages/hnle/src/hnle/templates.py"
+      - "scripts/build_site.py"
+      - "scripts/build_static_templates.py"
       - ".github/workflows/pages.yml"
   workflow_dispatch:
 
@@ -25,8 +30,14 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+      - run: uv sync --locked --no-dev
+      - name: Refresh scenario export
+        run: uv run --no-sync python scripts/build_static_templates.py
       - name: Assemble shared assets
-        run: python scripts/build_site.py --output site
+        run: python3 scripts/build_site.py --output site
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

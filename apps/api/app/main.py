@@ -57,7 +57,7 @@ from app.settings import settings
 from app.state import request_cancel
 from hnle.spec import ModelSpec
 
-app = FastAPI(title="OpinionLab API", version="0.1.0")
+app = FastAPI(title="OpinionLab API", version="1.3.1")
 app.add_exception_handler(ApiError, api_error_handler)  # type: ignore[arg-type]
 app.add_middleware(RateLimitMiddleware)
 

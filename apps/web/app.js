@@ -36,11 +36,17 @@ addParticles("particlesShares", charts.shares, "shares");
 addParticles("particlesCascade", charts.cascade, "cascade");
 
 function tickClock() {
-  if (!$("cockpitClock")) return;
   const now = new Date();
-  $("cockpitClock").textContent =
-    [now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds()]
-      .map((value) => String(value).padStart(2, "0")).join(":");
+  const pad = (value) => String(value).padStart(2, "0");
+  const time = [now.getHours(), now.getMinutes(), now.getSeconds()].map(pad).join(":");
+  if ($("cockpitClock")) {
+    $("cockpitClock").textContent =
+      [now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds()].map(pad).join(":");
+  }
+  if ($("heroClock")) $("heroClock").textContent = time;
+  if ($("heroDate")) {
+    $("heroDate").textContent = `${pad(now.getDate())}-${pad(now.getMonth() + 1)}-${now.getFullYear()}`;
+  }
 }
 tickClock();
 setInterval(tickClock, 1000);
@@ -89,6 +95,48 @@ function showQuestion() {
   $("question").innerHTML = `${P(template.question_zh, template.question_en)}`;
   $("reading").innerHTML =
     `<strong>${T("readPrefix")}</strong> ${P(template.interpretation_zh, template.interpretation_en)}`;
+  updateHeroTemplate(template);
+}
+
+function updateHeroTemplate(template) {
+  if (!template) return;
+  if ($("heroScenario")) $("heroScenario").textContent = `${template.key} · ${P(template.name_zh, template.name_en)}`;
+  if (!state.data && $("heroRunMeta")) {
+    $("heroRunMeta").textContent = P(`预览 // ${template.key} 默认参数`, `PREVIEW // ${template.key} DEFAULT`);
+  }
+}
+
+function setGauge(wrapId, valueId, value) {
+  const wrap = $(wrapId);
+  const output = $(valueId);
+  if (!wrap || !output) return;
+  const clamped = Math.max(0, Math.min(100, Number(value) || 0));
+  wrap.style.setProperty("--gauge", clamped.toFixed(1));
+  output.textContent = String(Math.round(clamped));
+}
+
+function updateInstrumentFromData(data) {
+  if (!$("heroSteps") || !data) return;
+  const metrics = data.metrics || {};
+  const diversityMetric = metrics.diversity_final || {};
+  const diversity = diversityMetric.mean;
+  const cohesion = diversity === null || diversity === undefined ? 0 : (1 - Math.max(0, Math.min(1, diversity))) * 100;
+  const cascade = (data.series && data.series.cascade) || [];
+  const peak = cascade.length ? Math.max(...cascade) * 100 : 0;
+  const consensus = metrics.time_to_consensus && metrics.time_to_consensus.mean;
+  const n = diversityMetric.n || (data.spec && data.spec.repeats) || 0;
+  const steps = data.series && data.series.steps ? Math.max(0, data.series.steps.length - 1) : (data.spec && data.spec.n_steps) || 0;
+  const halfCi = diversityMetric.ci95_hi !== null && diversityMetric.ci95_hi !== undefined
+    ? (diversityMetric.ci95_hi - diversityMetric.ci95_lo) / 2 : null;
+  setGauge("gaugeCohesionWrap", "gaugeCohesion", cohesion);
+  setGauge("gaugeTurnWrap", "gaugeTurn", peak);
+  $("heroSteps").textContent = String(Math.round(steps));
+  $("heroMajority").textContent = consensus === null || consensus === undefined ? "—" : consensus.toFixed(1);
+  $("heroPeak").textContent = String(Math.round(peak));
+  $("heroCi").textContent = halfCi === null ? "—" : `±${halfCi.toFixed(3)}`;
+  if ($("heroRunMeta")) {
+    $("heroRunMeta").textContent = P(`运行结果 // ${n} 个副本`, `LIVE RUN // ${n} REPLICAS`);
+  }
 }
 
 async function loadTemplates() {
@@ -377,6 +425,7 @@ function renderViews(data) {
     $("aiRun").disabled = !enabled;
     $("aiStatus").textContent = enabled ? "" : T("aiDisabled");
   }
+  updateInstrumentFromData(data);
   if (tracker) {
     tracker.setData({
       shares: data.series.shares[data.series.shares.length - 1],
@@ -615,6 +664,14 @@ $("template").onchange = () => {
   updateRange();
 };
 $("run").onclick = run;
+if ($("heroRun")) {
+  $("heroRun").addEventListener("click", (event) => {
+    event.preventDefault();
+    const controls = $("controls");
+    if (controls) controls.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (state.templates.length && !$("run").disabled) $("run").click();
+  });
+}
 $("play").onclick = play;
 $("scrub").oninput = () => {
   stopPlayback();

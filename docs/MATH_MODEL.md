@@ -1,8 +1,13 @@
 # Math model
 
+**Applies to:** OpinionLab v1.3.1 · [Docs index](README.md) ·
+[Changelog](../CHANGELOG.md)
+
 This document is the normative definition of the OpinionLab model. Code and
 tests follow it; the README only summarises it. Each formula is mapped to a
 function so that a change in one engine cannot silently diverge from another.
+The formula-to-code bridge, including the tests that pin each behaviour, is
+[Conformance](CONFORMANCE.md).
 
 ## 1. State and assumptions
 
@@ -162,3 +167,16 @@ Implementation: `hnle/mc.py` (Welford updates to avoid drift at larger `R`).
   varying a parameter is not a causal effect of a real intervention.
 - Individual prediction, profiling or scoring is outside the model's promises
   and violates product red lines.
+
+The proof for the binary absorbing-state claim and its consequences live in the
+HNL research repository:
+[`docs/MODEL.md`](https://github.com/cxy2696/Hypergraph-Nonlinear-Latency-Voter-Model/blob/main/docs/MODEL.md).
+The repository boundary is in
+[`docs/RELATIONSHIP.md`](https://github.com/cxy2696/Hypergraph-Nonlinear-Latency-Voter-Model/blob/main/docs/RELATIONSHIP.md).
+
+## Related documents
+
+- [Conformance](CONFORMANCE.md): formula-to-code map, tests and the shared fixture.
+- [Model card](MODEL_CARD.md): capabilities, limits and prohibited uses.
+- [Case study](CASE_STUDY.md): the estimators applied to a real, fragmented graph.
+- [Demo](DEMO.md): how the browser translates aggregate metrics into gauges and readouts.

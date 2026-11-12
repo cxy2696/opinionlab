@@ -105,6 +105,11 @@ class MetricName(StrEnum):
     oscillation_autocorr = "oscillation_autocorr"
 
 
+def _all_metrics() -> list[MetricName]:
+    """Return the default metric set with an explicit element type."""
+    return list(MetricName)
+
+
 class _Base(BaseModel):
     model_config = ConfigDict(extra="forbid", populate_by_name=True)
 
@@ -199,7 +204,7 @@ class ModelSpec(_Base):
 
     shocks: list[ShockSpec] = Field(default_factory=list)
     interventions: list[InterventionSpec] = Field(default_factory=list)
-    metrics: list[MetricName] = Field(default_factory=lambda: list(MetricName))
+    metrics: list[MetricName] = Field(default_factory=_all_metrics)
 
     @model_validator(mode="after")
     def _check_engine_latency(self) -> Self:

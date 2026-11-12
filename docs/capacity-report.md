@@ -1,5 +1,8 @@
 # Capacity report
 
+**Applies to:** OpinionLab v1.3.1 · [Docs index](README.md) ·
+[Changelog](../CHANGELOG.md)
+
 ## Summary
 
 - Read traffic is not the bottleneck: at 20 orgs / 200 seats, peak reads are about 5 QPS, leaving
@@ -25,8 +28,11 @@ jobs_per_second = worker_slots / average_job_seconds
 | 100k nodes | 100,000 | 300,000 | ~1,050,000 | 500 | 7.5 s | 1.43e-8 |
 | adopted | — | — | — | — | — | **1.5e-8** |
 
-Reproduce with `make bench`: about 0.7 s for 10k and under 90 s for 100k
-(`benchmarks/bench_engine.py`).
+Reproduce with [`make bench`](../Makefile): roughly 0.7–0.8 s for 10k and under
+90 s for 100k on current hardware; the exact time is host-dependent. The
+benchmark lives in
+[`benchmarks/bench_engine.py`](../benchmarks/bench_engine.py); CI enforces the
+100k-node budget and runs the same command.
 
 ## Job examples (c = 1.5e-8)
 
@@ -38,7 +44,7 @@ Reproduce with `make bench`: about 0.7 s for 10k and under 90 s for 100k
 
 ## Load scenarios
 
-`benchmarks/locustfile.py`:
+Load scripts are in [`benchmarks/locustfile.py`](../benchmarks/locustfile.py):
 
 | Scenario | Setup | Pass criteria |
 |---|---|---|
@@ -68,3 +74,10 @@ locust -f benchmarks/locustfile.py ScenarioCAbuse --host http://localhost:8000 \
 - Load tests need real Postgres/Redis and workers; CI runs only the engine benchmark, while locust
   scenarios run manually or on a schedule in staging.
 - `c` changes with numpy/BLAS/CPU; recalibrate with `make bench` before every release.
+
+## Related documents
+
+- [Runbook](RUNBOOK.md): alert thresholds, rollback and tainted runs.
+- [Architecture](ARCHITECTURE.md): service layers and worker placement.
+- [Demo](DEMO.md): public demo caps and rate limits.
+- [Makefile](../Makefile): `make bench`, `make check` and `make site`.

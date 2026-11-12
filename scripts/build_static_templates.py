@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import argparse
 import json
 from pathlib import Path
 
@@ -10,8 +11,9 @@ from hnle.templates import iter_templates
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def main() -> None:
-    payload = []
+def export_templates(output: Path | None = None) -> list[dict[str, object]]:
+    """Return the enabled templates in the shape consumed by the static app."""
+    payload: list[dict[str, object]] = []
     for template in iter_templates(ROOT / "scenarios"):
         if not template.is_enabled():
             continue
@@ -49,9 +51,17 @@ def main() -> None:
                 "intervention": intervention,
             }
         )
-    target = ROOT / "site" / "templates.json"
+    target = output or ROOT / "site" / "templates.json"
+    target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(f"wrote {len(payload)} templates to {target}")
+    return payload
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--output", type=Path, default=ROOT / "site" / "templates.json")
+    export_templates(parser.parse_args().output)
 
 
 if __name__ == "__main__":

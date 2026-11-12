@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>OpinionLab · Scenario Sandbox</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23050b12'/%3E%3Ccircle cx='16' cy='16' r='9' fill='none' stroke='%2322d3ee' stroke-width='2'/%3E%3Ccircle cx='16' cy='16' r='3' fill='%2334d399'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="/api/v1/demo/static/style.css">
 <script src="/api/v1/demo/echarts.js"></script>
 <script defer src="/api/v1/demo/static/i18n.js"></script>
@@ -14,31 +15,156 @@
 <script defer src="/api/v1/demo/static/app.js"></script>
 </head>
 <body>
-<header class="hero">
+<header class="hero product-hero">
   <canvas id="galaxyScene" class="galaxy-canvas" aria-hidden="true"></canvas>
-  <div class="hero-copy">
-    <span class="eyebrow">INDUSTRIAL OPINION TRACKER // HNL-VM</span>
-    <h1>OpinionLab <span data-i18n="heroTitle">情景推演沙盘</span></h1>
-    <p class="lede" data-i18n="lede">把一群人会怎么想，变成一套可以反复试、能看到误差范围的追踪系统。</p>
-    <div class="hero-badges">
-      <span><i class="led"></i> <span data-i18n="badgeTracking">追踪在线</span></span>
-      <span data-i18n="badgeCi">95% 置信区间</span><span data-i18n="badgeAggregate">仅群体统计</span>
+  <div class="hero-shell">
+    <div class="hero-copy">
+      <div class="hero-headline">
+        <span class="eyebrow">INDUSTRIAL OPINION TRACKER // HNL-VM</span>
+        <h1>OpinionLab <span data-i18n="heroTitle">情景推演沙盘</span></h1>
+        <p class="lede" data-i18n="lede">把一群人会怎么想，变成一套可以反复试、能看到误差范围的追踪系统。</p>
+      </div>
+      <div class="hero-side">
+        <div class="hero-badges">
+          <span><i class="led"></i> <span data-i18n="badgeTracking">追踪在线</span></span>
+          <span data-i18n="badgeCi">95% 置信区间</span>
+          <span data-i18n="badgeAggregate">仅群体统计</span>
+        </div>
+        <div class="hero-actions">
+          <a id="heroCta" class="hero-cta" href="#controls">
+            <span data-i18n="openConsole">进入控制台</span><span class="cta-arrow" aria-hidden="true">↓</span>
+          </a>
+          <a class="repo-link" href="https://github.com/cxy2696/opinionlab" target="_blank" rel="noreferrer">GitHub <span aria-hidden="true">↗</span></a>
+        </div>
+      </div>
     </div>
-  </div>
-  <button id="langToggle" class="lang-toggle" type="button" aria-label="Switch language">EN</button>
-  <div class="track-panel">
-    <div class="track-head">
-      <span class="led"></span> <span data-i18n="trackingLabel">实时追踪</span>
-      <span id="trackStatus" class="track-status" data-i18n="trackStandby">待机</span>
+
+    <div class="instrument-cluster" role="figure" aria-label="OpinionLab live instrument cluster">
+      <div class="cluster-topbar">
+        <div class="cluster-status">
+          <div class="cluster-badges" aria-hidden="true">
+            <span class="scope" title="95% confidence interval">95</span>
+            <span class="scope" title="Group-level statistics only">Σ</span>
+          </div>
+          <div class="cluster-scenario">
+            <span data-i18n="clusterScenario">当前场景</span>
+            <b id="heroScenario">S2 · Rumor debunk timing</b>
+          </div>
+        </div>
+        <div class="cluster-clock">
+          <span class="cluster-date"><em>LOCAL</em><span id="heroDate">12-11-2026</span></span>
+          <b id="heroClock">06:11:04</b>
+          <span class="cluster-signal"><i class="led"></i> 95% CI</span>
+        </div>
+        <div class="cluster-actions">
+          <button id="langToggle" class="lang-toggle" type="button" aria-label="Switch language">EN</button>
+          <a id="heroRun" class="cluster-run" href="#controls" aria-label="Run the current scenario">
+            <span class="cluster-run-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" focusable="false"><path d="M8 5.5 19 12 8 18.5Z"></path></svg>
+            </span>
+            <span class="cluster-run-copy"><b data-i18n="runShort">运行</b><small>CONTROL DECK</small></span>
+          </a>
+        </div>
+      </div>
+
+      <div class="cluster-main">
+        <div class="gauge gauge-left" id="gaugeCohesionWrap" style="--gauge:76">
+          <svg class="gauge-svg" viewBox="0 0 240 240" aria-hidden="true">
+            <defs>
+              <linearGradient id="gaugeCyan" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#34d399"></stop>
+                <stop offset=".48" stop-color="#22d3ee"></stop>
+                <stop offset="1" stop-color="#7dd3fc"></stop>
+              </linearGradient>
+            </defs>
+            <circle class="gauge-edge" cx="120" cy="120" r="114"></circle>
+            <circle class="gauge-track" cx="120" cy="120" r="100"></circle>
+            <circle class="gauge-progress" cx="120" cy="120" r="100" pathLength="100"></circle>
+            <circle class="gauge-track inner" cx="120" cy="120" r="87"></circle>
+            <circle class="gauge-progress soft" cx="120" cy="120" r="87" pathLength="100"></circle>
+          </svg>
+          <span class="gauge-orbit" aria-hidden="true"></span>
+          <div class="gauge-core">
+            <span class="gauge-kicker">COHESION</span>
+            <div class="gauge-value"><b id="gaugeCohesion">76</b><small>%</small></div>
+            <span class="gauge-caption" data-i18n="gaugeCohesionCaption">群体共识度</span>
+          </div>
+        </div>
+
+        <div class="cluster-center">
+          <svg class="stage-lanes" viewBox="0 0 600 360" preserveAspectRatio="none" aria-hidden="true">
+            <path class="lane-edge" d="M142 352 282 116"></path>
+            <path class="lane-edge" d="M458 352 318 116"></path>
+            <path class="lane-mid" d="M300 132 300 352"></path>
+            <path class="lane-horizon" d="M258 118Q300 96 342 118"></path>
+          </svg>
+          <span class="stage-arrow stage-arrow-left" aria-hidden="true"></span>
+          <span class="stage-arrow stage-arrow-right" aria-hidden="true"></span>
+          <div class="stage-dome" aria-hidden="true"></div>
+          <div class="stage-top">
+            <span class="stage-live"><i class="led"></i> <span data-i18n="trackingLabel">实时追踪</span></span>
+            <span id="trackStatus" class="stage-status" data-i18n="trackStandby">待机</span>
+          </div>
+          <div class="stage-scene">
+            <canvas id="trackScene" aria-label="3D opinion network tracking"></canvas>
+          </div>
+          <div class="stage-telemetry">
+            <div><span>NODES</span><b id="trackNodes">—</b></div>
+            <div><span>STEP</span><b id="trackStep">000</b></div>
+            <div><span>DIVERGENCE</span><b id="trackDiv">0.00</b></div>
+          </div>
+          <div class="stage-scan" aria-hidden="true"></div>
+        </div>
+
+        <div class="gauge gauge-right" id="gaugeTurnWrap" style="--gauge:30">
+          <svg class="gauge-svg" viewBox="0 0 240 240" aria-hidden="true">
+            <defs>
+              <linearGradient id="gaugeViolet" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#a78bfa"></stop>
+                <stop offset=".6" stop-color="#6366f1"></stop>
+                <stop offset="1" stop-color="#22d3ee"></stop>
+              </linearGradient>
+            </defs>
+            <circle class="gauge-edge" cx="120" cy="120" r="114"></circle>
+            <circle class="gauge-track" cx="120" cy="120" r="100"></circle>
+            <circle class="gauge-progress" cx="120" cy="120" r="100" pathLength="100"></circle>
+            <circle class="gauge-track inner" cx="120" cy="120" r="87"></circle>
+            <circle class="gauge-progress soft" cx="120" cy="120" r="87" pathLength="100"></circle>
+          </svg>
+          <span class="gauge-orbit" aria-hidden="true"></span>
+          <div class="gauge-core">
+            <span class="gauge-kicker">PEAK TURN</span>
+            <div class="gauge-value"><b id="gaugeTurn">30</b><small>%</small></div>
+            <span class="gauge-caption" data-i18n="gaugeTurnCaption">单步最大转向</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="cluster-footer">
+        <div class="cluster-kpis">
+          <div class="cluster-kpi">
+            <span data-i18n="kpiSteps">观测步数</span>
+            <div><b id="heroSteps">100</b><em data-i18n="unitSteps">steps</em></div>
+          </div>
+          <div class="cluster-kpi">
+            <span data-i18n="kpiMajority">达到多数</span>
+            <div><b id="heroMajority">39.3</b><em data-i18n="unitSteps">steps</em></div>
+          </div>
+          <div class="cluster-kpi">
+            <span data-i18n="kpiPeak">级联峰值</span>
+            <div><b id="heroPeak">30</b><em>%</em></div>
+          </div>
+          <div class="cluster-kpi">
+            <span data-i18n="kpiCi">95% 置信区间</span>
+            <div><b id="heroCi">±0.176</b><em data-i18n="unitCi">diversity</em></div>
+          </div>
+        </div>
+        <div class="cluster-foot">
+          <span class="cluster-sim-note"><i class="led"></i> <span data-i18n="trackNote">模拟信号 / 非真实实时数据</span></span>
+          <span id="heroRunMeta">PREVIEW // S2 DEFAULT</span>
+        </div>
+      </div>
     </div>
-    <canvas id="trackScene" aria-label="3D opinion network tracking"></canvas>
-    <div class="track-scan"></div>
-    <div class="track-telemetry">
-      <div><span>NODES</span><b id="trackNodes">—</b></div>
-      <div><span>STEP</span><b id="trackStep">000</b></div>
-      <div><span>DIVERGENCE</span><b id="trackDiv">0.00</b></div>
-    </div>
-    <div class="track-note" data-i18n="trackNote">模拟信号 / 非真实实时数据</div>
   </div>
 </header>
 
@@ -48,13 +174,13 @@
     <span>ENGINE <b class="ok">READY</b></span>
     <span>REGION <b>LOCAL</b></span>
     <span>MODE <b>SIM</b></span>
-    <span class="hide-sm">BUILD <b>V1.0</b></span>
+    <span class="hide-sm">BUILD <b>V1.3.1</b></span>
   </div>
   <div class="cockpit-clock"><span>UTC</span><b id="cockpitClock">--:--:--</b></div>
 </div>
 
 <main>
-  <aside class="card controls">
+  <aside id="controls" class="card controls">
     <div class="deck-label">01 // CONTROL DECK</div>
     <div class="banner">
       <strong data-i18n="bannerStrong">先看边界</strong>

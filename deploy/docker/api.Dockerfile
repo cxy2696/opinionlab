@@ -1,5 +1,5 @@
 # Base image pinned by digest; refresh the digest at every release.
-FROM python:3.12.5-slim-bookworm@sha256:5d9c2b2d1b7a3b0c6d5f4e3a2b1c0d9e8f7a6b5c4d3e2f1a0b9c8d7e6f5a4b3c AS runtime
+FROM python:3.12.12-slim-bookworm@sha256:593bd06efe90efa80dc4eee3948be7c0fde4134606dd40d8dd8dbcade98e669c AS runtime
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \

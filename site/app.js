@@ -26,11 +26,17 @@ addParticles("particlesShares", charts.shares, "shares");
 addParticles("particlesCascade", charts.cascade, "cascade");
 
 function tickClock() {
-  if (!$("cockpitClock")) return;
   const now = new Date();
-  $("cockpitClock").textContent =
-    [now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds()]
-      .map((value) => String(value).padStart(2, "0")).join(":");
+  const pad = (value) => String(value).padStart(2, "0");
+  const time = [now.getHours(), now.getMinutes(), now.getSeconds()].map(pad).join(":");
+  if ($("cockpitClock")) {
+    $("cockpitClock").textContent =
+      [now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds()].map(pad).join(":");
+  }
+  if ($("heroClock")) $("heroClock").textContent = time;
+  if ($("heroDate")) {
+    $("heroDate").textContent = `${pad(now.getDate())}-${pad(now.getMonth() + 1)}-${now.getFullYear()}`;
+  }
 }
 tickClock();
 setInterval(tickClock, 1000);
@@ -81,6 +87,47 @@ function showQuestion() {
   $("question").innerHTML = P(template.question_zh, template.question_en);
   $("reading").innerHTML =
     `<strong>${T("readPrefix")}</strong> ${P(template.interpretation_zh, template.interpretation_en)}`;
+  updateHeroTemplate(template);
+}
+
+function updateHeroTemplate(template) {
+  if (!template) return;
+  if ($("heroScenario")) $("heroScenario").textContent = `${template.key} · ${P(template.name_zh, template.name_en)}`;
+  if (!state.last && $("heroRunMeta")) {
+    $("heroRunMeta").textContent = P(`预览 // ${template.key} 默认参数`, `PREVIEW // ${template.key} DEFAULT`);
+  }
+}
+
+function setGauge(wrapId, valueId, value) {
+  const wrap = $(wrapId);
+  const output = $(valueId);
+  if (!wrap || !output) return;
+  const clamped = Math.max(0, Math.min(100, Number(value) || 0));
+  wrap.style.setProperty("--gauge", clamped.toFixed(1));
+  output.textContent = String(Math.round(clamped));
+}
+
+function updateInstrumentFromData(data) {
+  if (!$("heroSteps") || !data || !data.metrics) return;
+  const m = data.metrics;
+  const diversityMetric = m.diversity || {};
+  const diversity = diversityMetric.mean;
+  const cohesion = diversity === null || diversity === undefined ? 0 : (1 - Math.max(0, Math.min(1, diversity))) * 100;
+  const peak = (m.peakValue || 0) * 100;
+  const consensus = m.consensus ? m.consensus.mean : null;
+  const n = diversityMetric.n || (state.config && state.config.repeats) || 0;
+  const steps = state.config ? state.config.steps : (data.first && data.first.diversity ? data.first.diversity.length - 1 : 0);
+  const halfCi = diversityMetric.hi !== null && diversityMetric.hi !== undefined
+    ? (diversityMetric.hi - diversityMetric.lo) / 2 : null;
+  setGauge("gaugeCohesionWrap", "gaugeCohesion", cohesion);
+  setGauge("gaugeTurnWrap", "gaugeTurn", peak);
+  $("heroSteps").textContent = String(Math.round(steps));
+  $("heroMajority").textContent = consensus === null || consensus === undefined ? "—" : consensus.toFixed(1);
+  $("heroPeak").textContent = String(Math.round(peak));
+  $("heroCi").textContent = halfCi === null ? "—" : `±${halfCi.toFixed(3)}`;
+  if ($("heroRunMeta")) {
+    $("heroRunMeta").textContent = P(`运行结果 // ${n} 个副本`, `LIVE RUN // ${n} REPLICAS`);
+  }
 }
 
 function applyTemplate(template) {
@@ -392,6 +439,7 @@ function run() {
     renderPlain(result);
     renderDecision(OpinionSim.decisionBrief(settings, result, $("template").value));
     renderCharts(result);
+    updateInstrumentFromData(result);
     renderDelta();
     if (tracker) {
       tracker.setData({
@@ -497,6 +545,14 @@ document.addEventListener("keydown", (event) => {
 $("q").oninput = () => { updateLabels(); updateRange(); };
 $("template").onchange = () => { const template = currentTemplate(); if (template) applyTemplate(template); };
 $("run").onclick = run;
+if ($("heroRun")) {
+  $("heroRun").addEventListener("click", (event) => {
+    event.preventDefault();
+    const controls = $("controls");
+    if (controls) controls.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (state.templates.length && !$("run").disabled) $("run").click();
+  });
+}
 $("play").onclick = play;
 $("scrub").oninput = () => { stopPlayback(); if (state.last) renderCharts(state.last, Number($("scrub").value)); };
 $("csv").onclick = downloadCsv;
@@ -515,6 +571,7 @@ window.addEventListener("languagechange", () => {
     renderPlain(state.last);
     renderDecision(OpinionSim.decisionBrief(state.config, state.last, $("template").value));
     renderCharts(state.last);
+    updateInstrumentFromData(state.last);
     renderDelta();
   }
 });

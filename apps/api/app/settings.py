@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     database_url: str = "postgresql+asyncpg://app:CHANGE_ME@localhost:5432/opinionlab"
     redis_url: str = "redis://localhost:6379/0"
     log_level: str = "INFO"
-    jwt_secret: str = "dev-secret-change-me"
+    jwt_secret: str = "dev-secret-change-me-please-32-bytes"
     rate_limit_global_rps: int = 100
     rate_limit_ip_rps: int = 20
     rate_limit_user_rps: int = 30

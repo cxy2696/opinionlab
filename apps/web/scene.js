@@ -138,7 +138,7 @@
       const h = this.height;
       const cx = w / 2;
       const cy = h / 2 + 6;
-      const radius = Math.min(w, h) * 0.36;
+      const radius = Math.min(w, h) * 0.42;
       ctx.clearRect(0, 0, w, h);
 
       // perspective floor grid

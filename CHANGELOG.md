@@ -1,5 +1,7 @@
 # Changelog
 
+**Related:** [Repository README](README.md) · [Docs index](docs/README.md)
+
 ## v1.3.1 — 2026-11-12
 
 ### Changed
@@ -12,6 +14,59 @@
 - Added a source-versus-generated note to the README: `runs/` is local,
   `site/` is assembled from the site shell plus shared `apps/web/` assets, and
   `data/` is a fixed CC0 sample.
+
+### Demo and documentation
+
+- Redesigned the browser product hero as a dashboard-style instrument cluster:
+  cohesion and peak-turn gauges, a central 3D opinion stage, four linked
+  readouts and a live preview/run state. The existing cockpit controls, 3D
+  telemetry and bilingual labels are unchanged.
+- Refreshed the README, docs index, demo guide, use cases, architecture, model
+  card, compliance, runbook, capacity report, data note, examples and air-gap
+  guide for v1.3.1. Every page now links back to the docs index and changelog.
+- Replaced `docs/demo.png` and `docs/telemetry-3d.png` with screenshots from the
+  current instrument-cluster build.
+- Aligned visible version labels in the demo (`BUILD V1.3.1`), FastAPI app
+  metadata and Helm image values. Documented that the hosted demo exports CSV
+  while the local service exports an HTML report.
+- Corrected documentation claims about censored consensus reporting, the
+  3D-telemetry/CSV split and the tainted-run surface.
+
+### Operations
+
+- Added `.env.example` and made the Compose `env_file` optional, so
+  `docker compose config` and local startup no longer require a pre-existing
+  `.env`. `make setup` now bootstraps the file, starts the local services when
+  Docker is available and applies migrations.
+- Replaced the placeholder Docker base-image digest with the real
+  `python:3.12.12-slim-bookworm` index digest, and made the worker wait for
+  MinIO as well as PostgreSQL and Redis.
+- Added `.dockerignore` so local secrets, virtualenvs and runtime artifacts are
+  not sent to the Docker daemon.
+- `make site` now regenerates `site/templates.json` from the scenario library,
+  and the Pages workflow also runs (and regenerates the export) when shared
+  `apps/web/` assets, scenarios or build scripts change. Tests compare the
+  committed export with the library.
+- Added deployment tests for the env sample, optional Compose config, worker
+  readiness and Pages path triggers.
+- CI, migration, benchmark and security jobs now run `uv lock --check` /
+  `uv sync --locked`, so a stale lockfile fails instead of being silently
+  re-resolved.
+
+### Dependencies and security
+
+- Upgraded the service stack to FastAPI 0.162.5, Starlette 1.10.0,
+  Pydantic 2.14.3 and pydantic-settings 2.16.2, with matching typing updates.
+- Replaced `python-jose`/`ecdsa` with PyJWT 2.15.1 for HS256 tokens, removed
+  the old JWT import shim and raised the development default secret to 32+
+  bytes. Production deployments must supply their own secret.
+- Updated Jinja2 to 3.1.6 and PyArrow to 23.0.1; the pinned numeric stack
+  (NumPy, SciPy, pandas) is unchanged so golden results remain comparable.
+- Updated test tooling to pytest 9.2.0, pytest-asyncio 1.4.1,
+  pytest-benchmark 5.3.1 and Hypothesis 6.170.15, and set the async fixture
+  loop scope explicitly.
+- `uv run pip-audit` now reports no known vulnerabilities. The weekly security
+  workflow therefore runs against a clean dependency set.
 
 ### Unchanged
 

@@ -40,10 +40,27 @@ def test_worker_resource_limits_and_no_localhost_for_app_services() -> None:
         assert "redis:6379" in env["REDIS_URL"]
 
 
+def test_env_example_and_optional_compose_env() -> None:
+    sample = (ROOT / ".env.example").read_text(encoding="utf-8")
+    for key in ("DATABASE_URL", "REDIS_URL", "JWT_SECRET", "OLLAMA_ENABLED", "DEMO_MAX_NODES"):
+        assert key in sample
+    gitignore = (ROOT / ".gitignore").read_text(encoding="utf-8")
+    assert "!.env.example" in gitignore
+    compose = _compose()["services"]
+    for name in ("api", "worker"):
+        env_file = compose[name]["env_file"]
+        assert env_file == [{"path": ".env", "required": False}], name
+    worker_deps = compose["worker"]["depends_on"]
+    assert worker_deps["minio"]["condition"] == "service_healthy"
+
+    dockerignore = (ROOT / ".dockerignore").read_text(encoding="utf-8")
+    assert ".env" in dockerignore and ".git" in dockerignore
+
+
 def test_dockerfiles_pin_digest_and_run_as_non_root() -> None:
     for name in ("api.Dockerfile", "worker.Dockerfile"):
         text = (ROOT / "deploy" / "docker" / name).read_text(encoding="utf-8")
-        assert re.search(r"FROM python:3\.12\.5-slim-bookworm@sha256:[0-9a-f]{64}", text), name
+        assert re.search(r"FROM python:3\.12\.\d+-slim-bookworm@sha256:[0-9a-f]{64}", text), name
         assert "USER app" in text
         assert "useradd" in text
 
@@ -70,6 +87,22 @@ def test_ci_has_migration_and_weekly_audit() -> None:
     assert "schedule:" in security
     assert "cron:" in security
     assert "pip-audit" in security
+    assert "uv lock --check" in ci
+    assert "uv sync --locked" in ci
+    assert "uv sync --locked" in security
+
+
+def test_pages_workflow_tracks_shared_ui_and_scenarios() -> None:
+    pages = (ROOT / ".github" / "workflows" / "pages.yml").read_text(encoding="utf-8")
+    for marker in (
+        "apps/web/**",
+        "scenarios/**",
+        "scripts/build_site.py",
+        "scripts/build_static_templates.py",
+        "uv sync --locked",
+        "uv run --no-sync python scripts/build_static_templates.py",
+    ):
+        assert marker in pages
 
 
 def test_runbook_documents_canary_rollback_and_tainted() -> None:

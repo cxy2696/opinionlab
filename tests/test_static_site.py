@@ -40,7 +40,7 @@ def test_build_script_assembles_shared_assets(tmp_path: Path) -> None:
     assert "3D" in (tmp_path / "index.html").read_text(encoding="utf-8")
 
 
-def test_templates_export_matches_the_library() -> None:
+def test_templates_export_matches_the_library(tmp_path: Path) -> None:
     payload = json.loads((SITE / "templates.json").read_text(encoding="utf-8"))
     assert len(payload) == 15
     keys = {item["key"] for item in payload}
@@ -49,6 +49,21 @@ def test_templates_export_matches_the_library() -> None:
         assert item["question_zh"] and item["question_en"]
         assert item["defaults"]["n_nodes"] > 0
         assert item["defaults"]["q"] > 0
+
+    generated = tmp_path / "templates.json"
+    subprocess.run(
+        [
+            sys.executable,
+            str(ROOT / "scripts" / "build_static_templates.py"),
+            "--output",
+            str(generated),
+        ],
+        cwd=ROOT,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    assert json.loads(generated.read_text(encoding="utf-8")) == payload
 
 
 def test_browser_simulator_selftest() -> None:
