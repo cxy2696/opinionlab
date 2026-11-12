@@ -20,10 +20,16 @@ def test_static_site_sources_exist() -> None:
     html = (SITE / "index.html").read_text(encoding="utf-8")
     assert "OpinionLab" in html
     assert 'lang="en"' in html
-    assert "非对真实舆情的预测" in html
+    assert "not a prediction of real opinion" in html
     assert "./sim.js" in html
-    assert "这些参数到底在做什么" in html
+    assert "Why these knobs" in html
     assert 'data-preset="quick"' in html
+    for lang in ("en", "zh", "ja", "de"):
+        assert f'<option value="{lang}"' in html, lang
+    assert "data-tip-ja" in html and "data-tip-de" in html
+    i18n = (ROOT / "apps" / "web" / "i18n.js").read_text(encoding="utf-8")
+    assert "シナリオ・サンドボックス" in i18n
+    assert "Szenario-Sandbox" in i18n
 
 
 def test_build_script_assembles_shared_assets(tmp_path: Path) -> None:

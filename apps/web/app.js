@@ -1,6 +1,6 @@
 const $ = (id) => document.getElementById(id);
 const T = (key) => (window.I18N ? I18N.t(key) : key);
-const P = (zh, en) => (window.I18N ? I18N.pick(zh, en) : zh);
+const P = (zh, en, ja, de) => (window.I18N ? I18N.pick(zh, en, ja, de) : zh);
 const state = {
   templates: [],
   features: {},
@@ -58,7 +58,7 @@ if (window.TrackScene && $("trackScene")) {
     onTick: ({ step, divergence, active }) => {
       $("trackStep").textContent = String(step).padStart(3, "0");
       $("trackDiv").textContent = divergence.toFixed(2);
-      if (active) $("trackStatus").textContent = P("已锁定", "LOCKED");
+      if (active) $("trackStatus").textContent = P("已锁定", "LOCKED", "ロック済み", "ERFASST");
     },
   });
   $("trackNodes").textContent = "150";
@@ -69,10 +69,10 @@ const SPLIT = { lineStyle: { color: "rgba(30,74,95,.55)" } };
 const METRICS = ["diversity_final", "cascade_p99", "time_to_consensus", "absorbing"];
 
 const METRIC_LABELS = {
-  diversity_final: ["多样性", "Diversity"],
-  cascade_p99: ["级联 P99", "Cascade P99"],
-  time_to_consensus: ["收敛步", "Consensus step"],
-  absorbing: ["吸收态比例", "Absorbing rate"],
+  diversity_final: ["多样性", "Diversity", "多様性", "Diversität"],
+  cascade_p99: ["级联 P99", "Cascade P99", "カスケード P99", "Kaskade P99"],
+  time_to_consensus: ["收敛步", "Consensus step", "合意到達ステップ", "Konsensschritt"],
+  absorbing: ["吸收态比例", "Absorbing rate", "吸収率", "Absorptionsrate"],
 };
 
 function fmt(value) {
@@ -82,7 +82,9 @@ function fmt(value) {
 }
 
 function updateLabels() {
-  $("qVal").textContent = Number($("q").value).toFixed(1);
+  const value = Number($("q").value).toFixed(1);
+  $("qVal").textContent = value;
+  if ($("qScaleValue")) $("qScaleValue").textContent = value;
 }
 
 function currentTemplate() {
@@ -92,17 +94,24 @@ function currentTemplate() {
 function showQuestion() {
   const template = currentTemplate();
   if (!template) return;
-  $("question").innerHTML = `${P(template.question_zh, template.question_en)}`;
+  $("question").innerHTML = I18N.template(template, "question");
   $("reading").innerHTML =
-    `<strong>${T("readPrefix")}</strong> ${P(template.interpretation_zh, template.interpretation_en)}`;
+    `<strong>${T("readPrefix")}</strong> ${I18N.template(template, "interpretation")}`;
   updateHeroTemplate(template);
 }
 
 function updateHeroTemplate(template) {
   if (!template) return;
-  if ($("heroScenario")) $("heroScenario").textContent = `${template.key} · ${P(template.name_zh, template.name_en)}`;
+  if ($("heroScenario")) {
+    $("heroScenario").textContent = `${template.key} · ${I18N.template(template, "name")}`;
+  }
   if (!state.data && $("heroRunMeta")) {
-    $("heroRunMeta").textContent = P(`预览 // ${template.key} 默认参数`, `PREVIEW // ${template.key} DEFAULT`);
+    $("heroRunMeta").textContent = P(
+      `预览 // ${template.key} 默认参数`,
+      `PREVIEW // ${template.key} DEFAULT`,
+      `プレビュー // ${template.key} デフォルト`,
+      `VORSCHAU // ${template.key} STANDARD`,
+    );
   }
 }
 
@@ -135,7 +144,12 @@ function updateInstrumentFromData(data) {
   $("heroPeak").textContent = String(Math.round(peak));
   $("heroCi").textContent = halfCi === null ? "—" : `±${halfCi.toFixed(3)}`;
   if ($("heroRunMeta")) {
-    $("heroRunMeta").textContent = P(`运行结果 // ${n} 个副本`, `LIVE RUN // ${n} REPLICAS`);
+    $("heroRunMeta").textContent = P(
+      `运行结果 // ${n} 个副本`,
+      `LIVE RUN // ${n} REPLICAS`,
+      `実行結果 // ${n} 複製`,
+      `LIVE-LAUF // ${n} REPLIKATE`,
+    );
   }
 }
 
@@ -165,7 +179,7 @@ function refreshOptions() {
   if (!state.templates.length) return;
   const selected = $("template").value;
   $("template").innerHTML = state.templates
-    .map((item) => `<option value="${item.key}">${item.key} · ${P(item.name_zh, item.name_en)}</option>`)
+    .map((item) => `<option value="${item.key}">${item.key} · ${I18N.template(item, "name")}</option>`)
     .join("");
   if (state.templates.some((item) => item.key === selected)) $("template").value = selected;
 }
@@ -187,17 +201,37 @@ function requestBody() {
 }
 
 const METRIC_WHY = {
-  diversity_final: ["越低越集中；0 表示只剩一种立场。", "Lower is more concentrated; 0 means one stance left."],
-  cascade_p99: ["最剧烈的 1% 步数里，改变立场的人占比。", "Share changing in the most intense 1% of steps."],
-  time_to_consensus: ["达到 80% 多数所需的步数；只统计达到多数的副本。", "Steps to an 80% majority; majority-reaching replicas only."],
-  absorbing: ["有多少副本最终稳定在多数。", "Share of replicas that end in a stable majority."],
+  diversity_final: [
+    "越低越集中；0 表示只剩一种立场。",
+    "Lower is more concentrated; 0 means one stance left.",
+    "低いほど集中しており、0 は一つの立場だけが残った状態です。",
+    "Niedriger bedeutet konzentrierter; 0 heißt, dass nur eine Haltung übrig bleibt.",
+  ],
+  cascade_p99: [
+    "最剧烈的 1% 步数里，改变立场的人占比。",
+    "Share changing in the most intense 1% of steps.",
+    "最も激しい1%のステップで、立場を変えた人の割合。",
+    "Anteil der Wechsel in den intensivsten 1 % der Schritte.",
+  ],
+  time_to_consensus: [
+    "达到 80% 多数所需的步数；只统计达到多数的副本。",
+    "Steps to an 80% majority; majority-reaching replicas only.",
+    "80%の多数に達するまでのステップ数。多数に達した複製のみを集計します。",
+    "Schritte bis zu einer 80 %-Mehrheit; nur Replikate, die eine Mehrheit erreichen.",
+  ],
+  absorbing: [
+    "有多少副本最终稳定在多数。",
+    "Share of replicas that end in a stable majority.",
+    "最終的に安定した多数に至った複製の割合。",
+    "Anteil der Replikate, die in einer stabilen Mehrheit enden.",
+  ],
 };
 
 function metricCard(key, label, metric) {
   const value = metric && metric.mean !== null && metric.mean !== undefined ? metric.mean : null;
   const ci = metric && metric.ci95_lo !== null && metric.ci95_lo !== undefined
     ? `95% CI ${fmt(metric.ci95_lo)} – ${fmt(metric.ci95_hi)} · n=${metric.n}`
-    : "无副本达到多数 / no replica reached a majority";
+    : T("noMajority");
   const percent = key === "absorbing" ? "1" : "0";
   return `<div class="metric"><div class="name">${label}</div>
     <div class="val" data-target="${value === null ? "null" : value}" data-percent="${percent}">—</div>
@@ -240,10 +274,10 @@ function renderCharts(data, upto) {
   const timing = decision.timing || {};
   const cascadeMarkers = [
     timing.takeoff_step
-      ? { xAxis: timing.takeoff_step, label: { formatter: P("起势", "take-off"), position: "insideEndTop", rotate: 0 } }
+      ? { xAxis: timing.takeoff_step, label: { formatter: P("起势", "take-off", "立ち上がり", "Anlauf"), position: "insideEndTop", rotate: 0 } }
       : null,
     timing.peak_step
-      ? { xAxis: timing.peak_step, label: { formatter: P("峰值", "peak"), position: "insideEndTop", rotate: 0 } }
+      ? { xAxis: timing.peak_step, label: { formatter: P("峰值", "peak", "ピーク", "Peak"), position: "insideEndTop", rotate: 0 } }
       : null,
   ].filter(Boolean);
 
@@ -267,7 +301,7 @@ function renderCharts(data, upto) {
     color: ["transparent", "rgba(34,211,238,.16)", "#ffb020", "#22d3ee"],
     legend: { top: 0, right: 0, itemWidth: 10, itemHeight: 8, type: "scroll",
               textStyle: { color: "#9ec3d6", fontSize: 10 },
-              data: [P("本次运行", "this run"), P("中位数", "median"), "10–90%"] },
+              data: [P("本次运行", "this run", "今回の実行", "dieser Lauf"), P("中位数", "median", "中央値", "Median"), "10–90%"] },
     grid: { left: 44, right: 14, top: 30, bottom: 26 },
     xAxis: { type: "category", data: steps, boundaryGap: false, ...AXIS, splitLine: { show: false } },
     yAxis: {
@@ -280,9 +314,9 @@ function renderCharts(data, upto) {
       { name: "10–90%", type: "line", stack: "band", data: sliceUpto(width, index),
         lineStyle: { opacity: 0 }, areaStyle: { color: "rgba(43,108,176,.16)" },
         symbol: "none", silent: true },
-      { name: P("中位数", "median"), type: "line", data: sliceUpto(bands.p50, index),
+      { name: P("中位数", "median", "中央値", "Median"), type: "line", data: sliceUpto(bands.p50, index),
         smooth: true, showSymbol: false, lineStyle: { type: "dashed", width: 1.4, color: "#ffb020" } },
-      { name: P("本次运行", "this run"), type: "line", data: sliceUpto(series.diversity, index),
+      { name: P("本次运行", "this run", "今回の実行", "dieser Lauf"), type: "line", data: sliceUpto(series.diversity, index),
         smooth: true, showSymbol: false, lineStyle: { width: 2.4, color: "#22d3ee" },
         areaStyle: { color: runGradient } },
     ],
@@ -290,7 +324,7 @@ function renderCharts(data, upto) {
 
   const opinionCount = data.opinion_count || 2;
   const shares = Array.from({ length: opinionCount }, (_, opinion) => ({
-    name: P(`立场 ${opinion}`, `Opinion ${opinion}`),
+    name: P(`立场 ${opinion}`, `Opinion ${opinion}`, `立場 ${opinion}`, `Haltung ${opinion}`),
     type: "line",
     stack: "shares",
     smooth: true,
@@ -345,26 +379,79 @@ function renderCharts(data, upto) {
   }
 }
 
+function decisionCopy(decision) {
+  const timing = decision.timing || {};
+  const peak = timing.peak_step;
+  const takeoff = timing.takeoff_step;
+  const consensus = timing.consensus_step;
+  const intervention = timing.intervention_step;
+  const lead = Math.max(2, Math.round(2 * Number($("mu").value)));
+  const start = peak ? (takeoff || Math.max(1, peak - lead)) : null;
+  const cascade = (state.data && state.data.series && state.data.series.cascade) || [];
+  const peakValue = cascade.length ? Math.max(...cascade) : 0;
+  const repeats = (state.data && state.data.spec && state.data.spec.repeats) || Number($("repeats").value) || 0;
+  const ja = I18N.lang === "ja";
+  let windowText;
+  if (peak && intervention) {
+    windowText = ja
+      ? `推奨される介入ウィンドウはステップ ${Math.max(1, peak - lead)}–${peak} です。ピークの約${lead}ステップ前（約2反応周期）で、今回の設定はステップ ${intervention} です。`
+      : `Ein simuliertes Fenster liegt bei den Schritten ${Math.max(1, peak - lead)}–${peak}: etwa ${lead} Schritte vor dem Kaskadenpeak (rund zwei Reaktionszyklen). Dieser Lauf greift in Schritt ${intervention} ein.`;
+  } else if (peak) {
+    windowText = ja
+      ? `ステップ ${start}–${peak} を重点的に見てください。カスケードは約ステップ ${start} で立ち上がり、ステップ ${peak} でピークになります（約${(peakValue * 100).toFixed(0)}%が同時に立場を変える）。`
+      : `Schritte ${start}–${peak} beobachten: Die Kaskade beginnt etwa bei Schritt ${start} und erreicht bei Schritt ${peak} ihren Höhepunkt (${(peakValue * 100).toFixed(0)} % wechseln gleichzeitig).`;
+  } else {
+    windowText = ja
+      ? "明瞭なカスケードは観測されませんでした。まずパラメータとトポロジーを確認してください。"
+      : "Es wurde keine klare Kaskade beobachtet; zuerst Parameter und Topologie prüfen.";
+  }
+  if (consensus !== null && consensus !== undefined) {
+    windowText += ja
+      ? ` 約ステップ ${consensus} で多数に達します。`
+      : ` Eine Mehrheit wird etwa bei Schritt ${consensus} erreicht.`;
+  }
+  return {
+    decisionText: I18N.template(currentTemplate(), "decision"),
+    windowText,
+    followups: ja
+      ? [
+          "今回のパラメータを基準にし、時点を1つだけ変えて再実行してください。2つの95% CIが重ならない場合にのみ「時点が有効」と判断できます。",
+          `複製回数を30以上に増やしてから再確認してください（現在は${repeats}回）。区間が広い可能性があります。`,
+          "実データで q、遅延、初期態度分布を調整してください。ここでの時点はシミュレーション上の窓であり、事象予測ではありません。",
+        ]
+      : [
+          "Diesen Lauf als Basis nehmen, nur ein Timing ändern und erneut ausführen; erst wenn sich die beiden 95 %-KIs nicht überlappen, ist der Zeitpunkt belegt.",
+          `Replikate vor der Entscheidung auf 30+ erhöhen (aktuell ${repeats}); das Intervall kann breit sein.`,
+          "q, Latenz und Anfangsverteilung an echten Daten kalibrieren; das Fenster ist simuliert, keine Ereignisprognose.",
+        ],
+    caveat: ja
+      ? "時点の提案は所定の仮定に基づくシミュレーションであり、実イベントの時刻予測ではありません。"
+      : "Zeitangaben stammen aus einer Simulation unter Annahmen und sind keine Prognose realer Ereigniszeitpunkte.",
+  };
+}
+
 function renderDecision(decision) {
   const panel = $("decision");
   if (!decision) { panel.hidden = true; return; }
   panel.hidden = false;
-  $("decisionText").textContent = P(decision.decision_zh, decision.decision_en);
+  const localized = I18N.lang === "ja" || I18N.lang === "de" ? decisionCopy(decision) : null;
   const timing = decision.timing || {};
   const labels = [
-    ["takeoff_step", P("起势", "take-off")],
-    ["peak_step", P("峰值", "peak")],
-    ["consensus_step", P("多数", "majority")],
-    ["intervention_step", P("干预", "intervention")],
+    ["takeoff_step", P("起势", "take-off", "立ち上がり", "Anlauf")],
+    ["peak_step", P("峰值", "peak", "ピーク", "Peak")],
+    ["consensus_step", P("多数", "majority", "多数", "Mehrheit")],
+    ["intervention_step", P("干预", "intervention", "介入", "Eingriff")],
   ];
+  const stepLabel = T("stepLabel");
+  $("decisionText").textContent = localized ? localized.decisionText : P(decision.decision_zh, decision.decision_en);
   $("timing").innerHTML = labels
     .filter(([key]) => timing[key] !== null && timing[key] !== undefined)
-    .map(([key, label]) => `<span class="chip-timing">${label} <b>step ${timing[key]}</b></span>`)
+    .map(([key, label]) => `<span class="chip-timing">${label} <b>${stepLabel} ${timing[key]}</b></span>`)
     .join("");
-  $("window").textContent = P(decision.window_zh, decision.window_en);
-  const followups = P(decision.followups_zh, decision.followups_en);
+  $("window").textContent = localized ? localized.windowText : P(decision.window_zh, decision.window_en);
+  const followups = localized ? localized.followups : P(decision.followups_zh, decision.followups_en);
   $("followups").innerHTML = followups.map((item) => `<li>${item}</li>`).join("");
-  $("caveat").textContent = P(decision.caveat_zh, decision.caveat_en);
+  $("caveat").textContent = localized ? localized.caveat : P(decision.caveat_zh, decision.caveat_en);
 }
 
 function renderPlain(data) {
@@ -380,35 +467,70 @@ function renderPlain(data) {
     bullets.push(P(
       `最终多样性 ${fmt(diversity)}：${diversity < 0.05 ? "基本只剩一种声音" : diversity < 0.2 ? "仍有少数派，但明显收拢" : "多种立场仍然并存"}。`,
       `Final diversity ${fmt(diversity)}: ${diversity < 0.05 ? "one stance dominates" : diversity < 0.2 ? "minority remains but shrinking" : "multiple stances still coexist"}.`,
+      `最終的な多様性 ${fmt(diversity)}：${diversity < 0.05 ? "ほぼ一つの声だけ" : diversity < 0.2 ? "少数派は残るが縮小" : "複数の立場が併存"}。`,
+      `Endgültige Diversität ${fmt(diversity)}: ${diversity < 0.05 ? "eine Haltung dominiert" : diversity < 0.2 ? "Minderheit bleibt, schrumpft aber" : "mehrere Haltungen bestehen weiter"}.`,
     ));
   }
   if (cascade.length) {
     bullets.push(P(
       `级联峰值在第 ${peakStep} 步，约 ${(peak * 100).toFixed(0)}% 的人同时改变立场。`,
       `The cascade peaked at step ${peakStep}; about ${(peak * 100).toFixed(0)}% changed at once.`,
+      `カスケードのピークはステップ ${peakStep} で、約${(peak * 100).toFixed(0)}%が同時に立場を変えました。`,
+      `Der Kaskadenpeak lag bei Schritt ${peakStep}; etwa ${(peak * 100).toFixed(0)} % wechselten gleichzeitig.`,
     ));
   }
   if (consensus !== null) {
     bullets.push(P(
       `约第 ${consensus.toFixed(1)} 步达到 80% 多数。`,
       `An 80% majority is reached around step ${consensus.toFixed(1)}.`,
+      `約ステップ ${consensus.toFixed(1)} で80%の多数に達します。`,
+      `Eine 80 %-Mehrheit wird etwa bei Schritt ${consensus.toFixed(1)} erreicht.`,
     ));
   }
   if (absorbing !== null) {
     bullets.push(P(
       `${(absorbing * 100).toFixed(0)}% 的副本最终稳定在多数。`,
       `${(absorbing * 100).toFixed(0)}% of replicas end in a stable majority.`,
+      `${(absorbing * 100).toFixed(0)}%の複製が最終的に安定した多数に至りました。`,
+      `${(absorbing * 100).toFixed(0)} % der Replikate enden in einer stabilen Mehrheit.`,
     ));
   }
   $("plainReading").innerHTML =
-    `<strong>${P("用一句话说：", "In plain words:")}</strong><ul>${bullets.map((item) => `<li>${item}</li>`).join("")}</ul>`;
+    `<strong>${P("用一句话说：", "In plain words:", "ひと言でいうと：", "In einfachen Worten:")}</strong><ul>${bullets.map((item) => `<li>${item}</li>`).join("")}</ul>`;
+}
+
+function summaryCopy(data) {
+  const series = data.series;
+  const start = series.diversity[0];
+  const end = series.diversity[series.diversity.length - 1];
+  const timing = (data.decision && data.decision.timing) || {};
+  const peakStep = timing.peak_step || (series.cascade.length ? series.cascade.indexOf(Math.max(...series.cascade)) + 1 : 0);
+  const peak = series.cascade.length ? Math.max(...series.cascade) : 0;
+  const ttc = timing.consensus_step;
+  const observed = series.steps.length ? series.steps[series.steps.length - 1] : series.diversity.length - 1;
+  const stable = Boolean(data.summary && data.summary.absorbing);
+  const ja = I18N.lang === "ja";
+  const verdict = stable
+    ? (ja ? "安定した合意" : "Stabiler Konsens")
+    : ttc !== null && ttc !== undefined
+      ? (ja ? "多数に達したが変化中" : "Mehrheit erreicht, weiter in Bewegung")
+      : (ja ? "未収束" : "Nicht konvergiert");
+  const text = ttc !== null && ttc !== undefined
+    ? (ja
+        ? `この仮定の下で、多様性は ${start.toFixed(2)} から ${end.toFixed(2)} に低下し、約ステップ ${ttc} で多数に達しました。カスケードのピークはステップ ${peakStep} で、約${(peak * 100).toFixed(0)}%が同時に立場を変えました。`
+        : `Unter diesen Annahmen sank die Diversität von ${start.toFixed(2)} auf ${end.toFixed(2)}; eine Mehrheit wurde etwa bei Schritt ${ttc} erreicht. Der Kaskadenpeak lag bei Schritt ${peakStep}, wobei etwa ${(peak * 100).toFixed(0)} % gleichzeitig ihre Haltung änderten.`)
+    : (ja
+        ? `この仮定の下で、多様性は ${start.toFixed(2)} から ${end.toFixed(2)} に変化しましたが、${observed} ステップ以内に多数には達しませんでした。カスケードのピークはステップ ${peakStep}（${(peak * 100).toFixed(0)}%）です。`
+        : `Unter diesen Annahmen bewegte sich die Diversität von ${start.toFixed(2)} auf ${end.toFixed(2)}, aber innerhalb von ${observed} Schritten wurde keine Mehrheit erreicht. Der Kaskadenpeak lag bei Schritt ${peakStep} (${(peak * 100).toFixed(0)} %).`);
+  return { verdict, text };
 }
 
 function renderViews(data) {
   const summary = data.summary_text;
-  $("verdict").textContent = P(summary.verdict_zh, summary.verdict_en);
+  const localized = I18N.lang === "ja" || I18N.lang === "de" ? summaryCopy(data) : null;
+  $("verdict").textContent = localized ? localized.verdict : P(summary.verdict_zh, summary.verdict_en);
   $("verdict").className = data.summary.absorbing ? "verdict good" : "verdict";
-  $("summary").textContent = P(summary.text_zh, summary.text_en);
+  $("summary").textContent = localized ? localized.text : P(summary.text_zh, summary.text_en);
   renderMetrics(data.metrics);
   renderPlain(data);
   renderDecision(data.decision);
@@ -433,7 +555,7 @@ function renderViews(data) {
       peak: Math.max(...data.series.cascade),
       divergence: data.summary.diversity_final,
     });
-    $("trackStatus").textContent = P("已锁定", "LOCKED");
+    $("trackStatus").textContent = P("已锁定", "LOCKED", "ロック済み", "ERFASST");
     $("trackNodes").textContent = "150";
   }
 }
@@ -457,6 +579,8 @@ function renderFieldStats(series) {
     $("fieldWaveStat").textContent = P(
       `峰值 ${max.toFixed(2)} @ S${step} · 当前 ${diversity[diversity.length - 1].toFixed(2)}`,
       `peak ${max.toFixed(2)} @ S${step} · now ${diversity[diversity.length - 1].toFixed(2)}`,
+      `ピーク ${max.toFixed(2)} @ S${step} · 現在 ${diversity[diversity.length - 1].toFixed(2)}`,
+      `Peak ${max.toFixed(2)} @ S${step} · aktuell ${diversity[diversity.length - 1].toFixed(2)}`,
     );
   }
   if ($("fieldBarsStat") && cascade.length) {
@@ -465,12 +589,16 @@ function renderFieldStats(series) {
     $("fieldBarsStat").textContent = P(
       `峰值 ${(max * 100).toFixed(0)}% @ S${step}`,
       `peak ${(max * 100).toFixed(0)}% @ S${step}`,
+      `ピーク ${(max * 100).toFixed(0)}% @ S${step}`,
+      `Peak ${(max * 100).toFixed(0)} % @ S${step}`,
     );
   }
   if ($("fieldCloudStat") && shares.length) {
     $("fieldCloudStat").textContent = P(
       `立场 0 ${(shares[0] * 100).toFixed(0)}% · 立场 1 ${(shares[1] * 100).toFixed(0)}%`,
       `stance 0 ${(shares[0] * 100).toFixed(0)}% · stance 1 ${(shares[1] * 100).toFixed(0)}%`,
+      `立場 0 ${(shares[0] * 100).toFixed(0)}% · 立場 1 ${(shares[1] * 100).toFixed(0)}%`,
+      `Haltung 0 ${(shares[0] * 100).toFixed(0)} % · Haltung 1 ${(shares[1] * 100).toFixed(0)} %`,
     );
   }
 }
@@ -485,20 +613,38 @@ function renderDelta() {
   const overlap = !(after.ci95_hi < before.ci95_lo || after.ci95_lo > before.ci95_hi);
   const cls = overlap ? "flat" : diff > 0 ? "up" : "down";
   const verdict = overlap
-    ? P("置信区间重叠，暂时不能说明有差异", "CIs overlap, no clear difference")
-    : diff > 0 ? P("比上一次更分散", "more diverse than the previous run")
-               : P("比上一次更集中", "more concentrated than the previous run");
+    ? P("置信区间重叠，暂时不能说明有差异", "CIs overlap, no clear difference", "信頼区間が重なり、差異はまだ判断できません", "KIs überlappen, kein klarer Unterschied")
+    : diff > 0 ? P("比上一次更分散", "more diverse than the previous run", "前回より多様", "diverser als der vorherige Lauf")
+               : P("比上一次更集中", "more concentrated than the previous run", "前回より集中", "konzentrierter als der vorherige Lauf");
   $("delta").className = `delta ${cls}`;
   $("delta").textContent = P(
     `与上一次相比，多样性 ${diff >= 0 ? "+" : ""}${diff.toFixed(4)}；${verdict}`,
     `Diversity ${diff >= 0 ? "+" : ""}${diff.toFixed(4)} vs the previous run; ${verdict}.`,
+    `前回との比較：多様性 ${diff >= 0 ? "+" : ""}${diff.toFixed(4)}。${verdict}。`,
+    `Diversität ${diff >= 0 ? "+" : ""}${diff.toFixed(4)} gegenüber dem vorherigen Lauf; ${verdict}.`,
   );
 }
 
 function updateURL() {
   const params = new URLSearchParams(requestBody());
   params.set("template", $("template").value);
+  params.set("lang", I18N.lang);
   history.replaceState(null, "", `${location.pathname}?${params.toString()}`);
+}
+
+function shareUrl() {
+  const url = new URL(location.href);
+  url.searchParams.set("lang", I18N.lang);
+  return url.toString();
+}
+
+function showRunStatus(spec) {
+  $("status").textContent = P(
+    `q=${spec.q} · steps=${spec.n_steps} · ${spec.repeats} replicas · seed=${spec.seed}`,
+    `q=${spec.q} · steps=${spec.n_steps} · ${spec.repeats} replicas · seed=${spec.seed}`,
+    `q=${spec.q} · ステップ=${spec.n_steps} · ${spec.repeats} 複製 · シード=${spec.seed}`,
+    `q=${spec.q} · Schritte=${spec.n_steps} · ${spec.repeats} Replikate · Seed=${spec.seed}`,
+  );
 }
 
 async function run() {
@@ -516,9 +662,7 @@ async function run() {
     const payload = await response.json();
     if (!response.ok || payload.error) throw new Error(payload.error?.message || "request failed");
     render(payload.data);
-    $("status").textContent =
-      `q=${payload.data.spec.q} · steps=${payload.data.spec.n_steps} · ` +
-      `${payload.data.spec.repeats} replicas · seed=${payload.data.spec.seed}`;
+    showRunStatus(payload.data.spec);
   } catch (error) {
     $("error").textContent = error.message;
     $("status").textContent = "";
@@ -550,14 +694,14 @@ function play() {
 }
 
 async function download() {
-  $("status").textContent = "生成报告中… / building report…";
+  $("status").textContent = T("statusBuildingReport");
   const response = await fetch("/api/v1/demo/report", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(requestBody()),
   });
   if (!response.ok) {
-    $("error").textContent = "report failed";
+    $("error").textContent = T("reportFailed");
     return;
   }
   const blob = await response.blob();
@@ -572,10 +716,11 @@ async function runAi() {
   $("aiText").textContent = "";
   $("aiRun").disabled = true;
   try {
+    const narrationLang = I18N.lang === "zh" ? "zh" : "en";
     const response = await fetch("/api/v1/demo/narrate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...requestBody(), lang: I18N.lang }),
+      body: JSON.stringify({ ...requestBody(), lang: narrationLang }),
     });
     const payload = await response.json();
     if (!response.ok) {
@@ -584,8 +729,8 @@ async function runAi() {
       throw new Error(payload.error?.message || T("aiFailed"));
     }
     $("aiText").textContent =
-      `${payload.data.text}\n\n${I18N.lang === "en" ? payload.data.disclaimer_en : payload.data.disclaimer_zh}`;
-    $("aiStatus").textContent = `${payload.data.model} · assistive narration`;
+      `${payload.data.text}\n\n${narrationLang === "zh" ? payload.data.disclaimer_zh : payload.data.disclaimer_en}`;
+    $("aiStatus").textContent = `${payload.data.model} · ${T("aiAssistLabel")}`;
   } catch (error) {
     $("aiStatus").textContent = error.message;
   } finally {
@@ -595,8 +740,8 @@ async function runAi() {
 
 async function copyLink() {
   try {
-    await navigator.clipboard.writeText(location.href);
-    $("status").textContent = "参数链接已复制 / link copied";
+    await navigator.clipboard.writeText(shareUrl());
+    $("status").textContent = T("statusCopied");
   } catch {
     $("status").textContent = location.href;
   }
@@ -689,13 +834,11 @@ window.addEventListener("languagechange", () => {
   if (state.data) renderViews(state.data);
   if (state.last) renderDelta();
   if ($("aiText")) $("aiText").textContent = "";
-  if (state.data) {
-    $("status").textContent =
-      `q=${state.data.spec.q} · steps=${state.data.spec.n_steps} · ` +
-      `${state.data.spec.repeats} replicas · seed=${state.data.spec.seed}`;
-  }
+  if (state.data) showRunStatus(state.data.spec);
 });
-if ($("langToggle")) $("langToggle").onclick = () => I18N.toggle();
+if ($("langToggle")) {
+  $("langToggle").addEventListener("change", (event) => I18N.setLang(event.target.value));
+}
 
 loadTemplates()
   .then(() => {

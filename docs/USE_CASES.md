@@ -126,7 +126,7 @@ The full library has 16 templates (15 enabled; G5 is gated):
   mix, emergency science literacy, financial expectations, community consensus,
   organizational change and product launch.
 
-List the current templates with their bilingual questions:
+List the current templates with their English/Chinese source questions:
 
 ```bash
 uv run hnle templates

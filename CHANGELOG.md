@@ -20,7 +20,7 @@
 - Redesigned the browser product hero as a dashboard-style instrument cluster:
   cohesion and peak-turn gauges, a central 3D opinion stage, four linked
   readouts and a live preview/run state. The existing cockpit controls, 3D
-  telemetry and bilingual labels are unchanged.
+  telemetry and multilingual labels are unchanged.
 - Refreshed the README, docs index, demo guide, use cases, architecture, model
   card, compliance, runbook, capacity report, data note, examples and air-gap
   guide for v1.3.1. Every page now links back to the docs index and changelog.
@@ -29,6 +29,14 @@
 - Aligned visible version labels in the demo (`BUILD V1.3.1`), FastAPI app
   metadata and Helm image values. Documented that the hosted demo exports CSV
   while the local service exports an HTML report.
+- Added Chinese, Japanese and German UI translations alongside
+  the default English interface. The language selector is URL-addressable
+  (`?lang=en|zh|ja|de`), persisted locally, and carried into shared run links.
+- Localized scenario names, questions and interpretations, chart legends,
+  metric cards, plain-language readings, summaries and decision briefs for
+  Japanese and German, including the decision timing/follow-up content.
+- Added English/Japanese/German screenshots (`docs/demo*.png`) and documentation
+  for the language selector.
 - Corrected documentation claims about censored consensus reporting, the
   3D-telemetry/CSV split and the tainted-run surface.
 

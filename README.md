@@ -26,8 +26,9 @@ repository's [`docs/RELATIONSHIP.md`](https://github.com/cxy2696/Hypergraph-Nonl
 [![OpinionLab instrument-cluster demo](docs/demo.png)](docs/DEMO.md)
 
 *The v1.3.1 browser demo: a dashboard-style instrument cluster, live 3D opinion
-stage, parameter controls and linked telemetry. English and Chinese UI labels
-are both supported. See [Demo](docs/DEMO.md) for a guided tour.*
+stage, parameter controls and linked telemetry. The UI defaults to English and
+supports Chinese, Japanese and German. See [Demo](docs/DEMO.md) for a guided
+tour.*
 
 ## Quick start
 
@@ -79,8 +80,8 @@ treating "not reached" as zero.
 The scenario library has 16 templates: 15 enabled, plus a gated election
 template. The enabled set covers public communication, community discussion,
 organizational change, product launch, and research/reproduction. The browser
-UI can display English or Chinese labels; the repository documentation itself
-is English-only.
+UI defaults to English and can switch to Chinese, Japanese or German; the
+repository documentation itself is English-only.
 
 ### Product surfaces
 
@@ -97,6 +98,8 @@ is English-only.
 
 - The browser demo has a new dashboard-style product hero with cohesion and
   peak-turn gauges, a central 3D opinion stage and four linked readouts.
+- The UI language selector defaults to English and now includes Chinese,
+  Japanese and German; the choice is kept in the URL and local storage.
 - Screenshots and all repository docs are refreshed against v1.3.1, and visible
   version labels in the UI, API and deployment values are aligned.
 - The service dependencies and security baseline are refreshed; `pip-audit`
@@ -185,7 +188,7 @@ Benchmark method, calibration and load scenarios are in
 |---|---|
 | [Docs index](docs/README.md) | Reading paths, product tour and the full document list |
 | [Use cases](docs/USE_CASES.md) | Six worked questions, commands and interpretation |
-| [Demo](docs/DEMO.md) | Hosted and local interfaces, new instrument cluster, API, limits |
+| [Demo](docs/DEMO.md) | Hosted and local interfaces, four-language UI, API, limits |
 | [Architecture](docs/ARCHITECTURE.md) | Layers, data flow, module map and asset pipeline |
 | [Math model](docs/MATH_MODEL.md) | Formulas, `q` limits, estimators and failure boundaries |
 | [Conformance](docs/CONFORMANCE.md) | Formula-to-code map and the shared fixture |

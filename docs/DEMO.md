@@ -68,19 +68,26 @@ Below the hero:
 
 | View | Image |
 |---|---|
-| Product hero and control surface | [`demo.png`](demo.png) |
+| Product hero, English default | [`demo.png`](demo.png) |
+| Japanese UI | [`demo-ja.png`](demo-ja.png) |
+| German UI | [`demo-de.png`](demo-de.png) |
 | 3D telemetry after a run | [`telemetry-3d.png`](telemetry-3d.png) |
 
-The interface supports English and Chinese labels. Use the language button in
-the top right of the instrument cluster, or append `?lang=zh` / `?lang=en` to
-the URL. A completed run can be shared with the parameter query string, and
-`?run=1` runs the current scenario on load.
+The interface defaults to **English** and ships with **Chinese**, **Japanese**
+and **German** translations. Use the language selector in the top right of the
+instrument cluster, or append `?lang=en`, `?lang=zh`, `?lang=ja` or `?lang=de`.
+The choice is stored locally and preserved in shareable run links. A completed
+run can be shared with the parameter query string, and `?run=1` runs the
+current scenario on load.
 
 ## Features
 
 - A dashboard-style product hero: two circular gauges, a live 3D opinion stage
   and four readouts (steps, mean majority, peak turn, 95 % CI); the instruments
   update after every run.
+- Four UI languages with English as the default: English, Chinese, Japanese
+  and German, including translated scenario questions, chart labels, metrics,
+  summaries and decision briefs.
 - 16 scenario templates (15 enabled; G5 is gated) with the question each one
   helps answer.
 - Inline explanations for every parameter, hover tips and one-click presets.
@@ -186,6 +193,9 @@ OLLAMA_ENABLED=true make demo
 | Observability | `/metrics` | API latency, queue depth, replica failures |
 
 - The public endpoints do not require login and do not write to the database.
+- The four-language UI covers the on-screen controls and result narrative. The
+  downloadable HTML report remains bilingual English/Chinese, and optional
+  Ollama narration falls back to English for Japanese and German.
 - Change caps in `.env` and restart the API.
 - The assets are split for maintainability: the site shell is
   `site/index.html`, `site/app.js`, `site/sim.js` and `site/templates.json`; the

@@ -89,7 +89,8 @@ service:
 - The four KPI readouts are filled from the same aggregate response used by the
   charts and metrics cards.
 - Both the local and hosted apps receive the same visible version label
-  (`BUILD V1.3.1`) and the same bilingual copy.
+  (`BUILD V1.3.1`) and the same four-language copy (English default, Chinese,
+  Japanese, German).
 
 ## Module map
 
@@ -104,7 +105,7 @@ service:
 | `hnle/metrics.py` | Diversity, entropy, cascade, consensus, oscillation |
 | `hnle/mc.py` | Replicas, Welford aggregation, CIs |
 | `hnle/io/` | Manifests, artifacts, offline HTML reports |
-| `hnle/templates.py` | Scenario library with English/Chinese display labels |
+| `hnle/templates.py` | Scenario library with English/Chinese source labels; the browser adds Japanese/German overlays |
 | `apps/api/app/` | Auth, jobs, quotas, connectors, compliance, demo |
 | `apps/web/` | Local demo UI and canvas scenes |
 | `site/` | Hosted shell, browser simulator and scenario export |

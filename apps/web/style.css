@@ -1117,3 +1117,47 @@ body { overflow-x: hidden; }
 
 /* Anchor the jump from the hero so the sticky cockpit rail does not cover it. */
 #controls { scroll-margin-top: 56px; }
+
+/* Four-language selector in the instrument-cluster rail. */
+.cluster-actions .lang-toggle {
+  appearance: none;
+  -webkit-appearance: none;
+  position: static;
+  width: auto;
+  min-width: 56px;
+  max-width: 76px;
+  padding: 6px 21px 6px 8px;
+  border-color: rgba(30, 74, 95, .9);
+  background-color: rgba(4, 12, 18, .72);
+  background-image:
+    linear-gradient(45deg, transparent 50%, #7fa6bd 50%),
+    linear-gradient(135deg, #7fa6bd 50%, transparent 50%);
+  background-position: calc(100% - 10px) 50%, calc(100% - 6px) 50%;
+  background-size: 4px 4px, 4px 4px;
+  background-repeat: no-repeat;
+  color: #b9d7e4;
+  font: 700 9px/1 var(--mono);
+  letter-spacing: .04em;
+  cursor: pointer;
+}
+.cluster-actions .lang-toggle:hover,
+.cluster-actions .lang-toggle:focus-visible {
+  border-color: var(--cyan);
+  color: var(--cyan);
+  outline: none;
+}
+.cluster-actions .lang-toggle option { background: #040b12; color: #d6fbff; }
+@media (max-width: 560px) {
+  .cluster-actions .lang-toggle {
+    min-width: 50px;
+    width: 50px;
+    padding: 5px 18px 5px 6px;
+    font-size: 8px;
+  }
+}
+
+/* Long German/Japanese tags need to wrap on narrow screens. */
+@media (max-width: 560px) {
+  .section-head { flex-wrap: wrap; row-gap: 6px; }
+  .section-head .tag { white-space: normal; text-align: left; }
+}

@@ -44,8 +44,11 @@ def test_demo_page_is_self_contained() -> None:
     assert "/api/v1/demo/echarts.js" in html
     assert "/api/v1/demo/static/app.js" in html
     assert "/api/v1/demo/static/style.css" in html
-    assert "非对真实舆情的预测" in html
+    assert "not a prediction of real opinion" in html
     assert 'id="langToggle"' in html
+    for lang in ("en", "zh", "ja", "de"):
+        assert f'<option value="{lang}"' in html, lang
+    assert "data-tip-ja" in html and "data-tip-de" in html
     assert "/api/v1/demo/static/scene.js" in html
     assert "/api/v1/demo/static/i18n.js" in html
     assert "/api/v1/demo/static/particles.js" in html
@@ -54,7 +57,7 @@ def test_demo_page_is_self_contained() -> None:
     assert "/api/v1/demo/static/galaxy.js" in html
     assert "/api/v1/demo/static/field3d.js" in html
     assert 'id="fieldWave"' in html and 'id="fieldBars"' in html and 'id="fieldCloud"' in html
-    assert "这些参数到底在做什么" in html
+    assert "Why these knobs" in html
     assert 'data-preset="robust"' in html
 
 

@@ -32,7 +32,7 @@ tour, or [Use cases](USE_CASES.md) for the questions it can help frame.*
 | Document | Contents |
 |---|---|
 | [Use cases](USE_CASES.md) | Six worked questions, exact commands and interpretation |
-| [Demo](DEMO.md) | Hosted and local interfaces, instrument cluster, API, limits, Ollama |
+| [Demo](DEMO.md) | Hosted and local interfaces, four-language UI, API, limits, Ollama |
 | [Architecture](ARCHITECTURE.md) | Layers, data flow, module map and web asset pipeline |
 | [Math model](MATH_MODEL.md) | Formulas, `q` limits, estimators and failure boundaries |
 | [Case study](CASE_STUDY.md) | A published hashtag sample, from CSV to component result |
@@ -51,9 +51,9 @@ tour, or [Use cases](USE_CASES.md) for the questions it can help frame.*
 
 - Every page starts with the release it applies to and links back to this index
   and the changelog.
-- The repository documentation is English-only. The browser demo still offers
-  an optional Chinese interface translation for end users; that is a UI
-  feature, not a second set of documentation.
+- The repository documentation is English-only. The browser demo defaults to
+  English and offers Chinese, Japanese and German UI translations for end
+  users; those are UI features, not additional documentation sets.
 - Commands assume the repository root unless a document says otherwise.
 - `runs/`, `datasets/` and downloaded reports are local artifacts; they are not
   committed.
@@ -66,7 +66,8 @@ tour, or [Use cases](USE_CASES.md) for the questions it can help frame.*
 The current screenshots are generated from v1.3.1 and are tracked in this
 directory:
 
-- [`demo.png`](demo.png): hosted and local demo, initial instrument-cluster state.
+- [`demo.png`](demo.png): default English hero.
+- [`demo-ja.png`](demo-ja.png) and [`demo-de.png`](demo-de.png): Japanese and German UI.
 - [`telemetry-3d.png`](telemetry-3d.png): the 3D telemetry deck after a run.
 
 For the source-vs-generated ownership rules, see the Repository map in the

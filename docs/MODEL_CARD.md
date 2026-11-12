@@ -19,7 +19,7 @@ forecasting product.
 - Reproducible runs with manifests and single-file offline reports.
 - Two engine paths: synchronous CSR and event-driven integer latency, with
   shared kernel semantics plus repository-specific tests.
-- A browser demo with English/Chinese labels, 3D telemetry and linked charts;
+- A browser demo with English, Chinese, Japanese and German labels, 3D telemetry and linked charts;
   see [Demo](DEMO.md).
 
 ## Limitations
