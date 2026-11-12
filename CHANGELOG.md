@@ -29,12 +29,17 @@
 - Aligned visible version labels in the demo (`BUILD V1.3.1`), FastAPI app
   metadata and Helm image values. Documented that the hosted demo exports CSV
   while the local service exports an HTML report.
-- Added Chinese, Japanese and German UI translations alongside
-  the default English interface. The language selector is URL-addressable
-  (`?lang=en|zh|ja|de`), persisted locally, and carried into shared run links.
+- Added Chinese, Japanese and German UI translations alongside the default
+  English interface. The selector now uses native language names, localizes its
+  accessible label, is URL-addressable (`?lang=en|zh|ja|de`), persisted locally,
+  synchronized across tabs, and carried into shared run links.
+- Localized dates follow the selected locale; cockpit/status labels and 3D
+  telemetry badges were also translated.
 - Localized scenario names, questions and interpretations, chart legends,
   metric cards, plain-language readings, summaries and decision briefs for
   Japanese and German, including the decision timing/follow-up content.
+- Added Japanese and German Ollama narration prompts and localized disclaimer
+  text; the narration follows the selected UI language.
 - Added English/Japanese/German screenshots (`docs/demo*.png`) and documentation
   for the language selector.
 - Corrected documentation claims about censored consensus reporting, the

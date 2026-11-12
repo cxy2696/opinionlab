@@ -48,6 +48,36 @@ Simulation JSON:
 {payload}
 """
 
+PROMPT_JA = """あなたは OpinionLab の補助解説者です。以下の JSON の数値だけを使い、
+日本語で3段落の短い説明を書いてください：
+1) 結果の意味：多様性、カスケードピーク、合意到達ステップ、吸収率を平易に説明する；
+2) この推演が支持できる判断と、支持できない判断；
+3) 次に行う実験を2つ（どのパラメータや時点を変えるか、期待される方向）。新しい数値を作らない。
+
+厳守：JSON の数値だけを使う；実在の個人や出来事を予測しない；選挙や標的型説得の助言をしない；
+単一ノードの情報を出さない；根拠が弱い場合は「不確実」と明記する。300字以内。
+
+シミュレーション JSON：
+{payload}
+"""
+
+PROMPT_DE = """Du erklärst eine OpinionLab-Simulation. Nutze ausschließlich die Zahlen
+im folgenden JSON und schreibe drei kurze Absätze auf Deutsch:
+1) Was die Zahlen bedeuten: Diversität, Kaskadenpeak, Konsensschritt und
+   Absorptionsrate in einfacher Sprache;
+2) Welche Entscheidung diese Auswertung stützen kann und welche nicht;
+3) Zwei konkrete nächste Experimente (welcher Parameter oder Zeitpunkt geändert
+   wird und welche Richtung erwartet wird), ohne neue Zahlen zu erfinden.
+
+Harte Regeln: nur die gelieferten Zahlen verwenden; keine realen Personen oder
+Ereignisse vorhersagen; keine Wahl- oder gezielte Überzeugungsberatung; keine
+Informationen zu einzelnen Knoten ausgeben; bei schwacher Evidenz „unsicher“
+sagen. Höchstens 180 Wörter.
+
+Simulations-JSON:
+{payload}
+"""
+
 
 THINK_BLOCK = re.compile(r"<think\b[^>]*>.*?</think>", re.IGNORECASE | re.DOTALL)
 
@@ -64,8 +94,24 @@ class OllamaError(RuntimeError):
 
 def build_prompt(context: dict[str, Any], lang: str = "zh") -> str:
     payload = json.dumps(context, ensure_ascii=False, indent=2, sort_keys=True)
-    template = PROMPT_EN if lang == "en" else PROMPT_ZH
-    return SYSTEM_GUARD + "\n\n" + template.format(payload=payload)
+    templates = {"en": PROMPT_EN, "ja": PROMPT_JA, "de": PROMPT_DE}
+    template = templates.get(lang, PROMPT_ZH)
+    guard = {
+        "ja": (
+            "あなたは集団意見シミュレーションの補助解説者です。"
+            "提供された数値だけを使い、実在の個人や出来事を予測せず、"
+            "選挙・標的型説得の助言をせず、単一ノードの情報を出さないでください。"
+            "これはシミュレーションであり、結論ではないことを明示してください。"
+        ),
+        "de": (
+            "Du bist Erklärassistent für eine Gruppenmeinungs-Simulation. "
+            "Verwende nur die gelieferten Zahlen, sage keine realen Personen oder "
+            "Ereignisse voraus, gib keine Wahl- oder gezielte Überzeugungsberatung, "
+            "gib keine Informationen zu einzelnen Knoten aus und mache klar, dass "
+            "dies eine Simulation und keine Schlussfolgerung ist."
+        ),
+    }.get(lang, SYSTEM_GUARD)
+    return guard + "\n\n" + template.format(payload=payload)
 
 
 async def generate_narration(

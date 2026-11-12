@@ -53,16 +53,16 @@
           </div>
         </div>
         <div class="cluster-clock">
-          <span class="cluster-date"><em>LOCAL</em><span id="heroDate">12-11-2026</span></span>
+          <span class="cluster-date"><em data-i18n="localTime">LOCAL</em><span id="heroDate">12-11-2026</span></span>
           <b id="heroClock">06:11:04</b>
           <span class="cluster-signal"><i class="led"></i> 95% CI</span>
         </div>
         <div class="cluster-actions">
-          <select id="langToggle" class="lang-toggle" aria-label="Language / 语言 / 言語 / Sprache">
-            <option value="en">EN</option>
-            <option value="zh">中文</option>
-            <option value="ja">日本語</option>
-            <option value="de">DE</option>
+          <select id="langToggle" class="lang-toggle" aria-label="Language">
+            <option value="en" lang="en">English</option>
+            <option value="zh" lang="zh">中文</option>
+            <option value="ja" lang="ja">日本語</option>
+            <option value="de" lang="de">Deutsch</option>
           </select>
           <a id="heroRun" class="cluster-run" href="#controls" aria-label="Run the current scenario">
             <span class="cluster-run-icon" aria-hidden="true">
@@ -177,10 +177,10 @@
 <div class="cockpit-bar">
   <div class="cockpit-id"><span class="led"></span> SYS // OPINIONLAB-01</div>
   <div class="cockpit-status">
-    <span>ENGINE <b class="ok">READY</b></span>
-    <span>REGION <b>LOCAL</b></span>
-    <span>MODE <b>SIM</b></span>
-    <span class="hide-sm">BUILD <b>V1.3.1</b></span>
+    <span><span data-i18n="engineLabel">ENGINE</span> <b class="ok" data-i18n="ready">READY</b></span>
+    <span><span data-i18n="regionLabel">REGION</span> <b data-i18n="localRegion">LOCAL</b></span>
+    <span><span data-i18n="modeLabel">MODE</span> <b data-i18n="simMode">SIM</b></span>
+    <span class="hide-sm"><span data-i18n="buildLabel">BUILD</span> <b>V1.3.1</b></span>
   </div>
   <div class="cockpit-clock"><span>UTC</span><b id="cockpitClock">--:--:--</b></div>
 </div>
@@ -325,7 +325,7 @@
     <section id="fieldDeck" class="card field-deck">
       <div class="section-head">
         <h3 data-i18n="fieldTitle">3D telemetry array</h3>
-        <span class="tag">HOLOGRAPHIC TELEMETRY</span>
+        <span class="tag" data-i18n="fieldTag">HOLOGRAPHIC TELEMETRY</span>
       </div>
       <div class="field-guide">
         <span data-i18n="fieldGuide1">① height = diversity</span>
@@ -335,7 +335,7 @@
       </div>
       <div class="field-grid">
         <div class="field-card">
-          <div class="field-head"><h4 data-i18n="fieldWave">Opinion terrain</h4><span class="field-badge">TERRAIN</span></div>
+          <div class="field-head"><h4 data-i18n="fieldWave">Opinion terrain</h4><span class="field-badge" data-i18n="fieldBadgeTerrain">TERRAIN</span></div>
           <div class="field-wrap"><canvas id="fieldWave" aria-hidden="true"></canvas></div>
           <div class="field-axis"><span data-i18n="fieldAxisTime">time →</span><span data-i18n="fieldAxisDiversity">diversity ↑</span></div>
           <div id="fieldWaveStat" class="field-stats">—</div>
@@ -343,7 +343,7 @@
           <div class="field-legend" data-i18n="fieldWaveLegend">higher dots = more disagreement</div>
         </div>
         <div class="field-card">
-          <div class="field-head"><h4 data-i18n="fieldBars">Cascade array</h4><span class="field-badge">CASCADE</span></div>
+          <div class="field-head"><h4 data-i18n="fieldBars">Cascade array</h4><span class="field-badge" data-i18n="fieldBadgeCascade">CASCADE</span></div>
           <div class="field-wrap"><canvas id="fieldBars" aria-hidden="true"></canvas></div>
           <div class="field-axis"><span data-i18n="fieldAxisStep">step →</span><span data-i18n="fieldAxisShare">share switching ↑</span></div>
           <div id="fieldBarsStat" class="field-stats">—</div>
@@ -351,7 +351,7 @@
           <div class="field-legend" data-i18n="fieldBarsLegend">hover a bar for step and share</div>
         </div>
         <div class="field-card">
-          <div class="field-head"><h4 data-i18n="fieldCloud">Stance cloud</h4><span class="field-badge">STANCE</span></div>
+          <div class="field-head"><h4 data-i18n="fieldCloud">Stance cloud</h4><span class="field-badge" data-i18n="fieldBadgeStance">STANCE</span></div>
           <div class="field-wrap"><canvas id="fieldCloud" aria-hidden="true"></canvas></div>
           <div class="field-axis"><span data-i18n="fieldAxisOrbit">orbits in 3D</span><span data-i18n="fieldAxisStance">colour = stance</span></div>
           <div id="fieldCloudStat" class="field-stats">—</div>

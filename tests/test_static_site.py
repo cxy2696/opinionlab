@@ -26,6 +26,7 @@ def test_static_site_sources_exist() -> None:
     assert 'data-preset="quick"' in html
     for lang in ("en", "zh", "ja", "de"):
         assert f'<option value="{lang}"' in html, lang
+    assert ">English</option>" in html and ">Deutsch</option>" in html
     assert "data-tip-ja" in html and "data-tip-de" in html
     i18n = (ROOT / "apps" / "web" / "i18n.js").read_text(encoding="utf-8")
     assert "シナリオ・サンドボックス" in i18n

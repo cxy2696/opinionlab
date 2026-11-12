@@ -98,8 +98,10 @@ repository documentation itself is English-only.
 
 - The browser demo has a new dashboard-style product hero with cohesion and
   peak-turn gauges, a central 3D opinion stage and four linked readouts.
-- The UI language selector defaults to English and now includes Chinese,
-  Japanese and German; the choice is kept in the URL and local storage.
+- The UI language selector defaults to English, shows native language names for
+  Chinese, Japanese and German, and keeps the choice in the URL, local storage
+  and cross-tab updates. Dates follow the selected locale, and optional local
+  Ollama narration uses the selected language.
 - Screenshots and all repository docs are refreshed against v1.3.1, and visible
   version labels in the UI, API and deployment values are aligned.
 - The service dependencies and security baseline are refreshed; `pip-audit`

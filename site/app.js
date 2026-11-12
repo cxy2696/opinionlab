@@ -35,7 +35,10 @@ function tickClock() {
   }
   if ($("heroClock")) $("heroClock").textContent = time;
   if ($("heroDate")) {
-    $("heroDate").textContent = `${pad(now.getDate())}-${pad(now.getMonth() + 1)}-${now.getFullYear()}`;
+    const locale = window.I18N ? I18N.locale : "en-GB";
+    $("heroDate").textContent = new Intl.DateTimeFormat(locale, {
+      year: "numeric", month: "2-digit", day: "2-digit",
+    }).format(now);
   }
 }
 tickClock();
@@ -693,6 +696,7 @@ window.addEventListener("languagechange", () => {
   refreshOptions();
   showQuestion();
   updateLabels();
+  tickClock();
   if ($("aiRun") && $("aiRun").disabled) $("aiStatus").textContent = T("aiOffline");
   if (state.last) {
     renderSummary(state.last);

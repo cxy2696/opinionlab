@@ -37,6 +37,18 @@
     openConsole: ["进入控制台", "OPEN CONTROL DECK", "コンソールを開く", "KONSOLE ÖFFNEN"],
     runShort: ["运行", "RUN", "実行", "START"],
     clusterScenario: ["当前场景", "SCENARIO", "現在のシナリオ", "SZENARIO"],
+    languageLabel: ["界面语言", "Language", "表示言語", "Sprache"],
+    localTime: ["本地", "LOCAL", "ローカル", "LOKAL"],
+    engineLabel: ["引擎", "ENGINE", "エンジン", "ENGINE"],
+    regionLabel: ["区域", "REGION", "リージョン", "REGION"],
+    localRegion: ["本地", "LOCAL", "ローカル", "LOKAL"],
+    modeLabel: ["模式", "MODE", "モード", "MODUS"],
+    simMode: ["模拟", "SIM", "シミュレーション", "SIM"],
+    buildLabel: ["构建", "BUILD", "ビルド", "BUILD"],
+    fieldTag: ["全息遥测", "HOLOGRAPHIC TELEMETRY", "ホログラフィック・テレメトリー", "HOLOGRAPHISCHE TELEMETRIE"],
+    fieldBadgeTerrain: ["地形", "TERRAIN", "地形", "GELÄNDE"],
+    fieldBadgeCascade: ["级联", "CASCADE", "カスケード", "KASKADE"],
+    fieldBadgeStance: ["立场", "STANCE", "立場", "HALTUNG"],
     gaugeCohesionCaption: ["群体共识度", "group cohesion", "集団の結束度", "Gruppenkohäsion"],
     gaugeTurnCaption: ["单步最大转向", "peak share switching", "最大の立場転換", "Stärkster Meinungswechsel"],
     kpiSteps: ["观测步数", "STEPS OBSERVED", "観測ステップ", "BEOBACHTETE SCHRITTE"],
@@ -450,11 +462,15 @@
   const LANGUAGES = ["en", "zh", "ja", "de"];
   const STRING_INDEX = { zh: 0, en: 1, ja: 2, de: 3 };
   const HTML_LANG = { en: "en", zh: "zh-CN", ja: "ja", de: "de" };
+  const LOCALES = { en: "en-GB", zh: "zh-CN", ja: "ja-JP", de: "de-DE" };
   const TIP_FIELD = { zh: "tipZh", en: "tipEn", ja: "tipJa", de: "tipDe" };
 
   function initial() {
     const fromUrl = new URLSearchParams(location.search).get("lang");
-    if (LANGUAGES.includes(fromUrl)) return fromUrl;
+    if (LANGUAGES.includes(fromUrl)) {
+      localStorage.setItem("opinionlab-lang", fromUrl);
+      return fromUrl;
+    }
     const saved = localStorage.getItem("opinionlab-lang");
     if (LANGUAGES.includes(saved)) return saved;
     return "en";
@@ -464,6 +480,7 @@
     lang: initial(),
     languages: LANGUAGES,
     strings: STRINGS,
+    get locale() { return LOCALES[api.lang] || "en-GB"; },
     templates: TEMPLATES,
     pick(zh, en, ja, de) {
       if (api.lang === "zh") return zh;
@@ -497,6 +514,7 @@
       });
       const toggle = document.getElementById("langToggle");
       if (toggle) {
+        toggle.setAttribute("aria-label", api.t("languageLabel"));
         if (toggle.tagName === "SELECT") toggle.value = api.lang;
         else toggle.textContent = api.lang === "en" ? "中文" : "EN";
       }
@@ -517,6 +535,14 @@
   };
 
   global.I18N = api;
+  if (typeof global.addEventListener === "function") {
+    global.addEventListener("storage", (event) => {
+      if (event.key !== "opinionlab-lang" || !LANGUAGES.includes(event.newValue)) return;
+      if (event.newValue === api.lang) return;
+      api.lang = event.newValue;
+      api.apply();
+    });
+  }
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", () => api.apply());
   } else {

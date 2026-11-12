@@ -45,7 +45,10 @@ function tickClock() {
   }
   if ($("heroClock")) $("heroClock").textContent = time;
   if ($("heroDate")) {
-    $("heroDate").textContent = `${pad(now.getDate())}-${pad(now.getMonth() + 1)}-${now.getFullYear()}`;
+    const locale = window.I18N ? I18N.locale : "en-GB";
+    $("heroDate").textContent = new Intl.DateTimeFormat(locale, {
+      year: "numeric", month: "2-digit", day: "2-digit",
+    }).format(now);
   }
 }
 tickClock();
@@ -716,7 +719,7 @@ async function runAi() {
   $("aiText").textContent = "";
   $("aiRun").disabled = true;
   try {
-    const narrationLang = I18N.lang === "zh" ? "zh" : "en";
+    const narrationLang = I18N.lang;
     const response = await fetch("/api/v1/demo/narrate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -728,8 +731,8 @@ async function runAi() {
       if (code === "OLLAMA_DISABLED") throw new Error(T("aiDisabled"));
       throw new Error(payload.error?.message || T("aiFailed"));
     }
-    $("aiText").textContent =
-      `${payload.data.text}\n\n${narrationLang === "zh" ? payload.data.disclaimer_zh : payload.data.disclaimer_en}`;
+    const disclaimer = payload.data[`disclaimer_${narrationLang}`] || payload.data.disclaimer_en;
+    $("aiText").textContent = `${payload.data.text}\n\n${disclaimer}`;
     $("aiStatus").textContent = `${payload.data.model} · ${T("aiAssistLabel")}`;
   } catch (error) {
     $("aiStatus").textContent = error.message;
@@ -831,6 +834,7 @@ window.addEventListener("languagechange", () => {
   refreshOptions();
   showQuestion();
   updateLabels();
+  tickClock();
   if (state.data) renderViews(state.data);
   if (state.last) renderDelta();
   if ($("aiText")) $("aiText").textContent = "";

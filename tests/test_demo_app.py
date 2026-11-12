@@ -48,6 +48,7 @@ def test_demo_page_is_self_contained() -> None:
     assert 'id="langToggle"' in html
     for lang in ("en", "zh", "ja", "de"):
         assert f'<option value="{lang}"' in html, lang
+    assert ">English</option>" in html and ">Deutsch</option>" in html
     assert "data-tip-ja" in html and "data-tip-de" in html
     assert "/api/v1/demo/static/scene.js" in html
     assert "/api/v1/demo/static/i18n.js" in html

@@ -76,9 +76,10 @@ Below the hero:
 The interface defaults to **English** and ships with **Chinese**, **Japanese**
 and **German** translations. Use the language selector in the top right of the
 instrument cluster, or append `?lang=en`, `?lang=zh`, `?lang=ja` or `?lang=de`.
-The choice is stored locally and preserved in shareable run links. A completed
-run can be shared with the parameter query string, and `?run=1` runs the
-current scenario on load.
+The selector shows native language names, updates the document language and
+locale-aware date, and keeps the choice in local storage and in shareable run
+links. A completed run can also be shared with the parameter query string, and
+`?run=1` runs the current scenario on load.
 
 ## Features
 
@@ -193,9 +194,9 @@ OLLAMA_ENABLED=true make demo
 | Observability | `/metrics` | API latency, queue depth, replica failures |
 
 - The public endpoints do not require login and do not write to the database.
-- The four-language UI covers the on-screen controls and result narrative. The
-  downloadable HTML report remains bilingual English/Chinese, and optional
-  Ollama narration falls back to English for Japanese and German.
+- The four-language UI covers the on-screen controls and result narrative.
+  Optional Ollama narration follows the selected language; the downloadable
+  HTML report remains bilingual English/Chinese.
 - Change caps in `.env` and restart the API.
 - The assets are split for maintainability: the site shell is
   `site/index.html`, `site/app.js`, `site/sim.js` and `site/templates.json`; the

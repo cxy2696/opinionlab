@@ -63,8 +63,26 @@ def test_prompt_contains_numbers_and_guardrails() -> None:
     context = {"metrics": {"diversity_final": {"mean": 0.12}}, "summary": "测试"}
     zh = build_prompt(context, "zh")
     en = build_prompt(context, "en")
+    ja = build_prompt(context, "ja")
+    de = build_prompt(context, "de")
     assert "只使用" in zh and "0.12" in zh and "不要" in zh
     assert "ONLY" in en and "0.12" in en and "uncertain" in en
+    assert "不確実" in ja and "0.12" in ja and "単一ノード" in ja
+    assert "unsicher" in de and "0.12" in de and "einzelnen Knoten" in de
+
+
+def test_narration_has_japanese_and_german_disclaimers(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(settings, "ollama_enabled", True)
+
+    async def fake(*args: Any, **kwargs: Any) -> str:
+        return "補助説明"
+
+    monkeypatch.setattr(demo_module, "generate_narration", fake)
+    for lang, marker in (("ja", "AIによる補助説明"), ("de", "KI-gestützte Erklärung")):
+        response = _request("/api/v1/demo/narrate", json={**BODY, "lang": lang})
+        assert response.status_code == 200
+        data = response.json()["data"]
+        assert marker in data[f"disclaimer_{lang}"]
 
 
 def test_reasoning_traces_are_removed() -> None:

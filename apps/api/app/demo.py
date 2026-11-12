@@ -42,7 +42,7 @@ class DemoRequest(BaseModel):
     repeats: int = Field(default=8, ge=1, le=DEMO_MAX_REPEATS)
     seed: int = Field(default=42, ge=0, le=1_000_000)
     steps: int | None = Field(default=None, ge=10, le=DEMO_MAX_STEPS)
-    lang: str = Field(default="zh", pattern="^(zh|en)$")
+    lang: str = Field(default="zh", pattern="^(zh|en|ja|de)$")
 
 
 def _template(key: str) -> Template:
@@ -297,6 +297,13 @@ async def demo_narrate(request: DemoRequest) -> dict[str, Any]:
             "disclaimer_zh": "AI 辅助解释，不是结论；指标与决策以引擎输出为准。",
             "disclaimer_en": (
                 "AI-assisted explanation, not a conclusion; engine outputs remain authoritative."
+            ),
+            "disclaimer_ja": (
+                "AIによる補助説明であり、結論ではありません。指標と意思決定はエンジン出力が優先です。"
+            ),
+            "disclaimer_de": (
+                "KI-gestützte Erklärung, keine Schlussfolgerung; "
+                "die Engine-Ausgaben bleiben maßgeblich."
             ),
         }
     }

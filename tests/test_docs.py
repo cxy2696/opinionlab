@@ -86,7 +86,8 @@ def test_visible_version_matches_package_version() -> None:
     assert f"**Applies to:** OpinionLab v{expected}" in docs_index
     for name in ("apps/web/index.html", "site/index.html"):
         html = (ROOT / name).read_text(encoding="utf-8")
-        assert f"BUILD <b>V{expected}</b>" in html, name
+        assert f"<b>V{expected}</b>" in html, name
+        assert 'data-i18n="buildLabel"' in html, name
     api = (ROOT / "apps" / "api" / "app" / "main.py").read_text(encoding="utf-8")
     assert f'version="{expected}"' in api
     for name in ("deploy/k8s/helm-cn/values.yaml", "deploy/k8s/helm-global/values.yaml"):
