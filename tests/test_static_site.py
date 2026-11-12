@@ -22,8 +22,11 @@ def test_static_site_sources_exist() -> None:
     assert 'lang="en"' in html
     assert "not a prediction of real opinion" in html
     assert "./sim.js" in html
-    assert "Why these knobs" in html
+    assert 'content="static"' in html
+    assert "How to set these knobs" in html
     assert 'data-preset="quick"' in html
+    assert 'id="scenarioBrief"' in html
+    assert 'id="quality"' in html
     for lang in ("en", "zh", "ja", "de"):
         assert f'<option value="{lang}"' in html, lang
     assert ">English</option>" in html and ">Deutsch</option>" in html
@@ -45,6 +48,10 @@ def test_build_script_assembles_shared_assets(tmp_path: Path) -> None:
                  "particles.js", "field3d.js", "galaxy.js", "templates.json", "echarts.min.js"):
         assert (tmp_path / name).exists(), name
     assert "3D" in (tmp_path / "index.html").read_text(encoding="utf-8")
+    # The checked-in site must be exactly the generated artifact: no drift
+    # between apps/web and the Pages build.
+    for name in ("index.html", "app.js", "templates.json"):
+        assert (tmp_path / name).read_bytes() == (SITE / name).read_bytes(), name
 
 
 def test_templates_export_matches_the_library(tmp_path: Path) -> None:
@@ -56,6 +63,10 @@ def test_templates_export_matches_the_library(tmp_path: Path) -> None:
         assert item["question_zh"] and item["question_en"]
         assert item["defaults"]["n_nodes"] > 0
         assert item["defaults"]["q"] > 0
+        for field in ("decision", "real_world", "parameters", "watch"):
+            assert item[f"{field}_zh"] and item[f"{field}_en"], (item["key"], field)
+        assert item["defaults"]["steps"] > 0
+        assert item["defaults"]["latency_dist"] in {"normal", "exponential", "lognormal", "const"}
 
     generated = tmp_path / "templates.json"
     subprocess.run(

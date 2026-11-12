@@ -12,9 +12,26 @@ assumptions_zh: 假设治理动作对全体用户同时生效。
 assumptions_en: Assumes moderation applies to all users simultaneously.
 limitations_zh: 无法观察被删除内容与跨平台迁移。
 limitations_en: Cannot observe removed content or cross-platform migration.
+decision_zh: 治理动作应在何时启动，以及限流窗口开多大。
+decision_en: When moderation should start and how wide the throttling window should be.
+real_world_zh: 平台完整性团队面对极端叙事升温时，比较早开短窗口与晚开长窗口两种治理方案，再确定处置排期和审核人力。
+real_world_en: A platform integrity team facing a rising extreme narrative compares an early short throttling
+  window with a later longer one, then sets the response schedule and reviewer staffing.
+parameters_zh: at_step 25 是现有的治理介入点，应取治理日志中的实际动作时间；duration 15 是限流窗口，可按处置单时长校准。q 2.0 用观测到的多数跟随比例校准，指数 latency 的 mu 2 用响应时间中位数校准；magnitude 0.3 是降温强度，repeats 3 按 CI 宽度增加，seed 13 用于复跑。
+parameters_en: at_step 25 is the current moderation point and should come from the actual action time in the
+  moderation log; duration 15 is the throttling window, calibrated from case-handling times. Calibrate
+  q 2.0 from observed majority following and the exponential latency mu 2 from median response time;
+  magnitude 0.3 is the damping strength, raise repeats 3 until the CI is tight, and reuse seed 13 for
+  reruns.
+watch_zh: 比较治理前后的级联 p99 和收敛步，判断限流是否真正压低了级联。若 p99 下降但收敛没有加快，讨论可能只是转移到别处，不能算治理成功；同时注意被删除内容和跨平台迁移不可观测。
+watch_en: Compare cascade p99 and time to consensus before and after moderation to see whether throttling
+  really reduces cascades. If p99 falls but convergence does not speed up, discussion may have moved
+  elsewhere, so do not call the action successful; note that removed content and cross-platform
+  migration remain unobserved.
 feature_flag: null
 enabled_by_default: true
 spec:
+  seed: 13
   n_steps: 120
   q: 2.0
   latency:

@@ -45,6 +45,12 @@ def test_defaults_match_spec() -> None:
     assert spec.metrics == list(MetricName)
 
 
+def test_metric_names_match_the_summary_contract() -> None:
+    from hnle.metrics import MetricSummary
+
+    assert {member.value for member in MetricName} == set(MetricSummary.__dataclass_fields__)
+
+
 @pytest.mark.parametrize(
     ("payload", "field"),
     [

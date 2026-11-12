@@ -1,22 +1,25 @@
 # Documentation
 
-**Applies to:** OpinionLab v1.3.1 · [Repository README](../README.md) ·
+**Applies to:** OpinionLab v1.4.0 · [Repository README](../README.md) ·
 [Changelog](../CHANGELOG.md)
 
 The documents below describe the model, the engine, the service, the browser
 demo and the boundaries of the product. They are written for different readers,
 so the reading order matters more than the length.
 
-[![OpinionLab v1.3.1 demo](demo.png)](DEMO.md)
+[![OpinionLab v1.4.0 demo](demo.png)](DEMO.md)
 
-*The v1.3.1 demo pairs a dashboard-style instrument cluster with the existing
-cockpit controls and 3D telemetry. Start with [Demo](DEMO.md) for the interface
-tour, or [Use cases](USE_CASES.md) for the questions it can help frame.*
+*The v1.4.0 demo runs a preview on load, then pairs a dashboard-style
+instrument cluster with a scenario brief, a decision brief, a compact 3D
+telemetry array and linked charts. Start with the [User guide](USER_GUIDE.md)
+for the end-to-end path, [Demo](DEMO.md) for the interface tour, or
+[Use cases](USE_CASES.md) for the questions it can help frame.*
 
 ## Where to start
 
-- **New to the product:** read [Use cases](USE_CASES.md), then
-  [Demo](DEMO.md), then [Model card](MODEL_CARD.md).
+- **New to the product:** read the [User guide](USER_GUIDE.md), then
+  [Use cases](USE_CASES.md), then [Demo](DEMO.md) and
+  [Model card](MODEL_CARD.md).
 - **Checking the numbers:** read [Math model](MATH_MODEL.md) and
   [Conformance](CONFORMANCE.md). For a concrete input, read the
   [case study](CASE_STUDY.md).
@@ -31,9 +34,10 @@ tour, or [Use cases](USE_CASES.md) for the questions it can help frame.*
 
 | Document | Contents |
 |---|---|
-| [Use cases](USE_CASES.md) | Six worked questions, exact commands and interpretation |
+| [User guide](USER_GUIDE.md) | Installation, surfaces, parameter reference, metric dictionary, cookbooks, deployment, FAQ |
+| [Use cases](USE_CASES.md) | Worked questions, exact commands and interpretation |
 | [Demo](DEMO.md) | Hosted and local interfaces, four-language UI, API, limits, Ollama |
-| [Architecture](ARCHITECTURE.md) | Layers, data flow, module map and web asset pipeline |
+| [Architecture](ARCHITECTURE.md) | Layers, data flow, module map and the generated web-asset pipeline |
 | [Math model](MATH_MODEL.md) | Formulas, `q` limits, estimators and failure boundaries |
 | [Case study](CASE_STUDY.md) | A published hashtag sample, from CSV to component result |
 | [Conformance](CONFORMANCE.md) | Equation-to-code map and the shared numerical fixture |
@@ -60,10 +64,12 @@ tour, or [Use cases](USE_CASES.md) for the questions it can help frame.*
 - Every published report must keep the fixed disclaimer. Individual-level
   predictions, profiles and traces are outside the product contract; see
   [Compliance](COMPLIANCE.md) and [Model card](MODEL_CARD.md).
+- `site/index.html`, `site/app.js` and `site/templates.json` are generated from
+  `apps/web/` and the scenario library. Edit the source, then run `make site`.
 
 ## Screenshots
 
-The current screenshots are generated from v1.3.1 and are tracked in this
+The current screenshots are generated from v1.4.0 and are tracked in this
 directory:
 
 - [`demo.png`](demo.png): default English hero.

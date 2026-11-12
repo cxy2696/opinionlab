@@ -11,9 +11,25 @@ assumptions_zh: 假设部门内互动强度相近，正式层级影响被简化�
 assumptions_en: Assumes comparable intra-department interaction and simplifies formal hierarchy.
 limitations_zh: 不包含真实人事决策、离职与外部就业市场影响。
 limitations_en: Excludes real HR decisions, attrition and labour-market effects.
+decision_zh: 变革消息分几个阶段释放，以及中途降温暂停放在哪一步。
+decision_en: How many stages to split a change announcement into, and where to place a mid-rollout cooling-off
+  pause.
+real_world_zh: 内部沟通团队在宣布组织调整前，比较一次宣布与分阶段释放加中途暂停两种节奏，再决定经理简报和员工沟通的排期。
+real_world_en: An internal communications team compares a single announcement with a staged release plus a
+  mid-point pause, then schedules manager briefings and employee updates.
+parameters_zh: at_step 20 与 duration 15 对应现有的降温介入点和窗口，可对齐实际暂停时间；magnitude 0.25 是降温力度。q 1.7 用部门内多数跟随比例校准，latency 的 mu 5 与 sigma 2 用响应时间中位数和离散度校准；repeats 3 按 CI 宽度增加，seed 32 用于复跑。
+parameters_en: at_step 20 with duration 15 is the current damping point and window and can be aligned to the actual
+  pause; magnitude 0.25 is the damping strength. Calibrate q 1.7 from within-department majority
+  following and latency mu 5 with sigma 2 from median response time and spread; raise repeats 3 until
+  the CI is tight, and reuse seed 32 for reruns.
+watch_zh: 看暂停结束后的情绪反弹步、级联 P99 和最终多样性。若反弹正好出现在暂停结束后，说明阶段间隔过长；若级联下降且多样性保持中等，说明沟通留住了讨论空间，比较不同节奏时要看 95% CI。
+watch_en: Read the rebound step after the pause, cascade P99 and final diversity. If the rebound lands right
+  after the pause ends, the gap between stages is too long; if cascades fall while diversity stays
+  moderate, the cadence kept the discussion open, and cadence comparisons need 95% CIs.
 feature_flag: null
 enabled_by_default: true
 spec:
+  seed: 32
   n_steps: 100
   q: 1.7
   latency:

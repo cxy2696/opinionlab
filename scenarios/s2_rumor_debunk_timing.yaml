@@ -12,9 +12,24 @@ assumptions_zh: 假设辟谣触达与话题活跃度成正比。
 assumptions_en: Assumes debunk reach is proportional to topic activity.
 limitations_zh: 忽略辟谣内容质量与信源可信度差异。
 limitations_en: Ignores debunk quality and source-credibility differences.
+decision_zh: 辟谣应在谣言峰值之前还是之后投放。
+decision_en: Whether to debunk before or after the rumor peak.
+real_world_zh: 传播团队在谣言热度上升时，比较峰值前投放与峰值后投放两种排期，再决定更正稿的发布时间。
+real_world_en: A communications team compares publishing a correction before the rumor peak with publishing it
+  after, then decides when the correction goes out.
+parameters_zh: at_step 20 是现有的辟谣点，可按监测到谣言峰值的实际时间前后移动，建议同时跑峰值前与峰值后两组。q 1.6 用回复中的一致率校准，latency 的 mu 3 与 sigma 1 用响应时间中位数和离散度校准；magnitude 0.3 是单次辟谣的说服比例，repeats 3 按 CI 宽度增加，seed 12 用于复跑。
+parameters_en: at_step 20 is the current debunk point and should be moved around the actual observed peak, with
+  both before-peak and after-peak runs. Calibrate q 1.6 from reply agreement and latency mu 3 with
+  sigma 1 from median response time and spread; magnitude 0.3 is the persuasion share of one debunk,
+  raise repeats 3 until the CI is tight, and reuse seed 12 for reruns.
+watch_zh: 比较两种时点的最终负向占比及其 95% CI，这是主判据。若 CI 重叠，不要宣称时点有效；同时看级联 p99 与被截断的多数占比，排除未收敛运行造成的假差异。
+watch_en: Compare the final negative share and its 95% CI across the two timings, which is the primary
+  criterion. If the CIs overlap, do not claim a timing effect; also check cascade p99 and the censored
+  majority rate to rule out a false difference from runs that never converge.
 feature_flag: null
 enabled_by_default: true
 spec:
+  seed: 12
   n_steps: 100
   q: 1.6
   latency:

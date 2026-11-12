@@ -52,7 +52,7 @@ def test_decision_brief_contains_timing_and_followups() -> None:
     assert timing["peak_step"] is not None
     assert timing["intervention_step"] == 20
     assert "第" in str(brief["window_zh"])
-    assert 0 < len(brief["followups_zh"]) <= 3
+    assert 0 < len(brief["followups_zh"]) <= 4
     assert any("CI" in item for item in brief["followups_zh"])
     assert "预测" in str(brief["caveat_zh"])
 
@@ -66,3 +66,19 @@ def test_window_without_intervention_uses_cascade_peak() -> None:
 def test_unknown_template_falls_back_to_generic_decision() -> None:
     brief = _brief(template_key="ZZ")
     assert "沟通" in str(brief["decision_zh"]) or "干预" in str(brief["decision_zh"])
+
+
+def test_absorbing_run_keeps_the_fourth_followup() -> None:
+    from hnle.decision import build_decision_brief
+    from hnle.spec import ModelSpec
+
+    class _Result:
+        cascade_series = [0.0, 0.1, 0.25, 0.05]
+        time_to_consensus = 3
+
+    spec = ModelSpec(n_steps=4, latency={"dist": "const", "mu": 1})
+    brief = build_decision_brief(
+        "S2", "辟谣时机", "Rumor debunk timing", spec, _Result(), repeats=8, absorbing=True
+    )
+    assert len(brief.followups_zh) == 4
+    assert any("推迟" in item for item in brief.followups_zh)

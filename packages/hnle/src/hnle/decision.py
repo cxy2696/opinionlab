@@ -90,8 +90,12 @@ def build_decision_brief(
     *,
     repeats: int = 1,
     absorbing: bool = False,
+    decision_zh: str | None = None,
+    decision_en: str | None = None,
 ) -> DecisionBrief:
-    decision_zh, decision_en = DECISIONS.get(template_key, GENERIC_DECISION)
+    fallback_zh, fallback_en = DECISIONS.get(template_key, GENERIC_DECISION)
+    decision_zh = decision_zh or fallback_zh
+    decision_en = decision_en or fallback_en
     cascade = np.asarray(result.cascade_series, dtype=np.float64)
     if cascade.size:
         threshold = max(0.02, float(cascade.mean()) * 2.0)
@@ -155,6 +159,9 @@ def build_decision_brief(
             "the window moves later."
         )
 
+    # Keep the three core checks and, when consensus has already formed, the
+    # goal-dependent fourth check. Truncating to three used to drop that item.
+    limit = 4 if (absorbing and consensus is not None) else 3
     return DecisionBrief(
         decision_zh=decision_zh,
         decision_en=decision_en,
@@ -164,8 +171,8 @@ def build_decision_brief(
         intervention_step=intervention,
         window_zh=window_zh,
         window_en=window_en,
-        followups_zh=followups_zh[:3],
-        followups_en=followups_en[:3],
+        followups_zh=followups_zh[:limit],
+        followups_en=followups_en[:limit],
         caveat_zh="时点建议来自给定假设下的模拟，不构成对真实事件时间的预测。",
         caveat_en="Timing advice comes from a simulation under stated assumptions and is not "
         "a forecast of real event timing.",

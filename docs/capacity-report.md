@@ -1,6 +1,6 @@
 # Capacity report
 
-**Applies to:** OpinionLab v1.3.1 · [Docs index](README.md) ·
+**Applies to:** OpinionLab v1.4.0 · [Docs index](README.md) ·
 [Changelog](../CHANGELOG.md)
 
 ## Summary

@@ -12,9 +12,24 @@ assumptions_zh: 假设互动量可近似影响力且不随事件变化。
 assumptions_en: Assumes engagement approximates influence and is stable across the event.
 limitations_zh: 未建模商业投放预算与竞品行为。
 limitations_en: Does not model paid media budgets or competitor behaviour.
+decision_zh: 发布预算中头部 KOL 与长尾创作者各占多少。
+decision_en: How much of the launch budget to allocate to top KOLs versus long-tail creators.
+real_world_zh: 品牌营销团队在发布前比较头部 KOL 为主与长尾创作者为主的两套投放配比，再决定预算分配和内容排期。
+real_world_en: A brand marketing team compares a top-KOL-heavy plan with a long-tail-creator-heavy plan before
+  committing the budget and content schedule.
+parameters_zh: weights 使用 engagement 并取 max 归一化，这是把互动量转成影响力的现有设定；q 1.4 用观测到的多数跟随比例校准，latency 的 mu 5 与 sigma 2 用响应时间中位数和离散度校准。at_step 10 与 magnitude 0.25 对应首轮投放时点和力度，repeats 3 按 CI 宽度增加，seed 14 用于复跑。
+parameters_en: weights use engagement with max normalisation, the current setting for turning interaction into
+  influence; calibrate q 1.4 from observed majority following and latency mu 5 with sigma 2 from
+  median response time and spread. at_step 10 and magnitude 0.25 are the first-wave timing and
+  strength, raise repeats 3 until the CI is tight, and reuse seed 14 for reruns.
+watch_zh: 同时看早期级联规模、后期多样性和最终负向占比，不要只看早期扩散。若 KOL 占比提高带来更大的早期级联但后期多样性明显下降，就不能把覆盖当成成功；两套配比的差异要带 95% CI。
+watch_en: Read early cascade size, late diversity and the final negative share together, not early spread
+  alone. If a higher KOL share brings a larger early cascade but clearly lower late diversity, do not
+  treat reach as success; report differences between mixes with 95% CIs.
 feature_flag: null
 enabled_by_default: true
 spec:
+  seed: 14
   n_steps: 100
   q: 1.4
   latency:

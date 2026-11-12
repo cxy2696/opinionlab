@@ -12,9 +12,25 @@ assumptions_zh: 假设官方账号影响力可由互动量近似。
 assumptions_en: Assumes official-account influence is approximated by engagement.
 limitations_zh: 未建模信任度与地域差异。
 limitations_en: Does not model trust levels or regional differences.
+decision_zh: 是否把权威信息集中成一次投放，还是在疫情话题早期分批播下正向观点。
+decision_en: Whether to concentrate authoritative messaging into one push or seed positive views in stages early
+  in the outbreak topic.
+real_world_zh: 公共卫生传播团队在疫情话题升温时，比较一次集中发布与分批投放官方信息的两种方案，再决定首周的发布节奏。
+real_world_en: A public-health communication team compares one concentrated release with staged official messaging
+  during a rising outbreak topic, then fixes the first-week cadence.
+parameters_zh: at_step 8 是现有的首次集中投放点，可按官方账号首发时间校准；magnitude 0.2 对应首批官方或种子账号占比。q 1.8 用观测到的多数跟随比例校准，latency 的 mu 4 与 sigma 1.5 用响应时间中位数和离散度校准；repeats 3 按 CI 宽度增加，seed 19 用于复跑。
+parameters_en: at_step 8 is the current first concentrated push and can be aligned to when official accounts first
+  post; magnitude 0.2 is the share of official or seeded accounts in the first wave. Calibrate q 1.8
+  from observed majority following and latency mu 4 with sigma 1.5 from median response time and its
+  spread; raise repeats 3 until the CI is tight, and reuse seed 19 for reruns.
+watch_zh: 看最终正向占比、收敛步和最终多样性，判断集中投放是否既提速又压低多样性。若正向占比上升但多样性趋近 0，说明过度集中，应改为分批投放；所有比较都要带 95% CI。
+watch_en: Read the final positive share, time to consensus and final diversity to see whether concentration
+  speeds convergence at the cost of diversity. If the positive share rises while diversity approaches
+  zero, the push is over-concentrated and should be staged; keep 95% CIs on every comparison.
 feature_flag: null
 enabled_by_default: true
 spec:
+  seed: 19
   n_steps: 100
   q: 1.8
   latency:

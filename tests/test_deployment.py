@@ -111,3 +111,22 @@ def test_runbook_documents_canary_rollback_and_tainted() -> None:
     assert "rollback" in text.lower()
     assert "tainted" in text.lower()
     assert "spec_sha256" in text
+
+
+def test_single_container_demo_is_database_free_and_non_root() -> None:
+    compose = yaml.safe_load((ROOT / "docker-compose.demo.yml").read_text(encoding="utf-8"))
+    services = compose["services"]
+    assert set(services) == {"demo"}
+    assert "depends_on" not in services["demo"]
+    assert services["demo"]["build"]["dockerfile"] == "deploy/docker/demo.Dockerfile"
+    assert "healthcheck" in services["demo"]
+    environment = services["demo"]["environment"]
+    assert "DATABASE_URL" not in environment
+    assert "REDIS_URL" not in environment
+    assert environment["DEMO_MAX_REPEATS"] == "${DEMO_MAX_REPEATS:-20}"
+
+    text = (ROOT / "deploy" / "docker" / "demo.Dockerfile").read_text(encoding="utf-8")
+    assert re.search(r"FROM python:3\.12\.\d+-slim-bookworm@sha256:[0-9a-f]{64}", text)
+    assert "USER app" in text
+    assert "alembic" not in text
+    assert "HEALTHCHECK" in text

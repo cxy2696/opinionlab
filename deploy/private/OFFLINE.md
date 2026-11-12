@@ -1,6 +1,6 @@
 # Air-gapped private delivery
 
-**Applies to:** OpinionLab v1.3.1 · [Docs index](../../docs/README.md) ·
+**Applies to:** OpinionLab v1.4.0 · [Docs index](../../docs/README.md) ·
 [Runbook](../../docs/RUNBOOK.md) · [Changelog](../../CHANGELOG.md)
 
 ## Contents
@@ -15,7 +15,7 @@
   [model card](../../docs/MODEL_CARD.md) and
   [runbook](../../docs/RUNBOOK.md) documents
 
-The default image tag in the Helm values for this release is `1.3.1`; pin the
+The default image tag in the Helm values for this release is `1.4.0`; pin the
 exact digest in the delivery manifest before installation.
 
 ## Steps
@@ -27,6 +27,9 @@ exact digest in the delivery manifest before installation.
 3. Run migrations with `alembic upgrade head`.
 4. Install the deployment chart with the private values file.
 5. Verify `/health`, `/metrics` and a demo run.
+6. For a demo-only host, load the single-container image built from
+   `deploy/docker/demo.Dockerfile` and run `docker compose -f
+   docker-compose.demo.yml up -d`; it needs no PostgreSQL, Redis or MinIO.
 6. Register the installation with the platform admin.
 
 ## Verification

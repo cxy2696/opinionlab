@@ -13,9 +13,26 @@ assumptions_zh: 假设议题空间稳定、外部事件可枚举。
 assumptions_en: Assumes a stable issue space and enumerable exogenous events.
 limitations_zh: 合规限制：不得用于真实个人或选情预测。
 limitations_en: 'Compliance: must not be used on real individuals or for election forecasting.'
+decision_zh: 某项选举周期研究是否落在已批准的学术用途边界内，以及应由谁完成用途审批。
+decision_en: Whether a proposed election-cycle study falls inside the approved academic use boundary, and who
+  signs off on that use-case review.
+real_world_zh: 高校研究方法组在运行选举周期模拟前，先按已批准的学术协议核对用途与数据范围，再由伦理或用途审批委员会确认是否可以执行；未通过审批的研究不进入运行。
+real_world_en: A university methods group checks a proposed election-cycle simulation against its approved academic
+  protocol and data scope, and an ethics or use-case review committee confirms whether it may run;
+  studies without approval do not proceed.
+parameters_zh: q 1.5、latency mu 4 与 sigma 2、repeats 3 只作为合成或已批准匿名数据上的描述性设置，不得用真实选情数据校准。seed 23 固定后先做重复运行，确认结果稳定；所有参数与用途说明一并写入审批记录。
+parameters_en: q 1.5, latency mu 4 with sigma 2, and repeats 3 are descriptive settings for synthetic or approved
+  anonymised data only, and must not be calibrated on real election data. Fix seed 23, rerun for
+  stability, and record the parameters and stated use alongside the approval.
+watch_zh: 先确认运行带有审批记录和明确的用途边界，再读取观点分布与级联的周期性描述及其 95% CI。任何输出都只能用于方法研究，不得转成对候选人、政党或选情的预测；若有人要求预测性解读，应停止并退回审批。
+watch_en: First confirm the run carries an approval record and an explicit use boundary, then read the
+  descriptive cyclical structure of opinion shares and cascades with its 95% CI. Outputs are for
+  methods research only and must never be turned into forecasts about candidates, parties or election
+  outcomes; if a predictive reading is requested, stop and return to review.
 feature_flag: ff_g5_election_templates
 enabled_by_default: false
 spec:
+  seed: 23
   n_steps: 100
   q: 1.5
   latency:

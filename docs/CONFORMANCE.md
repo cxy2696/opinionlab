@@ -1,6 +1,6 @@
 # Conformance: equations, code, tests
 
-**Applies to:** OpinionLab v1.3.1 · [Docs index](README.md) ·
+**Applies to:** OpinionLab v1.4.0 · [Docs index](README.md) ·
 [Changelog](../CHANGELOG.md)
 
 This note is the bridge between the model described in
@@ -20,6 +20,8 @@ the HNL research repository. The fixture is also used by the
 | threshold rule | `core/update.py::choose_opinions` | `tests/test_decision_rules.py` |
 | consensus / censoring | `core/kernel.py::reached_consensus`, `metrics.time_to_consensus` | `tests/test_metrics_analytic.py` |
 | Monte Carlo interval | `mc.py` | `tests/test_aggregate_ci.py` |
+| censored consensus interval | `mc.py::censored_interval` | `tests/test_censored_interval.py` |
+| browser conformity map parity | `site/sim.js::conformity` | `tests/test_browser_sim_math.py` |
 
 Two details are easy to get wrong and are therefore tested explicitly:
 
@@ -56,6 +58,10 @@ positive weights, mean aggregation, one synchronous step. Multi-stance
 opinions, the event kernel, continuous latency, shocks, interventions,
 time-varying topology and the service layer are tested by repository-specific
 tests, not by the shared fixture.
+
+The hosted browser preview is not part of the HNL fixture, but its conformity
+map is pinned to `core/kernel.py` by a separate test that runs `sim.js` under
+Node and compares a grid of `(ones, zeros, q)` cases with the Python kernel.
 
 ## Reproducing the check
 

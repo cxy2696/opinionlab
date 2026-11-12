@@ -52,6 +52,112 @@
     gaugeCohesionCaption: ["群体共识度", "group cohesion", "集団の結束度", "Gruppenkohäsion"],
     gaugeTurnCaption: ["单步最大转向", "peak share switching", "最大の立場転換", "Stärkster Meinungswechsel"],
     kpiSteps: ["观测步数", "STEPS OBSERVED", "観測ステップ", "BEOBACHTETE SCHRITTE"],
+    kpiReplicas: ["副本数", "REPLICAS", "複製回数", "REPLIKATE"],
+    unitRuns: ["次", "runs", "回", "Läufe"],
+    kpiPeakStep: ["峰值所在步", "PEAK AT STEP", "ピークのステップ", "PEAK BEI SCHRITT"],
+    unitStepShort: ["步", "step", "ステップ", "Schritt"],
+    briefTitle: ["场景说明", "Scenario brief", "シナリオ概要", "Szenario-Kurzfassung"],
+    briefTag: ["假设跟着数字一起走", "ASSUMPTIONS TRAVEL WITH THE NUMBERS", "仮定は数値と一緒に", "ANNAHMEN GEHÖREN ZU DEN ZAHLEN"],
+    briefRealWorld: ["真实用在哪里", "WHERE IT IS USED", "実際の利用場面", "WO ES EINGESETZT WIRD"],
+    briefParameters: ["先定这几个参数", "SET THESE FIRST", "まず決めるパラメータ", "ZUERST EINSTELLEN"],
+    briefWatch: ["该看什么信号", "WHAT TO WATCH", "見るべきシグナル", "WORAUF ACHTEN"],
+    briefAssumptions: ["假设与边界", "Assumptions and limits", "仮定と限界", "Annahmen und Grenzen"],
+    paramKnob: ["参数", "Knob", "パラメータ", "Parameter"],
+    paramRaise: ["调高会怎样", "If you raise it", "上げるとどうなる", "Bei Erhöhung"],
+    paramCalibrate: ["用什么校准", "Calibrate from", "何で調整する", "Kalibrieren mit"],
+    paramQRaise: [
+      "同化更快，最终多样性下降，级联也可能更尖锐。",
+      "Faster homogenisation; final diversity falls and cascades can get sharper.",
+      "同質化が速まり、最終的な多様性が下がり、カスケードが鋭くなる可能性があります。",
+      "Schnellere Homogenisierung; die endgültige Diversität sinkt, Kaskaden können schärfer werden.",
+    ],
+    paramQCalibrate: [
+      "从回复/投票中的“跟随多数”比例估计；经典极限从 q=1 开始。",
+      "Observed majority-following in replies or votes; start at q=1 for the classical limit.",
+      "返信や投票で多数派に従う割合から推定。古典的極限は q=1 から始めます。",
+      "Beobachtetes Folgen der Mehrheit in Antworten oder Votes; für den klassischen Grenzfall bei q=1 beginnen.",
+    ],
+    paramMuRaise: [
+      "峰值与拖尾后移，每步更新的人更少。",
+      "Peak and tail move later; fewer people update per step.",
+      "ピークと裾が後ろにずれ、1ステップで更新する人が減ります。",
+      "Peak und Ausläufer verschieben sich nach hinten; pro Schritt aktualisieren weniger Personen.",
+    ],
+    paramMuCalibrate: [
+      "用户看到帖子到回复的中位时间；sigma 用分布宽度估计。",
+      "Median time from seeing a post to replying; estimate sigma from the spread.",
+      "投稿を見てから返信するまでの中位時間。sigma は分布の広がりから推定します。",
+      "Medianzeit vom Sehen eines Beitrags bis zur Antwort; sigma aus der Streuung schätzen.",
+    ],
+    paramStepsRaise: [
+      "能看到更完整的尾部，但耗时线性增加。",
+      "Captures more of the tail, at linear cost.",
+      "裾まで見えますが、計算時間は線形に増えます。",
+      "Erfasst mehr vom Ausläufer, zu linearen Kosten.",
+    ],
+    paramStepsCalibrate: [
+      "覆盖级联峰值后再多看 30–50 步；不要在峰值处截断。",
+      "Cover the cascade peak plus 30-50 steps; do not stop at the peak.",
+      "カスケードのピーク後に30〜50ステップ追加で見ます。ピークで打ち切らないでください。",
+      "Den Kaskadenpeak plus 30-50 Schritte abdecken; nicht am Peak abbrechen.",
+    ],
+    paramRepeatsRaise: [
+      "95% 区间更窄、结论更稳，但更慢。",
+      "Tighter 95% interval and steadier verdict; slower run.",
+      "95%区間が狭くなり結論が安定しますが、遅くなります。",
+      "Engeres 95 %-Intervall und stabileres Urteil; langsamerer Lauf.",
+    ],
+    paramRepeatsCalibrate: [
+      "做决定前预算 30 次以上；演示上限见按钮下方。",
+      "Budget for 30+ before a decision; the demo cap is shown below the button.",
+      "意思決定の前に30回以上を確保。デモの上限はボタン下に表示されます。",
+      "Vor einer Entscheidung 30+ einplanen; die Demo-Obergrenze steht unter dem Button.",
+    ],
+    paramSeedRaise: [
+      "只改变随机抽样，不改变模型。",
+      "Changes the random draw, not the model.",
+      "乱数の引き方だけが変わり、モデルは変わりません。",
+      "Ändert die Zufallsziehung, nicht das Modell.",
+    ],
+    paramSeedCalibrate: [
+      "固定它作为可复现基线；换 3–5 个种子检验稳健性。",
+      "Fix it for a reproducible baseline; re-run 3-5 seeds to test robustness.",
+      "再現可能な基準として固定し、3〜5個のシードで堅牢性を確認します。",
+      "Für eine reproduzierbare Basis fixieren; 3-5 Seeds zur Robustheitsprüfung wiederholen.",
+    ],
+    previousRun: ["上一次", "previous run", "前回", "vorheriger Lauf"],
+    metricEntropy: ["观点熵", "Entropy", "意見エントロピー", "Entropie"],
+    metricPolarization: ["极化度", "Polarization", "分極度", "Polarisierung"],
+    briefParametersFallback: [
+      "先调 q 与平均时延：它们决定收敛速度和峰值位置；再用副本数控制区间宽度。",
+      "Start with q and mean latency: they set convergence speed and the peak; use replicas to control interval width.",
+      "まず q と平均遅延を調整します。収束速度とピーク位置が決まり、複製回数で区間幅を調整します。",
+      "Zuerst q und mittlere Latenz einstellen: Sie bestimmen Konvergenzgeschwindigkeit und Peak; Replikate steuern die Intervallbreite.",
+    ],
+    briefWatchFallback: [
+      "同时看最终多样性、级联 P99 与多数到达步；95% CI 重叠时不要宣称差异成立。",
+      "Read final diversity, cascade P99 and majority step together; do not claim a difference when the 95% CIs overlap.",
+      "最終的な多様性、カスケードP99、多数到達ステップを合わせて読みます。95% CIが重なる場合は差異を主張しないでください。",
+      "Diversität, Kaskaden-P99 und Mehrheitsschritt gemeinsam lesen; bei überlappenden 95 %-KIs keine Differenz behaupten.",
+    ],
+    qualityReplicas: ["副本", "replicas", "複製", "Replikate"],
+    qualityCensored: ["副本未达多数", "replicas censored", "未達の複製", "Replikate zensiert"],
+    qualityUnderpowered: ["样本偏少（n<30）", "underpowered (n<30)", "サンプル不足（n<30）", "unterpowert (n<30)"],
+    qualityWarnings: ["引擎警告", "engine warnings", "エンジン警告", "Engine-Warnungen"],
+    qualityPreview: ["浏览器预览", "browser preview", "ブラウザプレビュー", "Browser-Vorschau"],
+    qualityEngine: ["引擎", "engine", "エンジン", "Engine"],
+    footerStatic: [
+      "在线版是轻量浏览器模拟，完整引擎与报告需本地运行。",
+      "The hosted demo is a browser preview; the full engine and reports run locally.",
+      "オンライン版は軽量なブラウザシミュレーションです。完全なエンジンとレポートはローカルで実行します。",
+      "Die gehostete Demo ist eine Browser-Vorschau; vollständige Engine und Berichte laufen lokal.",
+    ],
+    footerApiMode: [
+      "完整引擎 API · 报告为单文件离线 HTML",
+      "Full engine API · report is a single offline HTML file",
+      "完全なエンジンAPI · レポートは単一のオフラインHTML",
+      "Vollständige Engine-API · Bericht als einzelne Offline-HTML-Datei",
+    ],
     kpiMajority: ["副本平均多数", "MEAN MAJORITY", "平均多数到達", "Ø MEHRHEITSSCHRITT"],
     kpiPeak: ["级联峰值", "PEAK TURN", "ピーク転換", "PEAK-WECHSEL"],
     kpiCi: ["95% 置信区间", "95% CONFIDENCE", "95% 信頼区間", "95 %-KONFIDENZ"],
@@ -129,7 +235,7 @@
     play: ["播放", "Play", "再生", "Abspielen"],
     metricsTitle: ["指标卡", "Metrics", "指標カード", "Kennzahlen"],
     metricsTag: ["95% CI · n = 副本", "95% CI · n = replicas", "95% CI · n = 複製", "95 %-KI · n = Replikate"],
-    guideSummary: ["这些参数到底在做什么？", "Why these knobs", "これらのパラメータは何をしている？", "Was bewirken diese Parameter?"],
+    guideSummary: ["这些参数怎么设？", "How to set these knobs", "これらのパラメータの決め方", "Wie diese Parameter einstellen?"],
     guideQ: ["从众强度 q", "Conformity q", "同調の強さ q", "Konformität q"],
     guideQText: [
       "一个人看到群体里多数是某立场时，跟随的概率有多强。q 越大，群体越容易快速同化；q=1 时接近经典 Voter 模型。",
@@ -498,6 +604,11 @@
       const extra = TEMPLATES[template.key]?.[field]?.[api.lang];
       if (extra) return extra;
       if (api.lang === "zh") return template[`${field}_zh`] ?? template[`${field}_en`] ?? "";
+      // The scenario narrative for these newer fields is authored in EN/ZH.
+      // For JA/DE, return empty so the caller can use a localized generic
+      // fallback instead of mixing English prose into a Japanese/German card.
+      if ((api.lang === "ja" || api.lang === "de")
+          && ["real_world", "parameters", "watch"].includes(field)) return "";
       return template[`${field}_en`] ?? "";
     },
     apply() {

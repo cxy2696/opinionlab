@@ -26,6 +26,10 @@ REQUIRED_TEXT_FIELDS = (
     "interpretation",
     "assumptions",
     "limitations",
+    "decision",
+    "real_world",
+    "parameters",
+    "watch",
 )
 
 
@@ -44,6 +48,14 @@ class Template:
     assumptions_en: str
     limitations_zh: str
     limitations_en: str
+    decision_zh: str
+    decision_en: str
+    real_world_zh: str
+    real_world_en: str
+    parameters_zh: str
+    parameters_en: str
+    watch_zh: str
+    watch_en: str
     spec: ModelSpec
     graph: Hypergraph
     path: Path
@@ -86,6 +98,14 @@ def load_template(path: str | Path) -> Template:
         assumptions_en=texts["assumptions"][1],
         limitations_zh=texts["limitations"][0],
         limitations_en=texts["limitations"][1],
+        decision_zh=texts["decision"][0],
+        decision_en=texts["decision"][1],
+        real_world_zh=texts["real_world"][0],
+        real_world_en=texts["real_world"][1],
+        parameters_zh=texts["parameters"][0],
+        parameters_en=texts["parameters"][1],
+        watch_zh=texts["watch"][0],
+        watch_en=texts["watch"][1],
         spec=spec,
         graph=graph,
         path=template_path,

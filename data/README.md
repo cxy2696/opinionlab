@@ -1,6 +1,6 @@
 # Sample data: Kaggle social-media sentiment posts
 
-**Applies to:** OpinionLab v1.3.1 · [Docs index](../docs/README.md) ·
+**Applies to:** OpinionLab v1.4.0 · [Docs index](../docs/README.md) ·
 [Case study](../docs/CASE_STUDY.md) · [Changelog](../CHANGELOG.md)
 
 `kaggle_sentiment.csv` is the 732-row *Social Media Sentiments Analysis

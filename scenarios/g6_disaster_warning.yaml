@@ -12,9 +12,24 @@ assumptions_zh: 假设预警触达与话题活跃度相关。
 assumptions_en: Assumes warning reach correlates with topic activity.
 limitations_zh: 未建模线下应急响应与地理因素。
 limitations_en: Does not model offline response or geography.
+decision_zh: 是否只发一次早期预警，还是在最初几小时内追加渠道推送。
+decision_en: Whether to issue one early warning burst or add follow-up channel pushes during the first hours.
+real_world_zh: 应急传播团队在灾害预警发布后，比较单次广播与广播加后续渠道推送两种方案，再决定最初几小时的触达安排。
+real_world_en: An emergency communication team compares a single warning broadcast with a broadcast plus follow-up
+  channel pushes, then sets the first-hours reach plan.
+parameters_zh: at_step 5 是现有的预警发布点，可直接取警报日志时间；magnitude 0.3 与 duration 10 对应首轮触达比例和持续时长，可按渠道覆盖数据校准。q 1.7 用多数跟随比例校准，latency 的 mu 3 与 sigma 1 用响应时间中位数和离散度校准；repeats 3 按 CI 宽度增加，seed 21 用于复跑。
+parameters_en: at_step 5 is the current warning point and can be taken directly from the alert log; magnitude 0.3
+  with duration 10 is the first-wave reach and its duration, calibrated from channel coverage data.
+  Calibrate q 1.7 from majority following and latency mu 3 with sigma 1 from median response time and
+  spread; raise repeats 3 until the CI is tight, and reuse seed 21 for reruns.
+watch_zh: 看正向占比是否在预警后快速上升并稳定在多数节点，同时检查推送结束后的回落和收敛步。若正向占比在 boost 结束后明显回落，说明需要追加渠道；比较不同方案时要看 95% CI 是否重叠。
+watch_en: Check whether the positive share rises quickly after the warning and holds across most nodes, and
+  watch for reversion after the push ends plus time to consensus. If the positive share falls clearly
+  once the boost stops, add follow-up channels; compare plans using overlapping or separated 95% CIs.
 feature_flag: null
 enabled_by_default: true
 spec:
+  seed: 21
   n_steps: 90
   q: 1.7
   latency:

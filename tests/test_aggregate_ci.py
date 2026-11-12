@@ -16,6 +16,19 @@ def _case(repeats: int) -> tuple[ModelSpec, Hypergraph]:
     return spec, graph
 
 
+def test_metric_subset_limits_the_aggregate_keys() -> None:
+    spec = ModelSpec(
+        n_steps=5,
+        seed=3,
+        repeats=2,
+        latency={"dist": "const", "mu": 1},
+        metrics=["diversity_final"],
+    )
+    graph = random_hypergraph(20, 40, np.random.default_rng(3), spec.hyperedge)
+    result = run_monte_carlo(spec, graph, repeats=2)
+    assert set(result.metrics) == {"diversity_final"}
+
+
 def test_every_metric_has_mean_and_interval() -> None:
     spec, graph = _case(30)
     result = run_monte_carlo(spec, graph, repeats=30)

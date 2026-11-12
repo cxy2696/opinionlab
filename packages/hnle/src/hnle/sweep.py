@@ -126,7 +126,12 @@ def run_sweep(
     for sample in samples:
         variant = _variant(spec, sample)
         aggregate = run_monte_carlo(variant, graph, repeats=repeats, jobs=jobs)
-        interval = aggregate.metrics[metric]
+        interval = aggregate.metrics.get(metric)
+        if interval is None:
+            raise ValueError(
+                f"metric {metric!r} is not selected by spec.metrics; "
+                f"available: {sorted(aggregate.metrics)}"
+            )
         rows.append(
             {
                 **sample,

@@ -1,6 +1,6 @@
 # Math model
 
-**Applies to:** OpinionLab v1.3.1 · [Docs index](README.md) ·
+**Applies to:** OpinionLab v1.4.0 · [Docs index](README.md) ·
 [Changelog](../CHANGELOG.md)
 
 This document is the normative definition of the OpinionLab model. Code and
@@ -81,6 +81,13 @@ Then:
   otherwise keep the current stance. Ties keep the status quo. This is why the
   rule needs the current opinion as well as `p_i`.
 
+**Initialisation.** `data_driven` uses ingested opinions when the graph carries
+them and falls back to a uniform draw otherwise. `balanced_random` draws each
+stance uniformly. `fixed_ratio` assigns `round(target_share_1 · N)` nodes to
+stance 1 and splits the remaining nodes as evenly as possible across the other
+`K − 1` stances; for `K = 2` this is the historical binary branch. The draw order
+of the binary branch is frozen so seeded baselines stay reproducible.
+
 Discrete kernels write atomically at the end of a sweep. The event kernel uses
 the same clock rule; with integer latencies the two agree step by step
 (`tests/test_engine_equivalence.py`).
@@ -117,6 +124,14 @@ CI95 = mean ± t_{0.975, R−1} · sqrt(var / R)
 
 Implementation: `hnle/mc.py` (Welford updates to avoid drift at larger `R`).
 
+**Censored metrics.** Consensus time is defined only for replicas that reach the
+threshold. Aggregating it must not turn `−1` into zero. `hnle.mc.censored_interval`
+therefore takes the uncensored values, applies the same Student-*t* formula with
+`n` equal to the number of contributing replicas, and returns `None` when `n = 0`.
+The demo API reports the censored count and rate in its `quality` block. A
+display layer may clamp a bounded interval (diversity, shares, polarization) to
+its feasible range; the stored estimate is unchanged.
+
 **Rigour notes:**
 
 - The interval is a Student-*t* interval, not a normal approximation. For
@@ -151,6 +166,7 @@ Implementation: `hnle/mc.py` (Welford updates to avoid drift at larger `R`).
 | readiness `t − T_i ≥ L_i` | `core/update.py::run_simulation`, `core/event.py::run_event` |
 | aggregation `mean / max / size_weighted` | `core/update.py::aggregate_node_probabilities`, `core/kernel.py::normalize_rows` |
 | `diversity = 1 − max_v share_v` | `metrics.diversity` |
+| censored consensus interval | `mc.censored_interval` |
 | `entropy = −Σ p log p` (bits in code) | `metrics.shannon_entropy` |
 | oscillation: FFT peak ratio, zero crossings, lag-k autocorrelation | `metrics.fft_power_ratio`, etc. |
 | consensus / censoring | `core/kernel.py::reached_consensus`, `metrics.time_to_consensus` |

@@ -25,6 +25,8 @@ class Settings(BaseSettings):
     demo_max_nodes: int = 400
     demo_max_steps: int = 200
     demo_max_repeats: int = 20
+    demo_min_steps: int = 10
+    demo_min_repeats: int = 1
     ollama_enabled: bool = False
     ollama_base_url: str = "http://127.0.0.1:11434"
     ollama_model: str = "llama3.2"

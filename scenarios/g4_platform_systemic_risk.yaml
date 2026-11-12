@@ -12,9 +12,25 @@ assumptions_zh: 假设新超边按稳定到达率出现。
 assumptions_en: Assumes new hyperedges arrive at a stable rate.
 limitations_zh: 未建模推荐系统对连接形成的反馈。
 limitations_en: Does not model recommender feedback on link formation.
+decision_zh: 是否把持续增长的话题流升级为系统性风险监测，并提前留出多少治理容量。
+decision_en: Whether to escalate a growing topic stream to systemic-risk monitoring, and how much moderation
+  capacity to reserve in advance.
+real_world_zh: 平台完整性团队在话题超边快速增长时，用该模板判断何时从日常监测切换到系统性风险响应，并为处置队列预留人力。
+real_world_en: A platform integrity team uses this template to decide when a fast-growing topic stream should move
+  from routine monitoring to a systemic-risk response, and how much reviewer capacity to reserve.
+parameters_zh: arrival_rate 0.5 与 decay_rate 0.02 是拓扑增长的核心输入，应从超边新增和衰减日志校准；q 2.2 用观测到的多数跟随比例校准，指数 latency 的 mu 3 用响应时间中位数校准。n_steps 120 与 repeats 3 是起点，按 CI 宽度增加 repeats，seed 20 用于复跑。
+parameters_en: arrival_rate 0.5 and decay_rate 0.02 are the core topology inputs and should be calibrated from
+  hyperedge creation and decay logs; calibrate q 2.2 from observed majority following and the
+  exponential latency mu 3 from median response time. n_steps 120 and repeats 3 are the starting
+  point, raise repeats until the CI is tight, and reuse seed 20 for reruns.
+watch_zh: 比较不同到达率下的级联 p99、收敛步和 runaway 比例。若 p99 明显抬升且 n_steps 内无法收敛，应升级监测；若 CI 重叠则只算提示信号，不构成升级依据。
+watch_en: Compare cascade p99, time to consensus and the runaway rate across arrival rates. If p99 rises
+  clearly and the run does not converge within n_steps, escalate monitoring; if the CIs overlap, treat
+  it as a signal only and not grounds for escalation.
 feature_flag: null
 enabled_by_default: true
 spec:
+  seed: 20
   n_steps: 120
   q: 2.2
   latency:

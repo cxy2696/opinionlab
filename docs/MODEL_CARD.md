@@ -1,6 +1,6 @@
 # Model card
 
-**Applies to:** OpinionLab v1.3.1 · [Docs index](README.md) ·
+**Applies to:** OpinionLab v1.4.0 · [Docs index](README.md) ·
 [Changelog](../CHANGELOG.md)
 
 ## Intended use
@@ -19,8 +19,10 @@ forecasting product.
 - Reproducible runs with manifests and single-file offline reports.
 - Two engine paths: synchronous CSR and event-driven integer latency, with
   shared kernel semantics plus repository-specific tests.
-- A browser demo with English, Chinese, Japanese and German labels, 3D telemetry and linked charts;
-  see [Demo](DEMO.md).
+- A browser demo with English, Chinese, Japanese and German labels, a scenario
+  brief, 3D telemetry and linked charts; see [Demo](DEMO.md).
+- Every result carries evidence flags (censored replicas, underpowered sample,
+  engine warnings) next to the estimates.
 
 ## Limitations
 
@@ -37,6 +39,10 @@ forecasting product.
   is not evidence that the process will never converge; it bounds the claim to
   the observation window. See
   [Math model §6](MATH_MODEL.md#6-monte-carlo-estimator-and-intervals).
+- The hosted browser preview is intentionally narrower than the engine: binary
+  stances, uniform weights, mean aggregation, static topology and no shocks. Its
+  results are a preview, not the full model; see the fidelity table in
+  [Demo](DEMO.md#browser-preview-fidelity).
 
 ## Prohibited uses
 

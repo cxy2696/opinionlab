@@ -12,9 +12,25 @@ assumptions_zh: 假设科普内容被同等理解，未建模健康素养差异�
 assumptions_en: Assumes equal comprehension; health-literacy differences are not modelled.
 limitations_zh: 不包含线下行为与真实感染数据。
 limitations_en: Excludes offline behaviour and real infection data.
+decision_zh: 应急科普是尽早集中投放，还是把权威信息分几次重复触达。
+decision_en: Whether to push emergency science communication early in one wave or repeat authoritative messages
+  in several rounds.
+real_world_zh: 公共卫生教育团队在突发事件初期，比较一次早期科普与多轮重复触达两种方案，再决定首周的科普排期。
+real_world_en: A public-health education team compares a single early explainer push with repeated authoritative
+  posts, then sets the first-week science-communication schedule.
+parameters_zh: at_step 10 是现有的科普投放点，可按实际发帖时间校准；magnitude 0.4 与 duration 5 对应单轮科普的力度和持续时长。q 1.5 用观测到的多数跟随比例校准，latency 的 mu 4 与 sigma 1.5 用响应时间中位数和离散度校准；repeats 3 按 CI 宽度增加，seed 15 用于复跑。
+parameters_en: at_step 10 is the current science-communication point and can be aligned to the actual posting time;
+  magnitude 0.4 with duration 5 is one round's strength and duration. Calibrate q 1.5 from observed
+  majority following and latency mu 4 with sigma 1.5 from median response time and spread; raise
+  repeats 3 until the CI is tight, and reuse seed 15 for reruns.
+watch_zh: 看恐慌性观点的最终占比、正向占比和收敛步。若正向占比只在 duration 5 的窗口内上升、随后回落，说明需要多轮重复触达；不同方案的比较要看 95% CI 是否重叠。
+watch_en: Read the final panic-opinion share, the positive share and time to consensus. If the positive share
+  rises only inside the five-step window and falls back afterwards, plan repeated rounds instead;
+  compare plans using overlapping or separated 95% CIs.
 feature_flag: null
 enabled_by_default: true
 spec:
+  seed: 15
   n_steps: 90
   q: 1.5
   latency:

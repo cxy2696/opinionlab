@@ -1,6 +1,6 @@
 # Case study: a published hashtag sample
 
-**Applies to:** OpinionLab v1.3.1 · [Docs index](README.md) ·
+**Applies to:** OpinionLab v1.4.0 · [Docs index](README.md) ·
 [Changelog](../CHANGELOG.md)
 
 This case shows the engine on a real, citable input rather than a synthetic

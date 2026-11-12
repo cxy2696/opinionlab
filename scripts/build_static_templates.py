@@ -12,7 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def export_templates(output: Path | None = None) -> list[dict[str, object]]:
-    """Return the enabled templates in the shape consumed by the static app."""
+    """Return the enabled templates in the shape consumed by the web client."""
     payload: list[dict[str, object]] = []
     for template in iter_templates(ROOT / "scenarios"):
         if not template.is_enabled():
@@ -34,19 +34,37 @@ def export_templates(output: Path | None = None) -> list[dict[str, object]]:
                 "name_en": template.name_en,
                 "question_zh": template.question_zh,
                 "question_en": template.question_en,
+                "data_shape_zh": template.data_shape_zh,
+                "data_shape_en": template.data_shape_en,
                 "interpretation_zh": template.interpretation_zh,
                 "interpretation_en": template.interpretation_en,
+                "assumptions_zh": template.assumptions_zh,
+                "assumptions_en": template.assumptions_en,
+                "limitations_zh": template.limitations_zh,
+                "limitations_en": template.limitations_en,
+                "decision_zh": template.decision_zh,
+                "decision_en": template.decision_en,
+                "real_world_zh": template.real_world_zh,
+                "real_world_en": template.real_world_en,
+                "parameters_zh": template.parameters_zh,
+                "parameters_en": template.parameters_en,
+                "watch_zh": template.watch_zh,
+                "watch_en": template.watch_en,
                 "defaults": {
                     "q": template.spec.q,
                     "latency_mu": template.spec.latency.mu,
                     "latency_sigma": template.spec.latency.sigma,
+                    "latency_dist": template.spec.latency.dist.value,
                     "steps": min(template.spec.n_steps, 200),
+                    "n_steps": min(template.spec.n_steps, 200),
                     "repeats": max(template.spec.repeats, 8),
                     "seed": template.spec.seed,
                     "n_nodes": template.graph.n_nodes,
                     "n_edges": len(template.graph.hyperedges),
                     "min_size": template.spec.hyperedge.min_size,
                     "max_size": template.spec.hyperedge.max_size,
+                    "init_mode": template.spec.init_mode.value,
+                    "target_share_1": template.spec.target_share_1,
                 },
                 "intervention": intervention,
             }

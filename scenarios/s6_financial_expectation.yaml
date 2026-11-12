@@ -12,9 +12,25 @@ assumptions_zh: 假设市场参与者同质解读同一信息。
 assumptions_en: Assumes homogeneous interpretation of the same message.
 limitations_zh: 未建模真实价格反馈与机构交易行为。
 limitations_en: Does not model price feedback or institutional trading.
+decision_zh: 监管沟通是一次性表态，还是跨交易时段渐进释放。
+decision_en: Whether to communicate a regulatory message in one statement or release it gradually across trading
+  sessions.
+real_world_zh: 监管沟通团队在发布预期指引前，比较一次声明与跨交易时段分次沟通两种节奏，再决定发布安排和对市场情绪的观察窗口。
+real_world_en: A supervisory communication team compares a single statement with a sequence released across trading
+  sessions, then sets the release plan and the window for watching sentiment.
+parameters_zh: at_step 15 应尽量对齐交易时段，可按实际发布记录校准；magnitude 0.2 与 duration 20 是渐进沟通的力度和窗口。q 1.7 用观测到的多数跟随比例校准，latency 的 mu 6 与 sigma 2 用响应时间中位数和离散度校准；repeats 3 按 CI 宽度增加，seed 16 用于复跑。
+parameters_en: at_step 15 should align to a trading session and can be calibrated from the release record;
+  magnitude 0.2 with duration 20 is the gradual sequence's strength and window. Calibrate q 1.7 from
+  observed majority following and latency mu 6 with sigma 2 from median response time and spread;
+  raise repeats 3 until the CI is tight, and reuse seed 16 for reruns.
+watch_zh: 比较不同节奏下的级联 p99 与收敛步，报告稳定性与效率的权衡，不要只看单一指标。若渐进沟通压低了 p99 但明显延长收敛，应把这一取舍写清楚；CI 重叠时不要宣称某一节奏更优。
+watch_en: Compare cascade p99 and time to consensus across cadences and report the stability-versus-speed
+  trade-off rather than a single metric. If gradual communication lowers p99 but clearly lengthens
+  convergence, state the trade-off; when CIs overlap, do not claim one cadence is better.
 feature_flag: null
 enabled_by_default: true
 spec:
+  seed: 16
   n_steps: 110
   q: 1.7
   latency:

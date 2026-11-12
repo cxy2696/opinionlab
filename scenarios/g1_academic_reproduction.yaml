@@ -12,9 +12,24 @@ assumptions_zh: 假设无外部冲击、均匀权重。
 assumptions_en: Assumes no external shocks and uniform weights.
 limitations_zh: 有限步长与有限图规模会影响收敛判定。
 limitations_en: Finite horizon and graph size affect convergence detection.
+decision_zh: 是否接受一次复现运行作为有效基准，以及在预注册中把图规模定为多大。
+decision_en: Whether to accept a reproduction run as a valid baseline, and what graph size to pre-register.
+real_world_zh: 研究软件团队在把新版模拟引擎投入新实验前，先用一篇已发表的 Voter 模型结果做回归验证；只有基准对得上，才进入下一轮实验。
+real_world_en: A research-software team regression-tests a new simulation engine against a published voter-model
+  result before running new experiments, and proceeds only once the baseline matches.
+parameters_zh: q 固定为 1.0、超边大小固定为 2，这是复现的硬约束；n_steps 150、repeats 5 与 seed 17 是现有起点。复现时先用观测到的多数跟随比例核对 q，再按目标 CI 宽度上调 repeats，并固定 seed 检查结果是否稳健。
+parameters_en: q stays at 1.0 with pair hyperedges, which are hard constraints for reproduction; n_steps 150,
+  repeats 5 and seed 17 are the current starting point. Confirm q against the observed
+  majority-following share, raise repeats until the CI is narrow enough, and hold the seed fixed to
+  check robustness.
+watch_zh: 读取各规模下的最终共识概率及其 95% CI，检查是否随 n 单调下降。若相邻规模的 CI 重叠，先增加 repeats 或 n_steps，不要直接宣布复现成立；同时检查未收敛或截断的多数占比。
+watch_en: Read the final consensus probability at each size with its 95% CI and check that it falls
+  monotonically with n. If CIs overlap between adjacent sizes, raise repeats or n_steps before
+  claiming a reproduction, and also check the censored majority rate.
 feature_flag: null
 enabled_by_default: true
 spec:
+  seed: 17
   n_steps: 150
   q: 1.0
   n_opinions: 2

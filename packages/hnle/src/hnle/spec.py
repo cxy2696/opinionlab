@@ -84,17 +84,23 @@ class InterventionType(StrEnum):
 
 
 class MetricName(StrEnum):
-    """Whitelist of computable metrics."""
+    """Canonical aggregate metric keys produced by :func:`hnle.metrics.summarize`.
+
+    ``ModelSpec.metrics`` selects which of these keys are returned in the
+    aggregate result. The values must stay identical to the keys in
+    ``MetricSummary.to_dict``; ``tests/test_spec.py`` pins that contract.
+    """
 
     diversity_final = "diversity_final"
     entropy_final = "entropy_final"
     polarization_final = "polarization_final"
     n_active_opinions = "n_active_opinions"
     assortativity = "assortativity"
+    avg_share_final = "avg_share_final"
     time_to_consensus = "time_to_consensus"
     consensus_stability = "consensus_stability"
-    absorbing_rate = "absorbing_rate"
-    runaway_rate = "runaway_rate"
+    absorbing = "absorbing"
+    runaway = "runaway"
     cascade_p50 = "cascade_p50"
     cascade_p90 = "cascade_p90"
     cascade_p99 = "cascade_p99"
@@ -103,6 +109,8 @@ class MetricName(StrEnum):
     oscillation_power_ratio = "oscillation_power_ratio"
     oscillation_dominant_freq = "oscillation_dominant_freq"
     oscillation_autocorr = "oscillation_autocorr"
+    oscillation_sign_persistence = "oscillation_sign_persistence"
+    oscillating = "oscillating"
 
 
 def _all_metrics() -> list[MetricName]:

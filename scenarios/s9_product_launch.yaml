@@ -11,9 +11,24 @@ assumptions_zh: 假设互动量可近似影响力，且投放策略在窗口内�
 assumptions_en: Assumes engagement approximates influence and the media plan is stable in the window.
 limitations_zh: 不建模价格、竞品与真实销量反馈。
 limitations_en: Does not model price, competitors or actual sales feedback.
+decision_zh: 发布时创作者与真实用户如何配比，以及创作者内容是否前置。
+decision_en: What creator-to-real-user mix to use at launch, and whether to front-load creator posts.
+real_world_zh: 产品营销团队在上市前比较创作者为主与真实用户为主的两套发布配比，再确定投放计划和后续口碑观察窗口。
+real_world_en: A product marketing team compares a creator-heavy launch with a real-user-heavy launch before fixing
+  the media plan and the follow-up word-of-mouth window.
+parameters_zh: weights 使用 engagement 并取 max 归一化，这是把互动量转成影响力的现有设定；q 1.8 用观测到的多数跟随比例校准，指数 latency 的 mu 2 用响应时间中位数校准。at_step 8 与 magnitude 0.3 对应首轮创作者投放的时点和力度，repeats 3 按 CI 宽度增加，seed 33 用于复跑。
+parameters_en: weights use engagement with max normalisation, the current setting for turning interaction into
+  influence; calibrate q 1.8 from observed majority following and the exponential latency mu 2 from
+  median response time. at_step 8 and magnitude 0.3 are the first creator wave's timing and strength,
+  raise repeats 3 until the CI is tight, and reuse seed 33 for reruns.
+watch_zh: 把早期级联规模与后期多样性、最终负向占比放在一起看，判断热度是否转成持久口碑。若早期级联很大但后期多样性下降、负向占比上升，不能把发布判为健康；两套配比的差异要带 95% CI。
+watch_en: Read early cascade size alongside late diversity and the final negative share to judge whether
+  attention turns into durable word of mouth. If the early cascade is large but late diversity falls
+  and the negative share rises, do not call the launch healthy; report mix differences with 95% CIs.
 feature_flag: null
 enabled_by_default: true
 spec:
+  seed: 33
   n_steps: 90
   q: 1.8
   latency:

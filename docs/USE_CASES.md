@@ -1,6 +1,6 @@
 # Use cases
 
-**Applies to:** OpinionLab v1.3.1 · [Docs index](README.md) ·
+**Applies to:** OpinionLab v1.4.0 · [Docs index](README.md) ·
 [Changelog](../CHANGELOG.md)
 
 OpinionLab is not limited to public opinion. Any setting where **people
@@ -10,6 +10,13 @@ events, and reaction speed becomes latency.
 
 It outputs group-level “what if” ranges, not predictions about individuals or
 real events. Run the commands below from the repository root after `make setup`.
+
+Every template now carries four extra fields that the browser and the API
+surface: the **decision** it informs, a **real-world use** (the team and the
+workflow), the **parameters to set first** and how to calibrate them, and the
+**signal to watch** with its decision rule. The scenario brief in the demo
+renders them; `uv run hnle templates` lists the library. The
+[User guide](USER_GUIDE.md#scenario-library) has the full table.
 
 ## 1. When should we debunk a rumor?
 
@@ -134,6 +141,31 @@ uv run hnle templates
 
 G5 is disabled by default and requires use-case review; see
 [Compliance](COMPLIANCE.md#use-case-review).
+
+## From a scenario to a real engagement
+
+1. **Match the decision, not the label.** Pick the template whose decision
+   statement matches the decision you actually have to make. S2 and G2 both
+   concern corrections, but S2 is about timing around a rumor peak and G2 is
+   about blocking secondary spread; the parameter advice differs.
+2. **Calibrate before comparing.** Fill `q`, the latency distribution and the
+   initial stance shares from observed behaviour (reply agreement, median
+   response time, label shares). Without calibration the run is a directional
+   what-if, and the scenario brief says so.
+3. **Pre-register the primary metric and the comparison.** Decide whether the
+   decision hinges on final diversity, cascade P99, majority step or a share
+   before you look at the runs. Comparing every metric and picking the one that
+   separates is not evidence.
+4. **Use enough replicas and report the interval.** Thirty or more replicas is
+   the working minimum for a decision; below that the `underpowered` flag is on
+   and the interval is wide. Report the interval and the censoring rate, not
+   just the mean.
+5. **Change one thing at a time.** Treat the baseline as fixed, change one
+   timing, parameter or exposure, and rerun with the same seed set. Use
+   `hnle compare` for the paired bootstrap interval.
+6. **Keep the boundary with the result.** Share the assumptions, limitations,
+   the fixed disclaimer and the evidence flags. A number without them is not a
+   deliverable.
 
 ## Adapting the model to your setting
 

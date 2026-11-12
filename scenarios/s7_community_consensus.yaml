@@ -11,9 +11,25 @@ assumptions_zh: 假设成员对议题的初始态度可由发帖/投票粗略映
 assumptions_en: Assumes initial stances can be roughly mapped from posts or votes.
 limitations_zh: 不建模线下关系、议程设置与主持人权力差异。
 limitations_en: Does not model offline ties, agenda-setting or facilitator power differences.
+decision_zh: 社区议事是否需要主持人轻推，以及轻推应在讨论的哪一步出现。
+decision_en: Whether a community discussion needs a facilitator nudge, and at which point the nudge should
+  appear.
+real_world_zh: 社区主持人在邻里论坛测试一次轻量引导，与完全不干预的讨论对照，再决定是否把轻推纳入常规议事流程。
+real_world_en: A community facilitator tests a light nudge in a neighbourhood forum against an unguided discussion,
+  then decides whether to build the nudge into regular meetings.
+parameters_zh: at_step 10 是现有的轻推时点，可按实际引导发言时间校准；magnitude 0.15 表示小比例种子观点，不能变成多数压制。q 1.3 保持低从众以保留少数意见，latency 的 mu 4 与 sigma 1.5 用响应时间中位数和离散度校准；repeats 3 按 CI 宽度增加，seed 31 用于复跑。
+parameters_en: at_step 10 is the current nudge point and can be aligned to when facilitation actually happens;
+  magnitude 0.15 is a small seeded share, not a majority that can override the room. Keep q 1.3 low to
+  preserve minority views, calibrate latency mu 4 with sigma 1.5 from median response time and spread,
+  raise repeats 3 until the CI is tight, and reuse seed 31 for reruns.
+watch_zh: 同时看收敛步、最终多样性和少数意见占比，判断是形成共识还是压成沉默的多数。若收敛变快但多样性塌到 0，不能算共识成功；与不干预对照的差异要带 95% CI。
+watch_en: Read time to consensus, final diversity and the minority share together to judge whether the room
+  reached consensus or was silenced. If consensus arrives faster but diversity collapses to zero, do
+  not count it as success; compare against the unguided run with 95% CIs.
 feature_flag: null
 enabled_by_default: true
 spec:
+  seed: 31
   n_steps: 90
   q: 1.3
   latency:

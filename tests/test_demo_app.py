@@ -58,7 +58,10 @@ def test_demo_page_is_self_contained() -> None:
     assert "/api/v1/demo/static/galaxy.js" in html
     assert "/api/v1/demo/static/field3d.js" in html
     assert 'id="fieldWave"' in html and 'id="fieldBars"' in html and 'id="fieldCloud"' in html
-    assert "Why these knobs" in html
+    assert "How to set these knobs" in html
+    assert 'id="scenarioBrief"' in html
+    assert 'id="quality"' in html
+    assert 'id="csv"' in html
     assert 'data-preset="robust"' in html
 
 
@@ -80,6 +83,8 @@ def test_templates_endpoint_lists_enabled_templates() -> None:
     s2 = next(item for item in payload["data"] if item["key"] == "S2")
     assert s2["question_zh"] and s2["question_en"]
     assert "q" in s2["defaults"]
+    assert s2["decision_en"] and s2["real_world_en"] and s2["watch_en"]
+    assert payload["limits"]["max_steps"] >= 10
 
 
 def test_demo_simulation_is_reproducible() -> None:
@@ -97,6 +102,11 @@ def test_demo_simulation_is_reproducible() -> None:
     assert len(left["series"]["shares"][0]) == 2
     assert len(left["series"]["bands"]["p50"]) == 41
     assert {"verdict_zh", "verdict_en", "text_zh", "text_en"} <= set(left["summary_text"])
+    quality = left["quality"]
+    assert {"engine", "graph", "replicas", "censored_replicas", "censored_rate",
+            "insufficient_samples", "warnings"} <= set(quality)
+    assert quality["graph"]["n_nodes"] > 0
+    assert left["spec"]["engine"] in {"sparse_vector", "event_driven"}
     decision = left["decision"]
     assert {"decision_zh", "decision_en", "window_zh", "window_en"} <= set(decision)
     assert {"takeoff_step", "peak_step", "consensus_step", "intervention_step"} <= set(

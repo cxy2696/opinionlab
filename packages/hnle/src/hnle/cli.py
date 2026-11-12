@@ -240,11 +240,16 @@ def simulate(
         narrative=narrative,
     )
     metrics = summarize(artifact, parsed, graph.hyperedges).to_dict()
-    diversity = aggregate.metrics["diversity_final"]
-    typer.echo(
-        f"run {paths['run_id']} · {parsed.repeats} replicas in {elapsed:.2f}s\n"
+    diversity = aggregate.metrics.get("diversity_final")
+    diversity_line = (
         f"diversity mean={diversity.mean:.4f} ci95=[{diversity.ci95_lo:.4f}, "
         f"{diversity.ci95_hi:.4f}] · absorbing={metrics['absorbing']}\n"
+        if diversity is not None
+        else "diversity_final was not selected in spec.metrics\n"
+    )
+    typer.echo(
+        f"run {paths['run_id']} · {parsed.repeats} replicas in {elapsed:.2f}s\n"
+        f"{diversity_line}"
         f"artifacts: {out_dir / paths['run_id']}"
     )
 

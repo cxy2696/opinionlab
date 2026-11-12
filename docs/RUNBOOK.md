@@ -1,6 +1,6 @@
 # Runbook
 
-**Applies to:** OpinionLab v1.3.1 · [Docs index](README.md) ·
+**Applies to:** OpinionLab v1.4.0 · [Docs index](README.md) ·
 [Changelog](../CHANGELOG.md)
 
 ## Service checks
@@ -67,9 +67,18 @@ Capacity pass lines and load scenarios are in the
 4. Suspicious numbers: compare the manifest's `engine_version + spec_sha256`
    against golden baselines and re-run `make check`.
 5. Hosted demo looks stale: confirm the Pages workflow ran after the latest
-   `site/` change; the hosted page is static and does not use the API.
+   `apps/web/` or scenario change. `site/index.html`, `site/app.js` and
+   `site/templates.json` are generated; run `make site` and redeploy if the
+   drift test fails. The hosted page is static and does not use the API.
 6. Local demo looks stale: rebuild/restart the service; `apps/web/` is served
    directly by the API, so a running server needs a reload after UI edits.
+7. Users report a missing or negative confidence bound: bounded intervals are
+   clamped for display only; check the stored `metrics` value and the censoring
+   rate first.
+8. Users ask why a result is labelled `underpowered` or `censored`: read the
+   `quality` block in the API response and the metric dictionary in the
+   [User guide](USER_GUIDE.md#metric-dictionary). Neither flag is an engine
+   failure.
 
 ## Canary and rollback
 

@@ -2,7 +2,7 @@
 
 PYTEST := uv run pytest
 
-.PHONY: setup test check bench migrate demo site case
+.PHONY: setup test check bench migrate demo demo-container site case
 
 setup:
 	@if [ ! -f .env ]; then cp .env.example .env; echo "created .env from .env.example (local development defaults)"; fi
@@ -28,8 +28,10 @@ migrate:
 demo:
 	uv run uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
 
+demo-container:
+	docker compose -f docker-compose.demo.yml up --build
+
 site:
-	uv run python scripts/build_static_templates.py
 	uv run python scripts/build_site.py
 
 bench:

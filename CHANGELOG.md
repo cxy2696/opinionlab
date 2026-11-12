@@ -2,6 +2,114 @@
 
 **Related:** [Repository README](README.md) · [Docs index](docs/README.md)
 
+## v1.4.0 — 2026-11-13
+
+### Engine and API rigour
+
+- Aggregate `time_to_consensus` now uses a Student-*t* interval over the
+  replicas that actually reached a majority (`hnle.mc.censored_interval`), with
+  `n` counting the uncensored replicas and `null` when none did. The previous
+  demo endpoint used a normal approximation and a different code path from the
+  rest of the estimator.
+- Fixed a decision-brief bug that truncated the fourth, goal-dependent
+  follow-up ("if the goal is to delay consensus...") even when consensus had
+  formed. The brief now keeps it only in that state.
+- `init_mode: fixed_ratio` now supports `n_opinions > 2`: stance 1 receives the
+  target share and the remainder is split as evenly as possible across the other
+  stances. The binary branch keeps its historical draw order, so seeded
+  baselines remain reproducible.
+- Demo results now carry a `quality` block (engine, graph size, replicas,
+  censored replicas and rate, underpowered flag, streaming degradation and
+  engine warnings) and a fuller `spec` echo (engine, latency distribution,
+  opinion count and consensus threshold). The verdict uses the aggregate
+  absorbing rate, not the first replica.
+- `/api/v1/demo/templates` returns operator-configured `limits`, so the browser
+  respects `DEMO_MAX_STEPS`, `DEMO_MAX_REPEATS`, `DEMO_MIN_STEPS` and
+  `DEMO_MIN_REPEATS` instead of hard-coding the caps.
+- Scenario templates are the source of the decision text. `Template` gained
+  `decision`, `real_world`, `parameters` and `watch` fields in English and
+  Chinese, and the demo API consumes them instead of a duplicated key map.
+- `MetricName` now matches the exact keys emitted by `MetricSummary`
+  (`absorbing`/`runaway` instead of the unused `absorbing_rate`/`runaway_rate`,
+  plus the missing `avg_share_final`, `oscillation_sign_persistence` and
+  `oscillating`). `ModelSpec.metrics` now actually filters the aggregate result
+  instead of being ignored; the CLI and sweep report a clear message when a
+  selected metric is excluded.
+- The browser preview now uses the same conformity map, latency clock,
+  stochastic decision rule and stable-majority definition as the Python kernel,
+  and supports constant, normal, exponential and lognormal integer latency,
+  `fixed_ratio` initialisation and one-shot interventions. Multi-stance,
+  time-varying topology, engagement weights and shocks remain Python-only and
+  are labelled as such.
+
+### Web client and layout
+
+- The hosted and local pages now share one HTML shell and one client
+  (`apps/web/app.js`). `scripts/build_site.py` generates `site/index.html`,
+  `site/app.js` and `site/templates.json`, and a test fails when the committed
+  Pages artifact drifts from the source.
+- The page runs a preview immediately on load, so charts, metrics, the decision
+  brief and the hero instruments are populated instead of leaving large empty
+  cards. `?run=1` forces a normal run, `?autorun=0` disables the preview, and a
+  preview no longer becomes the comparison baseline.
+- Added a scenario brief card with where the scenario is used, which parameters
+  to set first, what signal to watch, and collapsible assumptions and limits.
+  Added a parameter guide table (effect of raising, calibration source) inside
+  the control rail.
+- Replaced the duplicated hero readouts with replicas, mean majority step, peak
+  step and the 95% confidence half-width. The 3D telemetry deck is a compact
+  three-panel row on desktop instead of one oversized terrain panel.
+- Metrics expanded from four to six cards (diversity, cascade P99, majority
+  step, stable-majority rate, entropy, polarization), with bounded intervals
+  clamped to their feasible range for display.
+- Compare now toggles a previous-run overlay; the CSV and HTML-report actions
+  are separate; help text uses a fixed-position tooltip that cannot be clipped
+  by the scrollable rail; status, verdict, summary and quality messages are
+  announced with `aria-live`; Enter runs and Escape stops playback.
+- Tightened responsive rules at 1440, 1200, 768 and 390 px. The generated
+  screenshots are refreshed from the new layout.
+
+### Deployment
+
+- Added `deploy/docker/demo.Dockerfile` and `docker-compose.demo.yml`: a
+  single-container, non-root demo with the real engine and offline reports, no
+  PostgreSQL, Redis or MinIO, plus a healthcheck. `make demo-container` starts
+  it. The full Compose stack is unchanged.
+- The demo container documents that auth, persisted runs, quotas and the worker
+  queue are intentionally unavailable; use the full stack for those.
+
+### Documentation
+
+- Added [`docs/USER_GUIDE.md`](docs/USER_GUIDE.md): installation, the three
+  surfaces, a guided session, a parameter reference with calibration guidance,
+  a metric dictionary, censoring and interval rules, the scenario library, CLI
+  and API cookbooks, deployment, privacy, troubleshooting and a glossary.
+- Rewrote the README project description, surface summary, repository map,
+  scenario overview and documentation index; expanded the demo guide with the
+  preview, quality strip, scenario brief and parameter guide, and added the
+  real-world application and parameter guidance to the use cases.
+- Updated the architecture, math model, model card, runbook and air-gap notes
+  for the unified client, the demo container, the censored interval and the
+  multi-stance initialisation rule.
+- Aligned every visible version label and Helm tag to v1.4.0.
+
+### Tests
+
+- Added tests for the censored Student-t interval, the multi-stance
+  `fixed_ratio` split, the fourth decision follow-up, the browser/Python
+  conformity parity, the enriched template export, the demo `quality` and
+  `limits` payloads, and source-to-Pages drift.
+
+### Compatibility
+
+- Engine dynamics for existing binary scenarios are unchanged; the golden
+  baselines still pass.
+- The hosted `site/app.js` is generated. Edit `apps/web/app.js` and run
+  `make site`; do not edit `site/app.js` directly.
+- The default browser preview uses at least 8 replicas (subject to the demo
+  cap), so its first-run intervals are less degenerate than the previous
+  three-replica template default.
+
 ## v1.3.1 — 2026-11-12
 
 ### Changed

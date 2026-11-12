@@ -1,6 +1,6 @@
 # Compliance
 
-**Applies to:** OpinionLab v1.3.1 · [Docs index](README.md) ·
+**Applies to:** OpinionLab v1.4.0 · [Docs index](README.md) ·
 [Changelog](../CHANGELOG.md)
 
 This page states the operational policy shipped with the service. It is the

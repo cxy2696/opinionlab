@@ -1162,3 +1162,236 @@ body { overflow-x: hidden; }
   .section-head { flex-wrap: wrap; row-gap: 6px; }
   .section-head .tag { white-space: normal; text-align: left; }
 }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   v1.4.0 clarity pass: scenario brief, parameter guide, run-quality strip,
+   compact telemetry deck and an unclipped tooltip layer.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* The old CSS tooltip was clipped by the scrollable control deck. */
+.help::after { display: none !important; }
+.site-tooltip {
+  position: fixed;
+  z-index: 200;
+  max-width: min(300px, calc(100vw - 24px));
+  padding: 8px 10px;
+  border: 1px solid var(--line-2);
+  background: #02070b;
+  color: #c8e9f5;
+  font: 400 11px/1.55 var(--mono);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, .7);
+  pointer-events: none;
+}
+.site-tooltip[hidden] { display: none !important; }
+
+/* Scenario brief inside the control rail */
+.scenario-brief {
+  margin-top: 10px;
+  border: 1px solid var(--line-2);
+  border-left: 2px solid var(--cyan-dim);
+  background: rgba(4, 12, 18, .55);
+  padding: 9px 10px;
+}
+.brief-row + .brief-row { margin-top: 8px; }
+.brief-key {
+  display: block;
+  margin-bottom: 3px;
+  color: #67e8b3;
+  font: 700 7.5px/1.2 var(--mono);
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+.scenario-brief p {
+  margin: 0;
+  color: #b9d7e4;
+  font-size: 11px;
+  line-height: 1.6;
+}
+.scenario-brief p:empty { display: none; }
+.brief-more { margin-top: 8px; border-top: 1px solid rgba(30, 74, 95, .5); padding-top: 6px; }
+.brief-more summary {
+  cursor: pointer;
+  color: #7fa6bd;
+  font: 600 8.5px/1.4 var(--mono);
+  letter-spacing: .06em;
+}
+.brief-more p { margin-top: 5px; color: #8fb3c9; font-size: 10.5px; }
+.brief-more p + p { margin-top: 4px; }
+
+/* Parameter guide table inside the rail */
+.param-guide {
+  margin-top: 12px;
+  border-top: 1px solid var(--line);
+  padding-top: 9px;
+}
+.param-guide > summary {
+  cursor: pointer;
+  color: #9ec3d6;
+  font: 700 9px/1.4 var(--mono);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.param-guide[open] > summary { color: var(--cyan); }
+.param-guide table { width: 100%; margin-top: 7px; border-collapse: collapse; }
+.param-guide th, .param-guide td {
+  text-align: left;
+  vertical-align: top;
+  padding: 5px 5px 5px 0;
+  border-bottom: 1px solid rgba(30, 74, 95, .4);
+  font-size: 9.5px;
+  line-height: 1.45;
+  color: #8fb3c9;
+}
+.param-guide thead th {
+  color: #587e94;
+  font: 600 7.5px/1.2 var(--mono);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.param-guide tbody th {
+  width: 31%;
+  color: #c7e5f2;
+  font: 600 9px/1.4 var(--mono);
+  white-space: normal;
+}
+.param-guide code { color: var(--cyan); }
+
+/* Run-quality strip */
+.quality {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 9px;
+}
+.quality[hidden] { display: none !important; }
+.chip-quality {
+  border: 1px solid var(--line);
+  background: rgba(4, 12, 18, .55);
+  padding: 4px 7px;
+  color: #8fb3c9;
+  font: 600 8.5px/1.2 var(--mono);
+  letter-spacing: .03em;
+}
+.chip-quality b { color: var(--cyan); font-weight: 700; }
+.chip-quality.warn { border-color: rgba(255, 176, 32, .38); color: #ffd58a; background: rgba(255, 176, 32, .06); }
+
+/* Toolbar state */
+button.ghost.active {
+  border-color: var(--cyan);
+  color: var(--cyan);
+  background: rgba(34, 211, 238, .09);
+}
+
+/* Metrics: six cards in a calm 3 × 2 grid on desktop */
+.metrics { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.metric .why { min-height: 30px; }
+@media (max-width: 760px) { .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 520px) { .metrics { grid-template-columns: 1fr; } }
+
+/* Telemetry deck: three compact panels instead of one oversized terrain. */
+.field-grid {
+  grid-template-columns: 1.25fr 1fr 1fr;
+  grid-template-rows: auto;
+}
+.field-card:first-child { grid-row: auto; grid-column: auto; }
+.field-card:first-child .field-wrap,
+.field-card:not(:first-child) .field-wrap { height: 188px; }
+.field-card p { min-height: 0; }
+@media (max-width: 980px) {
+  .field-grid { grid-template-columns: 1fr 1fr; }
+  .field-card:first-child { grid-column: 1 / -1; }
+  .field-card:first-child .field-wrap { height: 210px; }
+}
+@media (max-width: 560px) {
+  .field-grid { grid-template-columns: 1fr; }
+  .field-card:first-child { grid-column: auto; }
+  .field-card:first-child .field-wrap,
+  .field-card:not(:first-child) .field-wrap { height: 170px; }
+}
+
+/* Slightly tighter charts keep the result column scannable. */
+.chart { height: 210px; }
+.chart.tall { height: 250px; }
+@media (max-width: 1040px) { .chart, .chart.tall { height: 225px; } }
+@media (max-width: 760px) { .chart, .chart.tall { height: 200px; } }
+
+/* Keep long scenario text readable in the rail without pushing the run button away. */
+@media (min-width: 1041px) {
+  .controls { max-height: calc(100vh - 24px); }
+  .scenario-brief p { font-size: 10.5px; }
+}
+@media (max-width: 520px) {
+  .scenario-brief { padding: 8px; }
+  .brief-key { font-size: 7px; }
+  .scenario-brief p { font-size: 10.5px; }
+}
+
+/* Scenario brief card in the results column */
+.scenario-brief {
+  margin-top: 0;
+  border: 1px solid var(--line);
+  border-left: 1px solid var(--line);
+  background: linear-gradient(180deg, rgba(11, 26, 38, .95), rgba(7, 17, 26, .98));
+  padding: 14px 16px;
+}
+.brief-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 8px;
+}
+.brief-grid .brief-row + .brief-row {
+  margin-top: 0;
+  padding-left: 14px;
+  border-left: 1px solid rgba(30, 74, 95, .55);
+}
+.brief-grid .brief-key { color: #67e8b3; }
+.brief-grid p { font-size: 11.5px; line-height: 1.65; }
+@media (max-width: 900px) {
+  .brief-grid { grid-template-columns: 1fr; gap: 9px; }
+  .brief-grid .brief-row + .brief-row {
+    padding-left: 0;
+    padding-top: 9px;
+    border-left: 0;
+    border-top: 1px solid rgba(30, 74, 95, .42);
+  }
+}
+
+/* Run-quality strip: readable at a glance, distinct from metric cards. */
+.chip-quality {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 8px;
+  font-size: 9px;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+.chip-quality b { text-transform: none; }
+@media (max-width: 560px) {
+  .quality { gap: 4px; }
+  .chip-quality { padding: 4px 6px; font-size: 8px; }
+}
+
+/* Compact hero on laptop-height screens: the tool should start higher. */
+@media (min-width: 981px) and (max-height: 900px) {
+  .product-hero { padding-top: 18px; padding-bottom: 22px; }
+  .hero-headline h1 { font-size: clamp(30px, 3vw, 42px); }
+  .hero-headline h1 span { font-size: clamp(10px, 1vw, 13px); }
+  .hero-headline .lede { font-size: 12.5px; line-height: 1.6; }
+  .hero-copy { margin-bottom: 12px; }
+  .cluster-center { height: 232px; }
+  .gauge { max-width: 202px; }
+  .gauge-value b { font-size: 44px; }
+  .gauge-kicker { font-size: 7px; }
+  .gauge-caption { font-size: 7px; }
+  .cluster-kpi b { font-size: 21px; }
+  .cluster-main { padding-top: 4px; }
+  .cluster-footer { padding-top: 8px; }
+  .cluster-foot { margin-top: 6px; }
+}
+
+/* Scenario-brief lists: one idea per line instead of a dense paragraph. */
+.scenario-brief ul { margin: 4px 0 0 14px; padding: 0; }
+.scenario-brief li { margin: 2px 0; }
+.scenario-brief li::marker { color: var(--cyan-dim); }

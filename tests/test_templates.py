@@ -43,6 +43,14 @@ def test_every_template_has_complete_bilingual_metadata() -> None:
             "assumptions_en",
             "limitations_zh",
             "limitations_en",
+            "decision_zh",
+            "decision_en",
+            "real_world_zh",
+            "real_world_en",
+            "parameters_zh",
+            "parameters_en",
+            "watch_zh",
+            "watch_en",
         ):
             assert getattr(template, attribute).strip(), (template.key, attribute)
 

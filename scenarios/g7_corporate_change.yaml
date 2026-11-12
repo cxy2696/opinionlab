@@ -12,9 +12,27 @@ assumptions_zh: 假设部门内互动同质，忽略正式组织层级。
 assumptions_en: Assumes homogeneous intra-department interaction and ignores formal hierarchy.
 limitations_zh: 不包含真实人事决策与离职行为。
 limitations_en: Excludes actual HR decisions and attrition.
+decision_zh: 变革沟通是一次全员宣布，还是分部门、分阶段释放并安排中途降温。
+decision_en: Whether to announce a change in one all-hands moment or release it in stages by department, with a
+  mid-point pause.
+real_world_zh: 企业内部沟通团队在重组宣布前，比较一次全员大会与分部门、分阶段沟通两种节奏，再决定经理简报和员工问答的排期。
+real_world_en: An internal communications team compares a single all-hands announcement with a staged
+  department-by-department rollout, then schedules manager briefings and employee Q&A.
+parameters_zh: at_step 20 对应现有降温介入点，可对齐实际宣布或暂停时间；magnitude 0.25 与 duration 10 表示降温力度和窗口，可按沟通日志校准。q 1.5 用部门内多数跟随比例校准，latency 的 mu 5 与 sigma 2 用响应时间中位数和离散度校准；repeats 3 按 CI 宽度增加，seed 22 用于复跑。
+parameters_en: at_step 20 is the current damping point and can be aligned to the actual announcement or pause;
+  magnitude 0.25 with duration 10 is the damping strength and window, calibrated from the
+  communication log. Calibrate q 1.5 from within-department majority following and latency mu 5 with
+  sigma 2 from median response time and spread; raise repeats 3 until the CI is tight, and reuse seed
+  22 for reruns.
+watch_zh: 看降温窗口结束后的负向占比、级联 p99 和多样性是否反弹。若负向占比在降温结束后重新聚集，说明阶段间隔过长，应缩短间隔；若多样性保持中等且级联下降，说明节奏留住了讨论空间，比较时仍要看 95% CI。
+watch_en: Read the negative share, cascade p99 and diversity after the damping window to see whether they
+  rebound. If negative opinion regroups once damping ends, the gap between stages is too long and
+  should be shortened; if diversity stays moderate while cascades fall, the cadence kept the
+  discussion open, and comparisons still need 95% CIs.
 feature_flag: null
 enabled_by_default: true
 spec:
+  seed: 22
   n_steps: 100
   q: 1.5
   latency:

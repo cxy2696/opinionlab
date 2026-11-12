@@ -110,10 +110,31 @@ def initial_opinions(
             )
         return values
     if spec.init_mode is InitMode.fixed_ratio:
-        ones = int(round(spec.target_share_1 * n_nodes))
+        if spec.n_opinions == 2:
+            # Keep the historical draw order for the binary case so seeded
+            # runs and frozen baselines remain reproducible.
+            ones = int(round(spec.target_share_1 * n_nodes))
+            opinions = np.zeros(n_nodes, dtype=np.int64)
+            if ones:
+                opinions[rng.choice(n_nodes, size=ones, replace=False)] = 1
+            return opinions
+        # General k > 2: ``target_share_1`` is the share of stance 1, and the
+        # remaining nodes are split as evenly as possible across the other
+        # stances (including stance 0). The binary branch above is exactly the
+        # k = 2 special case of this rule.
         opinions = np.zeros(n_nodes, dtype=np.int64)
+        ones = int(round(spec.target_share_1 * n_nodes))
+        order = rng.permutation(n_nodes)
         if ones:
-            opinions[rng.choice(n_nodes, size=ones, replace=False)] = 1
+            opinions[order[:ones]] = 1
+        others = [value for value in range(spec.n_opinions) if value != 1]
+        remaining = n_nodes - ones
+        base, extra = divmod(remaining, len(others))
+        cursor = ones
+        for index, value in enumerate(others):
+            count = base + (1 if index < extra else 0)
+            opinions[order[cursor : cursor + count]] = value
+            cursor += count
         return opinions
     # data_driven without a dataset and balanced_random both draw uniformly; the
     # ingest layer supplies label-derived shares for real data.

@@ -11,9 +11,25 @@ assumptions_zh: 假设核查结论被均匀接受。
 assumptions_en: Assumes fact-check conclusions are uniformly accepted.
 limitations_zh: 忽略平台标注机制与用户既有立场。
 limitations_en: Ignores platform labelling mechanics and prior user beliefs.
+decision_zh: 是否在谣言峰值之前发布辟谣，以及核查结论应落在扩散周期的哪一步。
+decision_en: Whether to publish a debunk before the rumor peak, and where in the diffusion cycle the correction
+  should land.
+real_world_zh: 新闻机构的事实核查团队在热点话题升温时，比较峰值前发布与峰值后补充更正两种排期，再决定核查稿的发布时间。
+real_world_en: A newsroom fact-checking team compares publishing a correction before a topic peaks with publishing
+  it afterwards, then sets the correction's release time.
+parameters_zh: at_step 12 对应现有的核查投放点，可按核查稿实际发布时间前后移动；q 1.6 用观测到的回复一致率校准，latency 的 mu 3 与 sigma 1 用响应时间中位数和离散度校准。magnitude 0.35 表示一次辟谣能触达并说服的比例，repeats 3 是起点，按 CI 宽度增加，seed 18 用于复跑稳健性。
+parameters_en: at_step 12 is the current check point and can be shifted around the correction's actual release
+  time; q 1.6 is calibrated from observed reply agreement, and latency mu 3 with sigma 1 from median
+  response time and its spread. magnitude 0.35 is the share a debunk can reach and persuade, repeats 3
+  is the starting point to raise until the CI is tight, and seed 18 supports robustness reruns.
+watch_zh: 比较不同投放时点的最终负向占比及其 95% CI，并同时看级联 p99 与收敛步。若 CI 重叠，不要宣称时点有效；再检查被截断的多数占比，确认结论不是由未收敛的运行造成。
+watch_en: Compare the final negative share and its 95% CI across timings, together with cascade p99 and time
+  to consensus. If the CIs overlap, do not claim a timing effect; also check the censored majority
+  rate to rule out an artefact of runs that never converge.
 feature_flag: null
 enabled_by_default: true
 spec:
+  seed: 18
   n_steps: 100
   q: 1.6
   latency:

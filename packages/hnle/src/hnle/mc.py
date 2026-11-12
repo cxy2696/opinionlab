@@ -11,6 +11,7 @@ from __future__ import annotations
 import math
 import multiprocessing
 import warnings
+from collections.abc import Sequence
 from concurrent.futures import ProcessPoolExecutor
 from dataclasses import dataclass, field
 
@@ -62,6 +63,37 @@ class AggregateResult:
             "insufficient_samples": self.insufficient_samples,
             "degraded_to_streaming": self.degraded_to_streaming,
         }
+
+
+def censored_interval(
+    values: Sequence[float], confidence: float = 0.95
+) -> dict[str, float | int | None]:
+    """Student-*t* interval for a metric that is defined per successful replica.
+
+    Consensus time is censored: replicas that never reach a majority have no
+    value and must be excluded from the mean, not counted as zero. The number
+    of contributing replicas is returned separately so callers can report the
+    censoring rate alongside the interval.
+
+    ``n = 0`` returns all ``None`` values (JSON-safe); ``n = 1`` returns the
+    single value with a zero-width interval.
+    """
+    data = [float(value) for value in values]
+    count = len(data)
+    if count == 0:
+        return {"mean": None, "ci95_lo": None, "ci95_hi": None, "n": 0}
+    mean = math.fsum(data) / count
+    if count == 1:
+        return {"mean": mean, "ci95_lo": mean, "ci95_hi": mean, "n": 1}
+    variance = math.fsum((value - mean) ** 2 for value in data) / (count - 1)
+    standard_error = math.sqrt(variance / count)
+    critical = float(student_t.ppf(0.5 + confidence / 2.0, count - 1))
+    return {
+        "mean": mean,
+        "ci95_lo": mean - critical * standard_error,
+        "ci95_hi": mean + critical * standard_error,
+        "n": count,
+    }
 
 
 class _Welford:
@@ -175,8 +207,11 @@ def run_monte_carlo(
             accumulator = accumulators.setdefault(name, _Welford())
             accumulator.add(float(value))
 
+    requested = {name.value for name in spec.metrics}
     metrics: dict[str, MetricCI] = {}
     for name, accumulator in accumulators.items():
+        if name not in requested:
+            continue
         low, high = accumulator.interval()
         metrics[name] = MetricCI(
             mean=accumulator.mean, ci95_lo=low, ci95_hi=high, n=accumulator.n

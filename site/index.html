@@ -3,16 +3,17 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>OpinionLab · Live Scenario Sandbox</title>
+<meta name="opinionlab-mode" content="static">
+<title>OpinionLab · Scenario Sandbox</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23050b12'/%3E%3Ccircle cx='16' cy='16' r='9' fill='none' stroke='%2322d3ee' stroke-width='2'/%3E%3Ccircle cx='16' cy='16' r='3' fill='%2334d399'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="./style.css">
 <script src="./echarts.min.js"></script>
 <script defer src="./i18n.js"></script>
 <script defer src="./scene.js"></script>
-<script defer src="./sim.js"></script>
 <script defer src="./galaxy.js"></script>
 <script defer src="./field3d.js"></script>
 <script defer src="./particles.js"></script>
+<script defer src="./sim.js"></script>
 <script defer src="./app.js"></script>
 </head>
 <body>
@@ -149,16 +150,16 @@
       <div class="cluster-footer">
         <div class="cluster-kpis">
           <div class="cluster-kpi">
-            <span data-i18n="kpiSteps">STEPS OBSERVED</span>
-            <div><b id="heroSteps">100</b><em data-i18n="unitSteps">steps</em></div>
+            <span data-i18n="kpiReplicas">REPLICAS</span>
+            <div><b id="heroReplicas">8</b><em data-i18n="unitRuns">runs</em></div>
           </div>
           <div class="cluster-kpi">
             <span data-i18n="kpiMajority">MEAN MAJORITY</span>
             <div><b id="heroMajority">39.3</b><em data-i18n="unitSteps">steps</em></div>
           </div>
           <div class="cluster-kpi">
-            <span data-i18n="kpiPeak">PEAK TURN</span>
-            <div><b id="heroPeak">30</b><em>%</em></div>
+            <span data-i18n="kpiPeakStep">PEAK AT STEP</span>
+            <div><b id="heroPeakStep">20</b><em data-i18n="unitStepShort">step</em></div>
           </div>
           <div class="cluster-kpi">
             <span data-i18n="kpiCi">95% CONFIDENCE</span>
@@ -180,7 +181,7 @@
     <span><span data-i18n="engineLabel">ENGINE</span> <b class="ok" data-i18n="ready">READY</b></span>
     <span><span data-i18n="regionLabel">REGION</span> <b data-i18n="localRegion">LOCAL</b></span>
     <span><span data-i18n="modeLabel">MODE</span> <b data-i18n="simMode">SIM</b></span>
-    <span class="hide-sm"><span data-i18n="buildLabel">BUILD</span> <b>V1.3.1</b></span>
+    <span class="hide-sm"><span data-i18n="buildLabel">BUILD</span> <b>V1.4.0</b></span>
   </div>
   <div class="cockpit-clock"><span>UTC</span><b id="cockpitClock">--:--:--</b></div>
 </div>
@@ -275,14 +276,43 @@
       <button type="button" class="chip" data-preset="slow" data-i18n="slow">Slow reaction</button>
       <button type="button" class="chip ghost" id="reset" data-i18n="reset">Reset</button>
     </div>
+    <p id="limitNote" class="hint"></p>
 
     <button id="run" class="primary">
       <span class="spinner" aria-hidden="true"></span>
       <span class="label" data-i18n="run">Run simulation</span>
       <kbd>Enter</kbd>
     </button>
-    <div id="status" class="status" data-i18n="statusIdle">Computed outside the browser; reproducible.</div>
-    <div id="error" class="error"></div>
+    <div id="status" class="status" aria-live="polite" data-i18n="statusIdle">Computed outside the browser; reproducible.</div>
+    <div id="error" class="error" role="alert"></div>
+
+    <details id="paramGuide" class="param-guide">
+      <summary data-i18n="guideSummary">How to set these knobs</summary>
+      <table>
+        <thead><tr>
+          <th data-i18n="paramKnob">Knob</th>
+          <th data-i18n="paramRaise">If you raise it</th>
+          <th data-i18n="paramCalibrate">Calibrate from</th>
+        </tr></thead>
+        <tbody>
+          <tr><th><code>q</code> <span data-i18n="qLabel">Conformity</span></th>
+            <td data-i18n="paramQRaise">Faster homogenisation; final diversity falls and cascades can get sharper.</td>
+            <td data-i18n="paramQCalibrate">Observed majority-following in replies or votes; start at 1.0 for the classical limit.</td></tr>
+          <tr><th><code>&mu;</code> <span data-i18n="latencyLabel">Latency</span></th>
+            <td data-i18n="paramMuRaise">Peak and tail move later; fewer people update per step.</td>
+            <td data-i18n="paramMuCalibrate">Median time between a user seeing a post and replying; use sigma for the spread.</td></tr>
+          <tr><th><span data-i18n="stepsLabel">Steps</span></th>
+            <td data-i18n="paramStepsRaise">Captures more of the tail, at linear cost.</td>
+            <td data-i18n="paramStepsCalibrate">Cover the cascade peak plus 30-50 steps; do not stop at the peak.</td></tr>
+          <tr><th><span data-i18n="repeatsLabel">Replicas</span></th>
+            <td data-i18n="paramRepeatsRaise">Tighter 95% interval and steadier verdict; slower run.</td>
+            <td data-i18n="paramRepeatsCalibrate">Budget for 30+ before a decision; the demo caps at the limit shown below the button.</td></tr>
+          <tr><th><span data-i18n="seedLabel">Seed</span></th>
+            <td data-i18n="paramSeedRaise">Changes the random draw, not the model.</td>
+            <td data-i18n="paramSeedCalibrate">Fix it for a reproducible baseline; re-run 3-5 seeds to test robustness.</td></tr>
+        </tbody>
+      </table>
+    </details>
   </aside>
 
   <section class="results">
@@ -298,14 +328,42 @@
           <div id="verdict" class="verdict" data-i18n="waiting">Waiting</div>
         </div>
         <div class="toolbar">
-          <button id="compare" class="ghost" disabled data-i18n="compare">Compare</button>
+          <button id="compare" class="ghost" disabled aria-pressed="false" data-i18n="compare">Compare</button>
+          <button id="download" class="ghost" disabled data-i18n="report">Report</button>
           <button id="csv" class="ghost" disabled data-i18n="csv">CSV</button>
           <button id="copy" class="ghost" disabled data-i18n="copy">Copy link</button>
         </div>
       </div>
-      <p id="summary" class="summary" data-i18n="summaryIdle">Pick a scenario and run it to see how the group might evolve.</p>
+      <p id="summary" class="summary" aria-live="polite" data-i18n="summaryIdle">Pick a scenario and run it to see how the group might evolve.</p>
       <div id="reading" class="reading"></div>
+      <div id="quality" class="quality" hidden></div>
     </div>
+
+    <section id="scenarioBrief" class="card scenario-brief" aria-live="polite">
+      <div class="section-head">
+        <h3 data-i18n="briefTitle">Scenario brief</h3>
+        <span class="tag" data-i18n="briefTag">ASSUMPTIONS TRAVEL WITH THE NUMBERS</span>
+      </div>
+      <div class="brief-grid">
+        <div class="brief-row">
+          <span class="brief-key" data-i18n="briefRealWorld">WHERE IT IS USED</span>
+          <p id="briefRealWorld"></p>
+        </div>
+        <div class="brief-row">
+          <span class="brief-key" data-i18n="briefParameters">SET THESE FIRST</span>
+          <p id="briefParameters"></p>
+        </div>
+        <div class="brief-row">
+          <span class="brief-key" data-i18n="briefWatch">WHAT TO WATCH</span>
+          <p id="briefWatch"></p>
+        </div>
+      </div>
+      <details class="brief-more">
+        <summary data-i18n="briefAssumptions">Assumptions and limits</summary>
+        <p id="briefAssumptions"></p>
+        <p id="briefLimitations"></p>
+      </details>
+    </section>
 
     <section id="decision" class="card decision" hidden>
       <div class="section-head">
@@ -413,23 +471,14 @@
       <div id="delta" class="delta"></div>
     </div>
 
-    <details class="card guide" open>
-      <summary data-i18n="guideSummary">Why these knobs</summary>
-      <div class="guide-grid">
-        <div><b data-i18n="guideQ">Conformity q</b><p data-i18n="guideQText">How strongly a local majority pulls people in. Larger q homogenises faster; q=1 approaches the classical voter model.</p></div>
-        <div><b data-i18n="guideLatency">Latency μ</b><p data-i18n="guideLatencyText">Reactions are not synchronous. Larger μ delays updates, the cascade peak and the tail.</p></div>
-        <div><b data-i18n="guideSteps">Steps</b><p data-i18n="guideStepsText">Observation window. Too short looks like non-convergence; cover the peak and 30–50 steps beyond.</p></div>
-        <div><b data-i18n="guideRepeats">Replicas</b><p data-i18n="guideRepeatsText">Independent repeats. More replicas tighten the median and CI; the hosted demo caps at 20, the full product supports 30+.</p></div>
-        <div><b data-i18n="guideSeed">Seed</b><p data-i18n="guideSeedText">A fixed seed reproduces a run; changing it shows whether the result was luck.</p></div>
-      </div>
-    </details>
-
     <footer class="fineprint">
       <span data-i18n="footer">Group-level statistics only; no per-node opinion traces.</span>
-      · <span data-i18n="footerLocal">The hosted demo is a lightweight simulation; use the full engine at</span>
-      <a href="https://github.com/cxy2696/opinionlab">GitHub</a>
+      · <span id="footerMode"></span>
+      · <a id="apiDocsLink" href="/docs" data-i18n="footerApi">API docs</a>
+      · <a href="https://github.com/cxy2696/opinionlab" target="_blank" rel="noreferrer">GitHub</a>
     </footer>
   </section>
 </main>
+<div id="siteTooltip" class="site-tooltip" role="tooltip" hidden></div>
 </body>
 </html>

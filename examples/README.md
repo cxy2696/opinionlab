@@ -1,6 +1,6 @@
 # Examples
 
-**Applies to:** OpinionLab v1.3.1 · [Docs index](../docs/README.md) ·
+**Applies to:** OpinionLab v1.4.0 · [Docs index](../docs/README.md) ·
 [Use cases](../docs/USE_CASES.md) · [Changelog](../CHANGELOG.md)
 
 Three runnable paths use the templates and engine directly. The first two need

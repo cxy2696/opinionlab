@@ -12,9 +12,26 @@ assumptions_zh: 假设话题内互动同质、外部事件不在观测窗口内�
 assumptions_en: Assumes homogeneous within-topic interaction and no exogenous events in the window.
 limitations_zh: 不建模媒体议程设置与平台推荐算法。
 limitations_en: Does not model media agenda-setting or platform recommendation algorithms.
+decision_zh: 政策一次完整发布，还是分成几次释放，并把解释性推送安排在哪一步。
+decision_en: Whether to release a policy in one go or in several stages, and where to schedule the explanatory
+  follow-up push.
+real_world_zh: 政府传播团队在新政策发布前，比较一次完整公布与先框架后细则的分阶段方案，再确定后续解释性发布的时间。
+real_world_en: A government communication team compares a single full release with a staged framework-then-details
+  release before publishing, then sets the timing of the explanatory follow-up.
+parameters_zh: at_step 30 是现有的解释性 boost 点，可按政策发布日志校准；magnitude 0.2 与 duration 10 对应解释性推送的触达比例和持续时长。q 1.8 用讨论中的多数跟随比例校准，latency 的 mu 4 与 sigma 1.5 用响应时间中位数和离散度校准；repeats 3 按 CI 宽度增加，seed 11 用于复跑。
+parameters_en: at_step 30 is the current explanatory boost and can be aligned to the policy release log; magnitude
+  0.2 with duration 10 is the explanatory push's reach and duration. Calibrate q 1.8 from majority
+  following in the discussion and latency mu 4 with sigma 1.5 from median response time and spread;
+  raise repeats 3 until the CI is tight, and reuse seed 11 for reruns.
+watch_zh: 读取讨论峰值步、峰值后的多样性和收敛步，判断讨论是收敛为单一叙事还是保持多声部。若峰值后多样性快速下降，或解释性推送后级联仍高，应增加发布阶段或延长沟通窗口；跨方案比较要看 95% CI。
+watch_en: Read the peak step, post-peak diversity and time to consensus to judge whether discussion settles
+  into one narrative or stays plural. If diversity drops quickly after the peak, or cascades stay high
+  after the explanatory push, add a release stage or extend the communication window; compare plans
+  with 95% CIs.
 feature_flag: null
 enabled_by_default: true
 spec:
+  seed: 11
   n_steps: 120
   q: 1.8
   latency:

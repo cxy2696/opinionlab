@@ -93,3 +93,14 @@ def test_initial_opinions_fixed_ratio_share() -> None:
     spec = ModelSpec(init_mode="fixed_ratio", target_share_1=0.25)
     opinions = initial_opinions(spec, 40, rng)
     assert np.count_nonzero(opinions == 1) == 10
+
+
+def test_initial_opinions_fixed_ratio_multi_opinion_splits_the_remainder() -> None:
+    rng = np.random.default_rng(0)
+    spec = ModelSpec(init_mode="fixed_ratio", target_share_1=0.5, n_opinions=3)
+    opinions = initial_opinions(spec, 60, rng)
+    assert np.count_nonzero(opinions == 1) == 30
+    # The other 30 nodes are split evenly across stances 0 and 2.
+    assert np.count_nonzero(opinions == 0) == 15
+    assert np.count_nonzero(opinions == 2) == 15
+    assert set(np.unique(opinions).tolist()) <= {0, 1, 2}
