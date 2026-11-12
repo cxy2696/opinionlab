@@ -24,6 +24,7 @@
       this.angle = 0.6;
       this.t = 0;
       this.last = 0;
+      this.lastFrame = 0;
       this.diversity = [0.5, 0.42, 0.3, 0.18, 0.08, 0.02];
       this.cascade = [0.04, 0.08, 0.12, 0.2, 0.32, 0.18, 0.1, 0.06];
       this.warm = 0.5;
@@ -47,8 +48,26 @@
           if (d < distance) { distance = d; best = pick; }
         });
         this.hover = best;
+        if (reduce) this.draw(this.t);
       });
-      this.canvas.addEventListener("pointerleave", () => { this.hover = null; });
+      this.canvas.addEventListener("pointerdown", (event) => {
+        if (this.mode !== "bars" && this.mode !== "wave") return;
+        const rect = this.canvas.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+        let best = null;
+        let distance = 26;
+        this.picks.forEach((pick) => {
+          const d = Math.hypot(pick.x - x, pick.y - y);
+          if (d < distance) { distance = d; best = pick; }
+        });
+        this.hover = best;
+        if (reduce) this.draw(this.t);
+      });
+      this.canvas.addEventListener("pointerleave", () => {
+        this.hover = null;
+        if (reduce) this.draw(this.t);
+      });
       if (!reduce) requestAnimationFrame(this.frame);
       else this.draw(0);
     }
@@ -76,30 +95,48 @@
         this.warm = last[1] || 0.5;
       }
       if (this.mode === "bars") this.buildBars();
+      // With reduced motion there is no animation loop, so a data update must
+      // repaint explicitly. Without this the 3D deck froze during replay and
+      // did not respond to hover.
+      if (reduce) this.draw(this.t);
     }
 
     buildBars() {
       const grid = 8;
-      this.targets = [];
+      const next = [];
       for (let ix = 0; ix < grid; ix += 1) {
         for (let iz = 0; iz < grid; iz += 1) {
           const index = Math.floor((ix / (grid - 1)) * (this.cascade.length - 1));
           const base = this.cascade[Math.max(0, index)] || 0.04;
           const wave = 0.5 + 0.5 * Math.sin(ix * 1.3 + iz * 0.9);
-          this.targets.push({
+          const target = Math.max(0.03, base * (0.55 + wave * 0.9));
+          const slot = ix * grid + iz;
+          const existing = this.targets[slot];
+          next.push({
             x: (ix / (grid - 1) - 0.5) * 1.8,
             z: (iz / (grid - 1) - 0.5) * 1.8,
-            height: 0.02,
+            // Preserve the current height so replay does not collapse the
+            // array to the floor on every frame.
+            height: existing ? existing.height : 0.02,
             step: index,
             value: base,
-            target: Math.max(0.03, base * (0.55 + wave * 0.9)),
+            target,
             color: (ix + iz) % 5 === 0 ? "255,176,32" : (ix + iz) % 3 === 0 ? "167,139,250" : "34,211,238",
           });
         }
       }
+      this.targets = next;
     }
 
     frame(time) {
+      // Decorative canvases run at ~30 fps normally and drop to ~12 fps while
+      // a replay is running so the chart itself keeps the main thread budget.
+      const fps = global.__OPINIONLAB_PLAYBACK__ ? 12 : 30;
+      if (time - this.lastFrame < 1000 / fps) {
+        requestAnimationFrame(this.frame);
+        return;
+      }
+      this.lastFrame = time;
       const delta = Math.min(40, time - (this.last || time));
       this.last = time;
       this.t += delta * 0.001;
@@ -149,8 +186,8 @@
     drawWave(ctx, t) {
       this.drawHorizon(ctx);
       this.picks = [];
-      const cols = 42;
-      const rows = 18;
+      const cols = global.__OPINIONLAB_PLAYBACK__ ? 30 : 42;
+      const rows = global.__OPINIONLAB_PLAYBACK__ ? 12 : 18;
       for (let ix = 0; ix < cols; ix += 1) {
         for (let iz = 0; iz < rows; iz += 1) {
           const nx = ix / (cols - 1) - 0.5;
@@ -181,15 +218,24 @@
       this.drawHorizon(ctx);
       this.targets.forEach((bar) => { bar.height += (bar.target - bar.height) * 0.06; });
       const angle = this.angle + t * 0.08;
+      const scale = this.scale * 1.02;
+      const cy = this.cy + this.height * 0.05;
       const sorted = this.targets
         .map((bar) => {
-          const base = project(bar.x, 0, bar.z, angle, this.cx, this.cy, this.scale * 1.35);
-          const top = project(bar.x, bar.height, bar.z, angle, this.cx, this.cy, this.scale * 1.35);
+          const base = project(bar.x, 0, bar.z, angle, this.cx, cy, scale);
+          const top = project(bar.x, bar.height, bar.z, angle, this.cx, cy, scale);
           return { ...bar, base, top };
         })
         .sort((a, b) => a.base.depth - b.base.depth);
-      this.picks = sorted.map((bar) => ({ x: bar.top.x, y: bar.top.y, step: bar.step + 1,
-        value: bar.value, percent: true }));
+      // Aim the hover hit area at the middle of the bar, not its tip: it is
+      // easier to hit and the tooltip is less likely to leave the canvas.
+      this.picks = sorted.map((bar) => ({
+        x: (bar.base.x + bar.top.x) / 2,
+        y: (bar.base.y + bar.top.y) / 2,
+        step: bar.step + 1,
+        value: bar.value,
+        percent: true,
+      }));
       sorted.forEach((bar) => {
         const width = 0.09 * this.scale * bar.top.perspective;
         const height = bar.base.y - bar.top.y;
@@ -207,7 +253,9 @@
     }
 
     drawCloud(ctx, t) {
-      const count = this.width < 420 ? 260 : 520;
+      const count = this.width < 420
+        ? (global.__OPINIONLAB_PLAYBACK__ ? 150 : 260)
+        : (global.__OPINIONLAB_PLAYBACK__ ? 260 : 520);
       const angle = t * 0.12;
       for (let i = 0; i < count; i += 1) {
         const seed = i * 12.9898;

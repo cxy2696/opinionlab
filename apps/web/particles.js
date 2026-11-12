@@ -13,6 +13,7 @@
       this.particles = [];
       this.running = true;
       this.last = 0;
+      this.lastFrame = 0;
       this.resize = this.resize.bind(this);
       this.frame = this.frame.bind(this);
       global.addEventListener("resize", this.resize);
@@ -30,12 +31,15 @@
       this.canvas.height = Math.round(this.height * dpr);
       this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       if (this.data) this.seed();
+      if (reduce && this.data) this.renderFrame();
     }
 
     setData(data) {
       this.data = data;
-      if (this.mode === "shares") this.seed();
-      else this.seed();
+      // Seed once when the first data arrives; keep the cloud stable across
+      // replay frames instead of reseeding (and jittering) on every step.
+      if (!this.particles.length) this.seed();
+      if (reduce) this.renderFrame();
     }
 
     bounds() {
@@ -97,8 +101,10 @@
         const color = particle.warm ? "255,176,32" : "34,211,238";
         this.ctx.beginPath();
         this.ctx.fillStyle = `rgba(${color},.9)`;
-        this.ctx.shadowColor = `rgba(${color},.9)`;
-        this.ctx.shadowBlur = 7;
+        if (!global.__OPINIONLAB_PLAYBACK__) {
+          this.ctx.shadowColor = `rgba(${color},.9)`;
+          this.ctx.shadowBlur = 7;
+        }
         this.ctx.arc(x, y, particle.size, 0, Math.PI * 2);
         this.ctx.fill();
         this.ctx.shadowBlur = 0;
@@ -143,18 +149,17 @@
         const alpha = Math.max(0, 0.7 * (1 - particle.life));
         this.ctx.beginPath();
         this.ctx.fillStyle = `rgba(255,176,32,${alpha.toFixed(2)})`;
-        this.ctx.shadowColor = "rgba(255,176,32,.8)";
-        this.ctx.shadowBlur = 6;
+        if (!global.__OPINIONLAB_PLAYBACK__) {
+          this.ctx.shadowColor = "rgba(255,176,32,.8)";
+          this.ctx.shadowBlur = 6;
+        }
         this.ctx.arc(x, y, particle.size * (1 - particle.life * 0.5), 0, Math.PI * 2);
         this.ctx.fill();
         this.ctx.shadowBlur = 0;
       });
     }
 
-    frame(time) {
-      if (!this.running) return;
-      const delta = Math.min(48, time - (this.last || time));
-      this.last = time;
+    renderFrame() {
       this.ctx.clearRect(0, 0, this.width, this.height);
       if (this.data && this.data.length && !document.hidden) {
         const bounds = this.bounds();
@@ -167,6 +172,19 @@
         else this.drawCascade(bounds);
         this.ctx.restore();
       }
+    }
+
+    frame(time) {
+      if (!this.running) return;
+      const fps = global.__OPINIONLAB_PLAYBACK__ ? 12 : 30;
+      if (time - this.lastFrame < 1000 / fps) {
+        requestAnimationFrame(this.frame);
+        return;
+      }
+      this.lastFrame = time;
+      const delta = Math.min(48, time - (this.last || time));
+      this.last = time;
+      this.renderFrame();
       requestAnimationFrame(this.frame);
     }
   }

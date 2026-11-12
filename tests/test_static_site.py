@@ -97,3 +97,25 @@ def test_browser_simulator_selftest() -> None:
     )
     assert result.returncode == 0, result.stderr
     assert "ok" in result.stdout
+
+
+def test_replay_and_3d_field_regressions() -> None:
+    """Guards for the v1.4.0 replay/3D-deck fixes."""
+    app = (ROOT / "apps" / "web" / "app.js").read_text(encoding="utf-8")
+    start = app.index("function play()")
+    end = app.index("function downloadCsv()", start)
+    play = app[start:end]
+    assert "requestAnimationFrame(tick)" in play
+    assert "setInterval" not in play
+    assert "playback: true" in play
+    assert "const playback = Boolean(options && options.playback)" in app
+    assert "renderCharts(state.data, index, { playback: true })" in app
+
+    field3d = (ROOT / "apps" / "web" / "field3d.js").read_text(encoding="utf-8")
+    assert "if (reduce) this.draw" in field3d
+    assert "global.__OPINIONLAB_PLAYBACK__ ? 12 : 30" in field3d
+    assert "existing ? existing.height : 0.02" in field3d
+
+    particles = (ROOT / "apps" / "web" / "particles.js").read_text(encoding="utf-8")
+    assert "if (!this.particles.length) this.seed();" in particles
+    assert "if (reduce) this.renderFrame();" in particles

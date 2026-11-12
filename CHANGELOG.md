@@ -4,6 +4,25 @@
 
 ## v1.4.0 — 2026-11-13
 
+### Playback and 3D deck fixes
+
+- Replay now uses a time-based `requestAnimationFrame` loop instead of a
+  70 ms `setInterval`. A fast chart path replaces only the point arrays, keeps
+  the axes and legend fixed, and skips ECharts enter/update animation, so a
+  100-step run plays at a steady ~30 fps instead of ~10 fps. The loop derives
+  the step from elapsed time and skips rather than queues if a device is slow.
+- The 3D telemetry deck repaints when data changes under
+  `prefers-reduced-motion`, so scrub/replay and hover work in that mode.
+  Cascade bars keep their current height between data updates instead of
+  collapsing on every replay frame, and the bar hit area is positioned on the
+  bar body rather than its tip.
+- Decorative canvas overlays are throttled to ~30 fps (12 fps during playback),
+  the drawing load is reduced while playing, and particle clouds are seeded
+  once instead of being rebuilt on every step. This leaves the main thread to
+  the charts and removes the replay jitter.
+- Scrub updates are coalesced into one animation frame and playback stops
+  cleanly on a new run, a scrub, or Escape.
+
 ### Engine and API rigour
 
 - Aggregate `time_to_consensus` now uses a Student-*t* interval over the

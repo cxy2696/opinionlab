@@ -516,8 +516,32 @@ function sliceUpto(values, index) {
   return values.slice(0, index + 1);
 }
 
-function renderCharts(data, upto) {
+function chartFrame(data, index, previous) {
+  const series = data.series;
+  const bands = series.bands;
+  const width = bands.p90.map((high, i) => high - bands.p10[i]);
+  const opinionCount = data.opinion_count || 2;
+  const diversity = [
+    { data: sliceUpto(bands.p10, index) },
+    { data: sliceUpto(width, index) },
+    { data: sliceUpto(bands.p50, index) },
+    { data: sliceUpto(series.diversity, index) },
+  ];
+  if (previous) {
+    diversity.push({ data: previous.series.diversity.slice(0, index + 1) });
+  }
+  return {
+    diversity,
+    shares: Array.from({ length: opinionCount }, (_, opinion) => ({
+      data: sliceUpto(series.shares.map((row) => row[opinion] || 0), index),
+    })),
+    cascade: [{ data: sliceUpto(series.cascade, index) }],
+  };
+}
+
+function renderCharts(data, upto, options) {
   if (!window.echarts || !charts.diversity) return;
+  const playback = Boolean(options && options.playback);
   const decision = data.decision || {};
   const timing = decision.timing || {};
   const markers = [
@@ -528,97 +552,117 @@ function renderCharts(data, upto) {
 
   const series = data.series;
   const index = upto === undefined ? series.steps.length - 1 : upto;
-  const steps = series.steps.slice(0, index + 1);
-  const bands = series.bands;
-  const width = bands.p90.map((high, i) => high - bands.p10[i]);
   const previous = state.previous && state.showPrevious ? state.previous : null;
+  const frame = chartFrame(data, index, previous);
 
-  const runGradient = new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-    { offset: 0, color: "rgba(34,211,238,.28)" },
-    { offset: 1, color: "rgba(34,211,238,0)" },
-  ]);
-  const diversitySeries = [
-    { name: "区间下界", type: "line", stack: "band", data: sliceUpto(bands.p10, index),
-      lineStyle: { opacity: 0 }, areaStyle: { opacity: 0 }, symbol: "none", silent: true },
-    { name: "10–90%", type: "line", stack: "band", data: sliceUpto(width, index),
-      lineStyle: { opacity: 0 }, areaStyle: { color: "rgba(43,108,176,.16)" },
-      symbol: "none", silent: true },
-    { name: P("中位数", "median", "中央値", "Median"), type: "line", data: sliceUpto(bands.p50, index),
-      smooth: true, showSymbol: false, lineStyle: { type: "dashed", width: 1.4, color: "#ffb020" } },
-    { name: P("本次运行", "this run", "今回の実行", "dieser Lauf"), type: "line", data: sliceUpto(series.diversity, index),
-      smooth: true, showSymbol: false, lineStyle: { width: 2.4, color: "#22d3ee" },
-      areaStyle: { color: runGradient },
-      markLine: markers.length ? { symbol: "none", lineStyle: { color: "#3f7288", type: "dotted" }, data: markers } : undefined },
-  ];
-  if (previous) {
-    diversitySeries.push({
-      name: T("previousRun"), type: "line", data: previous.series.diversity.slice(0, index + 1),
-      smooth: true, showSymbol: false, lineStyle: { width: 1.2, type: "dashed", color: "#94a3b8" },
-      itemStyle: { color: "#94a3b8" },
-    });
+  if (playback) {
+    // Fast path: keep the axes and legend fixed and only replace the point
+    // arrays. No enter/update animation, no layout pass, no markLine rebuild.
+    charts.diversity?.setOption({ animation: false, series: frame.diversity },
+      { lazyUpdate: true, silent: true });
+    charts.shares?.setOption({ animation: false, series: frame.shares },
+      { lazyUpdate: true, silent: true });
+    charts.cascade?.setOption({ animation: false, series: frame.cascade },
+      { lazyUpdate: true, silent: true });
+  } else {
+    const runGradient = new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+      { offset: 0, color: "rgba(34,211,238,.28)" },
+      { offset: 1, color: "rgba(34,211,238,0)" },
+    ]);
+    const diversitySeries = [
+      { name: "区间下界", type: "line", stack: "band", data: sliceUpto(series.bands.p10, index),
+        lineStyle: { opacity: 0 }, areaStyle: { opacity: 0 }, symbol: "none", silent: true },
+      { name: "10–90%", type: "line", stack: "band", data: sliceUpto(series.bands.p90.map((high, i) => high - series.bands.p10[i]), index),
+        lineStyle: { opacity: 0 }, areaStyle: { color: "rgba(43,108,176,.16)" },
+        symbol: "none", silent: true },
+      { name: P("中位数", "median", "中央値", "Median"), type: "line", data: sliceUpto(series.bands.p50, index),
+        smooth: true, showSymbol: false, lineStyle: { type: "dashed", width: 1.4, color: "#ffb020" } },
+      { name: P("本次运行", "this run", "今回の実行", "dieser Lauf"), type: "line", data: sliceUpto(series.diversity, index),
+        smooth: true, showSymbol: false, lineStyle: { width: 2.4, color: "#22d3ee" },
+        areaStyle: { color: runGradient },
+        markLine: markers.length ? { symbol: "none", lineStyle: { color: "#3f7288", type: "dotted" }, data: markers } : undefined },
+    ];
+    if (previous) {
+      diversitySeries.push({
+        name: T("previousRun"), type: "line", data: previous.series.diversity.slice(0, index + 1),
+        smooth: true, showSymbol: false, lineStyle: { width: 1.2, type: "dashed", color: "#94a3b8" },
+        itemStyle: { color: "#94a3b8" },
+      });
+    }
+    const legendData = [
+      P("本次运行", "this run", "今回の実行", "dieser Lauf"),
+      P("中位数", "median", "中央値", "Median"),
+      "10–90%",
+    ];
+    if (previous) legendData.push(T("previousRun"));
+    charts.diversity?.setOption({
+      animation: true,
+      animationDuration: 700, animationEasing: "cubicOut", animationDurationUpdate: 120,
+      textStyle: { color: "#7fa6bd", fontFamily: "ui-monospace" },
+      tooltip: { trigger: "axis", backgroundColor: "#02070b", borderColor: "#1e4a5f", textStyle: { color: "#d5edf7" } },
+      legend: { top: 0, right: 0, itemWidth: 10, itemHeight: 8, type: "scroll",
+                textStyle: { color: "#9ec3d6", fontSize: 10 }, data: legendData },
+      grid: { left: 44, right: 14, top: 30, bottom: 26 },
+      xAxis: { type: "category", data: series.steps, boundaryGap: false, ...AXIS, splitLine: { show: false } },
+      yAxis: { type: "value", min: 0, ...AXIS, splitLine: SPLIT,
+               max: Math.min(1, Math.max(0.5, Math.ceil(Math.max(...series.diversity) * 10) / 10)) },
+      series: diversitySeries,
+    }, { replaceMerge: ["series"] });
+
+    const opinionCount = data.opinion_count || 2;
+    const shares = Array.from({ length: opinionCount }, (_, opinion) => ({
+      name: P(`立场 ${opinion}`, `Opinion ${opinion}`, `立場 ${opinion}`, `Haltung ${opinion}`),
+      type: "line", stack: "shares", smooth: true, showSymbol: false,
+      areaStyle: { opacity: 0.7 }, lineStyle: { width: 1 },
+      color: COLORS[opinion % COLORS.length],
+      data: sliceUpto(series.shares.map((row) => row[opinion] || 0), index),
+    }));
+    charts.shares?.setOption({
+      animation: true,
+      animationDuration: 700, animationEasing: "cubicOut", animationDurationUpdate: 120,
+      textStyle: { color: "#7fa6bd", fontFamily: "ui-monospace" },
+      tooltip: { trigger: "axis", backgroundColor: "#02070b", borderColor: "#1e4a5f", textStyle: { color: "#d5edf7" } },
+      legend: { top: 0, right: 0, itemWidth: 10, itemHeight: 8, textStyle: { color: "#9ec3d6", fontSize: 10 } },
+      grid: { left: 40, right: 12, top: 30, bottom: 26 },
+      xAxis: { type: "category", data: series.steps, boundaryGap: false, ...AXIS, splitLine: { show: false } },
+      yAxis: { type: "value", min: 0, max: 1, ...AXIS, splitLine: SPLIT },
+      series: shares,
+    }, { replaceMerge: ["series"] });
+
+    charts.cascade?.setOption({
+      animation: true,
+      animationDuration: 700, animationEasing: "cubicOut", animationDurationUpdate: 120,
+      textStyle: { color: "#7fa6bd", fontFamily: "ui-monospace" },
+      tooltip: { backgroundColor: "#02070b", borderColor: "#1e4a5f", textStyle: { color: "#d5edf7" } },
+      grid: { left: 44, right: 14, top: 30, bottom: 26 },
+      xAxis: { type: "category", data: series.steps, ...AXIS, splitLine: { show: false } },
+      yAxis: { type: "value", ...AXIS, splitLine: SPLIT },
+      series: [{
+        type: "bar", data: sliceUpto(series.cascade, index),
+        itemStyle: { color: "#ffb020", opacity: 0.8 },
+        markLine: markers.length ? { symbol: "none", lineStyle: { color: "#6b7f8c", type: "dotted" }, data: markers } : undefined,
+      }],
+    }, { replaceMerge: ["series"] });
   }
-  const legendData = [
-    P("本次运行", "this run", "今回の実行", "dieser Lauf"),
-    P("中位数", "median", "中央値", "Median"),
-    "10–90%",
-  ];
-  if (previous) legendData.push(T("previousRun"));
-  charts.diversity?.setOption({
-    animationDuration: 700, animationEasing: "cubicOut", animationDurationUpdate: 120,
-    textStyle: { color: "#7fa6bd", fontFamily: "ui-monospace" },
-    tooltip: { trigger: "axis", backgroundColor: "#02070b", borderColor: "#1e4a5f", textStyle: { color: "#d5edf7" } },
-    legend: { top: 0, right: 0, itemWidth: 10, itemHeight: 8, type: "scroll",
-              textStyle: { color: "#9ec3d6", fontSize: 10 }, data: legendData },
-    grid: { left: 44, right: 14, top: 30, bottom: 26 },
-    xAxis: { type: "category", data: steps, boundaryGap: false, ...AXIS, splitLine: { show: false } },
-    yAxis: { type: "value", min: 0, ...AXIS, splitLine: SPLIT,
-             max: Math.min(1, Math.max(0.5, Math.ceil(Math.max(...series.diversity) * 10) / 10)) },
-    series: diversitySeries,
-  }, { replaceMerge: ["series"] });
 
-  const opinionCount = data.opinion_count || 2;
-  const shares = Array.from({ length: opinionCount }, (_, opinion) => ({
-    name: P(`立场 ${opinion}`, `Opinion ${opinion}`, `立場 ${opinion}`, `Haltung ${opinion}`),
-    type: "line", stack: "shares", smooth: true, showSymbol: false,
-    areaStyle: { opacity: 0.7 }, lineStyle: { width: 1 },
-    color: COLORS[opinion % COLORS.length],
-    data: sliceUpto(series.shares.map((row) => row[opinion] || 0), index),
-  }));
-  charts.shares?.setOption({
-    animationDuration: 700, animationEasing: "cubicOut", animationDurationUpdate: 120,
-    textStyle: { color: "#7fa6bd", fontFamily: "ui-monospace" },
-    tooltip: { trigger: "axis", backgroundColor: "#02070b", borderColor: "#1e4a5f", textStyle: { color: "#d5edf7" } },
-    legend: { top: 0, right: 0, itemWidth: 10, itemHeight: 8, textStyle: { color: "#9ec3d6", fontSize: 10 } },
-    grid: { left: 40, right: 12, top: 30, bottom: 26 },
-    xAxis: { type: "category", data: steps, boundaryGap: false, ...AXIS, splitLine: { show: false } },
-    yAxis: { type: "value", min: 0, max: 1, ...AXIS, splitLine: SPLIT },
-    series: shares,
-  }, { replaceMerge: ["series"] });
-
-  charts.cascade?.setOption({
-    animationDuration: 700, animationEasing: "cubicOut", animationDurationUpdate: 120,
-    textStyle: { color: "#7fa6bd", fontFamily: "ui-monospace" },
-    tooltip: { backgroundColor: "#02070b", borderColor: "#1e4a5f", textStyle: { color: "#d5edf7" } },
-    grid: { left: 44, right: 14, top: 30, bottom: 26 },
-    xAxis: { type: "category", data: steps, ...AXIS, splitLine: { show: false } },
-    yAxis: { type: "value", ...AXIS, splitLine: SPLIT },
-    series: [{
-      type: "bar", data: sliceUpto(series.cascade, index),
-      itemStyle: { color: "#ffb020", opacity: 0.8 },
-      markLine: markers.length ? { symbol: "none", lineStyle: { color: "#6b7f8c", type: "dotted" }, data: markers } : undefined,
-    }],
-  }, { replaceMerge: ["series"] });
-
-  if (particleFields.length === 3) {
-    particleFields[0].setData(series.diversity.slice(0, index + 1));
-    particleFields[1].setData(series.shares.slice(0, index + 1));
-    particleFields[2].setData(series.cascade.slice(0, index + 1));
-  }
-  if (fields.length === 3) {
-    const payload = { diversity: series.diversity.slice(0, index + 1),
-      cascade: series.cascade.slice(0, index + 1), shares: series.shares.slice(0, index + 1) };
-    fields.forEach((field) => field.setData(payload));
-    renderFieldStats(payload);
+  // Decorative overlays are throttled during playback: they refresh every two
+  // steps instead of fighting the charts for every frame.
+  const total = series.steps.length - 1;
+  const decorate = !playback || index === 0 || index === total
+    || state.decoIndex === undefined || Math.abs(index - state.decoIndex) >= 2;
+  if (decorate) {
+    state.decoIndex = index;
+    if (particleFields.length === 3) {
+      particleFields[0].setData(series.diversity.slice(0, index + 1));
+      particleFields[1].setData(series.shares.slice(0, index + 1));
+      particleFields[2].setData(series.cascade.slice(0, index + 1));
+    }
+    if (fields.length === 3) {
+      const payload = { diversity: series.diversity.slice(0, index + 1),
+        cascade: series.cascade.slice(0, index + 1), shares: series.shares.slice(0, index + 1) };
+      fields.forEach((field) => field.setData(payload));
+      renderFieldStats(payload);
+    }
   }
 }
 
@@ -964,6 +1008,7 @@ async function simulate() {
 
 async function run(options) {
   const preview = Boolean(options && options.preview);
+  stopPlayback();
   if ($("error")) $("error").textContent = "";
   if ($("loading")) $("loading").hidden = false;
   if ($("run")) {
@@ -990,23 +1035,46 @@ async function run(options) {
 }
 
 function stopPlayback() {
-  if (state.timer) clearInterval(state.timer);
-  state.timer = null;
+  if (state.playRaf) cancelAnimationFrame(state.playRaf);
+  if (state.scrubRaf) cancelAnimationFrame(state.scrubRaf);
+  state.playRaf = null;
+  state.scrubRaf = null;
+  window.__OPINIONLAB_PLAYBACK__ = false;
 }
 
 function play() {
   if (!state.data) return;
   stopPlayback();
+  const total = state.data.series.steps.length - 1;
+  if (total <= 0) return;
   state.index = 0;
-  state.timer = setInterval(() => {
-    if (!state.data || state.index >= state.data.series.steps.length - 1) {
-      stopPlayback();
-      return;
+  if ($("scrub")) $("scrub").value = "0";
+  window.__OPINIONLAB_PLAYBACK__ = true;
+  renderCharts(state.data, 0, { playback: true });
+  const started = performance.now();
+  // 33 ms per step targets 30 fps, a readable pace that still looks smooth.
+  // The index is derived from elapsed time, so a slow device skips steps
+  // instead of building an unbounded backlog.
+  const stepMs = 33;
+  const tick = (now) => {
+    if (!state.data) { state.playRaf = null; return; }
+    const currentTotal = state.data.series.steps.length - 1;
+    const index = Math.min(currentTotal, Math.floor((now - started) / stepMs));
+    if (index !== state.index) {
+      state.index = index;
+      if ($("scrub")) $("scrub").value = String(index);
+      renderCharts(state.data, index, { playback: true });
     }
-    state.index += 1;
-    if ($("scrub")) $("scrub").value = String(state.index);
-    renderCharts(state.data, state.index);
-  }, 70);
+    if (index < currentTotal) {
+      state.playRaf = requestAnimationFrame(tick);
+    } else {
+      state.playRaf = null;
+      window.__OPINIONLAB_PLAYBACK__ = false;
+      // Restore the full option once so the final frame keeps every marker.
+      renderCharts(state.data, currentTotal);
+    }
+  };
+  state.playRaf = requestAnimationFrame(tick);
 }
 
 function downloadCsv() {
@@ -1142,7 +1210,13 @@ if ($("play")) $("play").onclick = play;
 if ($("scrub")) {
   $("scrub").oninput = () => {
     stopPlayback();
-    if (state.data) renderCharts(state.data, Number($("scrub").value));
+    if (!state.data) return;
+    const index = Number($("scrub").value);
+    if (state.scrubRaf) cancelAnimationFrame(state.scrubRaf);
+    state.scrubRaf = requestAnimationFrame(() => {
+      state.scrubRaf = null;
+      if (state.data) renderCharts(state.data, index, { playback: true });
+    });
   };
 }
 if ($("csv")) $("csv").onclick = downloadCsv;
